@@ -1,0 +1,603 @@
+# Continuous integration.
+#
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+# THE `check` AND `image` JOBS BELOW ARE TEMPORARY, exactly as they are in `micro-devportal-web`,
+# `micro-explorer-web` and `micro-emberkin-web`. The org's reusable `web-ci.yml` is the target;
+# the local jobs exist because @cloudsforge/ui is unpublished and consumed as
+# `link:../ui/packages/ui`, which the reusable workflow's single checkout cannot resolve — and
+# because two of its inputs do not suit this repository:
+#
+#   * its `image` job requires a 200 for any deep link, while this app's nginx enumerates its
+#     real routes and answers 404 for everything else ON PURPOSE. The image is probed here, where
+#     the honest 404 can be asserted as well as the deep link.
+#   * it checks out no SIBLING SERVICE, so `test/aetherholm.test.ts` would skip its
+#     cross-repository half and the route citations would never be verified. That check is the
+#     one this repository exists to have.
+#
+# `deep-link-path` is `/chronicle` — a REAL route, declared in `src/lib/routes.ts` as
+# `DEEP_LINK_PATH` and checked against this file by `test/routes.test.ts`. It is also the
+# UNPROTECTED route: the probe has no token, and the chronicle is the game's one anonymous
+# surface, so the address a stranger is most likely to hold is the one proved to survive a hard
+# refresh.
+# ────────────────────────────────────────────────────────────────────────────────────────────────
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: aetherholm-web }
+
+      # Temporary, for the same reason as the Dockerfile's second build context: the design
+      # system is unpublished and resolves through `link:../ui/packages/ui`. It is also what
+      # `test/tokens.test.ts` reads to prove every custom property and every cf- class this app
+      # names exists.
+      - uses: actions/checkout@v4
+        with:
+          repository: cloudsforge-online/micro-ui
+          path: ui
+          # micro-ui is private; without a contents:read token this checkout 404s and the job
+          # dies before install.
+          token: ${{ secrets.ESTATE_READ_TOKEN }}
+
+      # ══════════════════════════════════════════════════════════════════════════════════════════
+      # THE SERVICE THIS CLIENT IS BUILT AGAINST, CHECKED OUT SO THE CITATIONS CAN BE VERIFIED.
+      #
+      # `test/aetherholm.test.ts` reads `aetherholm/src/server.ts` and requires that every route
+      # this bundle calls is registered at the line its citation names, that each authenticates
+      # by the MECHANISM the table records — not by a boolean, because the three queue handlers
+      # are one-line delegations to a helper and a boolean grep would call the routes that charge
+      # a treasury public — and that the client sends an `Idempotency-Key` to exactly the four
+      # routes that refuse a request without one. Only `src/` is fetched: the citations are line
+      # numbers in source, and nothing here builds or runs the service.
+      # ══════════════════════════════════════════════════════════════════════════════════════════
+      - uses: actions/checkout@v4
+        with:
+          repository: cloudsforge-online/micro-aetherholm
+          path: aetherholm
+          token: ${{ secrets.ESTATE_READ_TOKEN }}
+          sparse-checkout: |
+            src
+
+      # `/auth/me` nests the profile under `user`. This repository states that as a fact and
+      # cites two lines for it; `test/citations.test.ts` checks both are inside the files they
+      # name.
+      - uses: actions/checkout@v4
+        with:
+          repository: cloudsforge-online/micro-identity
+          path: identity
+          token: ${{ secrets.ESTATE_READ_TOKEN }}
+          sparse-checkout: |
+            src
+
+      # The title client, because "the descriptor is worlds' bridge's read" is a claim with a
+      # citation in it — and it is the reason GET /v1/title is declined rather than called.
+      - uses: actions/checkout@v4
+        with:
+          repository: cloudsforge-online/micro-worlds
+          path: worlds
+          token: ${{ secrets.ESTATE_READ_TOKEN }}
+          sparse-checkout: |
+            src
+
+      # Pinned, because the checkout lives at aetherholm-web/ and the action looks for the
+      # packageManager field in the workspace root, where there is no package.json.
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.9.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: aetherholm-web/pnpm-lock.yaml }
+
+      # `link:` resolves to the sibling's own node_modules, so the design system must be
+      # installed before this repository is — without this, `tsc` cannot resolve ../ui's own
+      # imports when it typechecks the linked sources.
+      - name: Install the sibling design system
+        run: pnpm --dir ui install --frozen-lockfile
+
+      - name: Install
+        working-directory: aetherholm-web
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        working-directory: aetherholm-web
+        run: pnpm typecheck
+
+      - name: Test
+        working-directory: aetherholm-web
+        run: pnpm test
+
+      # ── The route cross-check must have RUN, not merely not failed ────────────────────────────
+      #
+      # `test/aetherholm.test.ts` skips its cross-repository half when there is no
+      # micro-aetherholm checkout, so that `pnpm test` passes for somebody who cloned only this
+      # repository. A skipped test is an unmeasured one, so on the runner the absence has to be
+      # fatal.
+      - name: The citations were checked against the real service
+        working-directory: aetherholm-web
+        run: |
+          set -euo pipefail
+          test -f ../aetherholm/src/server.ts || {
+            echo "::error::micro-aetherholm was not checked out; the route citations were never verified"
+            exit 1
+          }
+          # ── The line is READ out of the test, never written down here ──────────────────────────
+          #
+          # Hardcoding a number in this file makes a THIRD copy of a citation that already lives
+          # in two places, and the copy is the one that goes stale: the day the launch route
+          # moves and somebody correctly updates the table, a hardcoded grep would accuse a
+          # correct test of being fake. Deriving it keeps this step honest.
+          cited=$(grep -oE "path: '/v1/fleets', line: [0-9]+" test/aetherholm.test.ts | grep -oE '[0-9]+$' | head -1)
+          [ -n "${cited:-}" ] || {
+            echo "::error::no citation for POST /v1/fleets in test/aetherholm.test.ts; the surface table has changed shape"
+            exit 1
+          }
+          out=$(node --import tsx --test test/aetherholm.test.ts 2>&1 || true)
+          if printf '%s\n' "$out" | grep -q 'SKIPPED: no micro-aetherholm checkout'; then
+            echo "::error::the route cross-check skipped itself while micro-aetherholm was present"
+            exit 1
+          fi
+          printf '%s\n' "$out" | grep -q "is registered at aetherholm/src/server.ts:${cited}" || {
+            echo "::error::the route cross-check did not run against aetherholm/src/server.ts"
+            exit 1
+          }
+          # Twenty-three called routes plus four declined ones, each asserted against its own
+          # line. DEDUPED before counting: node:test names each subtest twice — once as it runs
+          # and once in the summary — and a raw grep -c reports double.
+          count=$(printf '%s\n' "$out" | grep -oE 'is registered at aetherholm/src/server\.ts:[0-9]+' | sort -u | wc -l | tr -d ' ')
+          [ "$count" -ge 27 ] || {
+            echo "::error::only $count route citations were verified; the surface has twenty-seven"
+            exit 1
+          }
+          # And the MECHANISM half really ran too: a suite that verified every citation and
+          # skipped every authentication check would leave the property this service makes hard —
+          # six mechanisms, three of them living in helpers — entirely unmeasured. The character
+          # class must hold every mechanism name the table can: user-queue and sealed-public both
+          # carry a hyphen, and a class without one would stop at 'user' and grade the wrong row.
+          auth=$(printf '%s\n' "$out" | grep -oE 'authenticates by [a-z-]+' | sort -u | wc -l | tr -d ' ')
+          [ "$auth" -ge 7 ] || {
+            echo "::error::only $auth distinct mechanism checks ran; the table holds seven mechanisms across 27 routes"
+            exit 1
+          }
+          mech=$(printf '%s\n' "$out" | grep -cE 'authenticates by [a-z-]+' | tr -d ' ')
+          [ "$mech" -ge 27 ] || {
+            echo "::error::only $mech routes had their authentication mechanism checked"
+            exit 1
+          }
+          echo "ok: $count cited routes verified against the service that serves them, mechanisms included"
+
+      # …and the cross-check can fail. Bend one citation and require the suite to go red, so an
+      # aetherholm.test.ts reduced to assertions that always pass cannot look like a verified
+      # client.
+      - name: …and it would have noticed a wrong citation
+        working-directory: aetherholm-web
+        run: |
+          set -euo pipefail
+          cp test/aetherholm.test.ts "$RUNNER_TEMP/aetherholm.test.ts.orig"
+          restore() { cp "$RUNNER_TEMP/aetherholm.test.ts.orig" test/aetherholm.test.ts; }
+          trap restore EXIT
+
+          # Read the cited line and bend THAT, rather than naming a number here: a sed that
+          # names a line the file no longer carries is a silent no-op, and this step would then
+          # accuse a correct test of being fake. The cmp below makes "the mutation happened" a
+          # checked fact rather than an assumption.
+          cited=$(grep -oE "path: '/v1/fleets', line: [0-9]+" test/aetherholm.test.ts | grep -oE '[0-9]+$' | head -1)
+          [ -n "${cited:-}" ] || {
+            echo "::error::no citation for POST /v1/fleets in test/aetherholm.test.ts"
+            exit 1
+          }
+          bent=$((cited + 1))
+          sed -i "s|path: '/v1/fleets', line: ${cited}|path: '/v1/fleets', line: ${bent}|" test/aetherholm.test.ts
+          if cmp -s test/aetherholm.test.ts "$RUNNER_TEMP/aetherholm.test.ts.orig"; then
+            echo "::error::the mutation changed nothing, so this step proves nothing"
+            exit 1
+          fi
+
+          if node --import tsx --test test/aetherholm.test.ts >/dev/null 2>&1; then
+            echo "::error::the cross-check passed with POST /v1/fleets cited at ${bent} instead of ${cited} — it is not reading the service"
+            exit 1
+          fi
+          echo "ok: moving one citation from ${cited} to ${bent} turns the suite red, so a pass is evidence"
+
+      # …and the MECHANISM half can fail too, which is a different claim from the citation half.
+      # Prove it can go red by claiming the launch route — the one that charges a treasury — is
+      # public.
+      - name: …and it would have noticed a wrong authentication mechanism
+        working-directory: aetherholm-web
+        run: |
+          set -euo pipefail
+          cp test/aetherholm.test.ts "$RUNNER_TEMP/aetherholm.test.ts.orig2"
+          restore() { cp "$RUNNER_TEMP/aetherholm.test.ts.orig2" test/aetherholm.test.ts; }
+          trap restore EXIT
+
+          before=$(grep -c "auth: 'none'" test/aetherholm.test.ts)
+          sed -i "s|path: '/v1/fleets', line: \([0-9]*\), auth: 'user'|path: '/v1/fleets', line: \1, auth: 'none'|" test/aetherholm.test.ts
+          after=$(grep -c "auth: 'none'" test/aetherholm.test.ts)
+          [ "$after" -gt "$before" ] || {
+            echo "::error::the mutation changed nothing, so this step proves nothing"
+            exit 1
+          }
+
+          if node --import tsx --test test/aetherholm.test.ts >/dev/null 2>&1; then
+            echo "::error::the cross-check accepted POST /v1/fleets as PUBLIC — it is not reading the handler"
+            exit 1
+          fi
+          echo "ok: calling the launch route public turns the suite red"
+
+      # ── The design-system cross-check must also have RUN ──────────────────────────────────────
+      - name: The design tokens were checked against the design system
+        working-directory: aetherholm-web
+        run: |
+          set -euo pipefail
+          test -f ../ui/packages/ui/src/tokens.css || {
+            echo "::error::micro-ui was not checked out; the token references were never verified"
+            exit 1
+          }
+          out=$(node --import tsx --test test/tokens.test.ts 2>&1 || true)
+          if printf '%s\n' "$out" | grep -q 'SKIPPED: no micro-ui checkout'; then
+            echo "::error::the token cross-check skipped itself while micro-ui was present"
+            exit 1
+          fi
+          printf '%s\n' "$out" | grep -q 'every property this stylesheet reads is declared' || {
+            echo "::error::the token cross-check did not run against tokens.css"
+            exit 1
+          }
+          echo "ok: every custom property and class this bundle names exists upstream"
+
+      # The canaries name things that GENUINELY DO NOT EXIST — `--cf-not-a-real-token` and
+      # `cf-not-a-real-class`, not names that might one day become real and quietly turn these
+      # steps into failures on a correct build.
+      - name: …and it would have noticed an invented token
+        working-directory: aetherholm-web
+        run: |
+          set -euo pipefail
+          cp src/styles.css "$RUNNER_TEMP/styles.css.orig"
+          printf '\n.ah-canary { border: 1px solid var(--cf-not-a-real-token); }\n' >> src/styles.css
+          if node --import tsx --test test/tokens.test.ts >/dev/null 2>&1; then
+            echo "::error::the token cross-check accepted --cf-not-a-real-token, which does not exist"
+            cp "$RUNNER_TEMP/styles.css.orig" src/styles.css
+            exit 1
+          fi
+          cp "$RUNNER_TEMP/styles.css.orig" src/styles.css
+          echo "ok: an undefined custom property turns the suite red"
+
+      - name: …and it would have noticed an invented class
+        working-directory: aetherholm-web
+        run: |
+          set -euo pipefail
+          cp src/styles.css "$RUNNER_TEMP/styles.css.orig2"
+          printf '\n.cf-not-a-real-class { color: var(--cf-fg); }\n' >> src/styles.css
+          if node --import tsx --test test/tokens.test.ts >/dev/null 2>&1; then
+            echo "::error::the class cross-check accepted cf-not-a-real-class, which ui.css does not declare"
+            cp "$RUNNER_TEMP/styles.css.orig2" src/styles.css
+            exit 1
+          fi
+          cp "$RUNNER_TEMP/styles.css.orig2" src/styles.css
+          echo "ok: an undeclared cf- class turns the suite red"
+
+      # ── Every OTHER citation, swept ────────────────────────────────────────────────────────────
+      - name: Every citation names a line that exists
+        working-directory: aetherholm-web
+        run: |
+          set -euo pipefail
+          out=$(node --import tsx --test test/citations.test.ts 2>&1) || {
+            printf '%s\n' "$out"
+            echo "::error::a citation in this repository names a line that does not exist"
+            exit 1
+          }
+          printf '%s\n' "$out" | grep -q 'names a line INSIDE that file' || {
+            echo "::error::the citation sweep did not run"
+            exit 1
+          }
+          # Every repository this bundle cites into IS checked out above, so an UNCHECKED line
+          # here means a citation reaches somewhere nobody has arranged to verify — a green run
+          # implying more than it measured. Fatal for that reason.
+          if printf '%s\n' "$out" | grep 'UNCHECKED:'; then
+            echo "::error::a citation reaches a repository this workflow does not check out"
+            exit 1
+          fi
+          echo "ok: every citation was verified against the repository it names"
+
+      - name: Build
+        working-directory: aetherholm-web
+        run: pnpm build
+
+      # A frontend that builds to nothing is a blank page, not a build failure.
+      - name: The bundle exists
+        working-directory: aetherholm-web
+        run: |
+          set -euo pipefail
+          test -f dist/index.html || { echo "::error::dist/index.html is missing after a successful build"; exit 1; }
+          echo "ok: $(find dist -type f | wc -l | tr -d ' ') files in dist"
+
+      # The brand chrome must survive the BUILD as well as be present in the source tree:
+      # test/brand-chrome.test.ts asserts the source, this asserts the artefact, and the image
+      # job asserts the running container.
+      - name: The brand chrome reached the bundle
+        working-directory: aetherholm-web
+        run: |
+          set -euo pipefail
+          for asset in favicon-32x32.png favicon-192x192.png favicon-512x512.png og-1200x630.png; do
+            test -f "dist/$asset" || { echo "::error::dist/$asset is missing from the build output"; exit 1; }
+          done
+          echo "ok: the favicons and the og card are in dist"
+
+  rules:
+    name: Estate rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No build-time configuration
+        # The same rule as test/no-build-time-config.test.ts, checked again here so it fails even
+        # if somebody deletes the test along with the line it forbids.
+        run: |
+          set -uo pipefail
+          if grep -rn --include='*.ts' --include='*.tsx' --include='*.html' \
+               -e 'import\.meta\.env' -e 'VITE_' src index.html; then
+            echo "::error::this bundle must read no build-time environment; hosts come from cloudsforgeHosts() at runtime"
+            exit 1
+          fi
+          echo "ok: no build-time environment"
+
+      - name: No hard-coded CloudsForge hostname
+        # A literal hostname is a second, unversioned copy of the surface registry, and the copy
+        # is the one that will be wrong. Comments are stripped first — this estate has failed six
+        # guards on the sentence explaining the rule.
+        run: |
+          set -uo pipefail
+          strip() { perl -0pe 's{/\*.*?\*/}{}gs; s{^\s*//.*$}{}gm' "$1"; }
+          for f in $(find src -name '*.ts' -o -name '*.tsx'); do
+            if strip "$f" | grep -n 'cloudsforge\.online' | sed "s|^|$f:|" | grep .; then
+              echo "::error::resolve hosts through cloudsforgeHosts() rather than naming them"
+              exit 1
+            fi
+          done
+          echo "ok: no literal hostnames in src"
+
+      - name: The SPA fallback keeps its 404
+        # Comments are stripped first: nginx.conf's own header QUOTES the directive it forbids in
+        # order to explain why the routes are enumerated by hand.
+        run: |
+          set -uo pipefail
+          directives=$(grep -v '^[[:space:]]*#' nginx.conf)
+          if printf '%s\n' "$directives" | grep -nE 'try_files[[:space:]]+\$uri[[:space:]]+(\$uri/[[:space:]]+)?/index\.html'; then
+            echo "::error::unknown paths must 404; serve the shell through error_page 404 /index.html"
+            exit 1
+          fi
+          printf '%s\n' "$directives" | grep -q 'error_page 404 /index.html'
+          echo "ok: unknown paths answer 404"
+
+      - name: The auth callback is redeemed before the app renders
+        run: grep -q 'bootstrapSession' src/main.tsx
+
+      - name: The route table, the navigation and nginx agree
+        # Already asserted by test/routes.test.ts; repeated here so deleting the test does not
+        # silently delete the rule.
+        run: test -f test/routes.test.ts && grep -q 'nginx.conf' test/routes.test.ts
+
+      - name: Every route this client calls cites the line that serves it
+        # The rule test/aetherholm.test.ts enforces, restated so that deleting the test does not
+        # delete it. Every request path in the client must live in the one file that also carries
+        # the `aetherholm/src/server.ts:<line>` citations.
+        run: |
+          set -uo pipefail
+          cites=$(grep -coE 'aetherholm/src/server\.ts:[0-9]+' src/lib/aetherholm.ts || true)
+          if [ "${cites:-0}" -lt 27 ]; then
+            echo "::error::src/lib/aetherholm.ts carries ${cites:-0} lines of route citation; the surface has twenty-seven routes"
+            exit 1
+          fi
+          if grep -rn --include='*.tsx' -E "aetherholm<[^>]*>\(\s*[\`'\"]/" src; then
+            echo "::error::a page calls the service directly; every call goes through src/lib/aetherholm.ts, where it is cited"
+            exit 1
+          fi
+          echo "ok: ${cites} citation lines, and no uncited call site"
+
+      - name: An Idempotency-Key goes to four routes and no others
+        # aetherholm requires the header on the three queue submissions and the launch, and reads
+        # no such header on any other mutation. Counted rather than described.
+        run: |
+          set -uo pipefail
+          sent=$(grep -co "'idempotency-key': key" src/lib/aetherholm.ts || true)
+          if [ "${sent:-0}" -ne 4 ]; then
+            echo "::error::src/lib/aetherholm.ts sends ${sent:-0} idempotency keys; four routes require one"
+            exit 1
+          fi
+          echo "ok: four wrapped routes, four keys"
+
+      - name: Nothing implies a purchasable advantage
+        # THE HONEST-GAMES RULE (docs/ecosystem/20-aetherholm.md §7): no resources for money, no
+        # speed-ups, no purchasable shields — and above all the aegis is never presented as
+        # buyable. Comments are stripped first, because this repository's own prose explains the
+        # refusal by naming it.
+        run: |
+          set -uo pipefail
+          strip() { perl -0pe 's{/\*.*?\*/}{}gs; s{^\s*//.*$}{}gm' "$1"; }
+          fail=0
+          for f in $(find src -name '*.ts' -o -name '*.tsx'); do
+            if strip "$f" | grep -niE '\b(buy|purchase|premium|unlock)\b.{0,40}\b(aegis|shield|slot|speed|resource)' \
+                 | sed "s|^|$f:|" | grep .; then
+              fail=1
+            fi
+            if strip "$f" | grep -niE '\b(aegis|shield)\b.{0,40}\b(buy|purchase|price|premium|sale)\b' \
+                 | sed "s|^|$f:|" | grep .; then
+              fail=1
+            fi
+            if strip "$f" | grep -niE 'speed.?up.{0,30}(build|research|travel|queue)' | sed "s|^|$f:|" | grep .; then
+              fail=1
+            fi
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::nothing in this UI may imply power can be bought; the aegis and the clock are not for sale"
+            exit 1
+          fi
+          # And the refusal is stated where the aegis is offered, so the absence is a sentence a
+          # player reads rather than a gap nobody can check.
+          grep -q 'never sold' src/pages/map.tsx || {
+            echo "::error::the founding form no longer says the aegis is never sold"
+            exit 1
+          }
+          echo "ok: no purchasable-power vocabulary, and the refusal is on screen"
+
+      - name: The chronicle is read-only in this client
+        # A sealed season is history. The service refuses mutation at the database; this client
+        # must not even own the request shape. Also asserted by test/aetherholm.test.ts; restated
+        # so deleting the test does not delete the rule.
+        run: |
+          set -uo pipefail
+          strip() { perl -0pe 's{/\*.*?\*/}{}gs; s{^\s*//.*$}{}gm' src/lib/aetherholm.ts; }
+          if strip | awk '/\/v1\/chronicle/,/^}/' | grep -E "method:\s*'(POST|PUT|PATCH|DELETE)'"; then
+            echo "::error::a chronicle wrapper carries a mutating method; sealed seasons are immutable history"
+            exit 1
+          fi
+          echo "ok: the chronicle wrappers only read"
+
+      - name: No client-side battle resolution
+        # A client that can resolve a battle can lie about one — the rule micro-emberkin-web
+        # earned by deleting its inherited engine. The report page renders stored results and the
+        # stored digest; nothing in src/ may compute an outcome. The vocabulary of a resolver is
+        # greppable: seeded PRNGs and damage arithmetic have names.
+        run: |
+          set -uo pipefail
+          strip() { perl -0pe 's{/\*.*?\*/}{}gs; s{^\s*//.*$}{}gm' "$1"; }
+          fail=0
+          for f in $(find src -name '*.ts' -o -name '*.tsx'); do
+            if strip "$f" | grep -nE 'resolveBattle|battleOutcome|rollDamage|mulberry|xorshift|splitmix|createHash|sha256\(' \
+                 | sed "s|^|$f:|" | grep .; then
+              fail=1
+            fi
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::battles render from the server's stored report and digest, never a local resolution"
+            exit 1
+          fi
+          echo "ok: no resolution engine, no local digesting"
+
+      - name: Every design token this stylesheet names is real
+        # test/tokens.test.ts proves it against the sibling checkout; this is the half that runs
+        # without one. Comments are stripped first.
+        run: |
+          set -uo pipefail
+          css=$(perl -0pe 's{/\*.*?\*/}{}gs' src/styles.css)
+          if printf '%s\n' "$css" | grep -nE 'var\(--cf-(border|radius-md|space-[1-5][^a-z0-9-]|status-(good|warn|crit)|critical|warning|font[^-])'; then
+            echo "::error::that custom property does not exist in tokens.css"
+            exit 1
+          fi
+          if printf '%s\n' "$css" | grep -nE 'var\(--cf-[a-z0-9-]+[[:space:]]*,'; then
+            echo "::error::a var() fallback is a hard-coded value wearing a token's clothes"
+            exit 1
+          fi
+          if printf '%s\n' "$css" | grep -nE '#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\('; then
+            echo "::error::no literal colours; every colour comes from a token"
+            exit 1
+          fi
+          echo "ok: real tokens only, no fallbacks, no literals"
+
+  image:
+    name: Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: aetherholm-web }
+      - uses: actions/checkout@v4
+        with:
+          repository: cloudsforge-online/micro-ui
+          path: ui
+          token: ${{ secrets.ESTATE_READ_TOKEN }}
+
+      - uses: docker/setup-buildx-action@v3
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: aetherholm-web
+          build-contexts: uipkg=ui
+          build-args: RELEASE=${{ github.sha }}
+          push: false
+          load: true
+          tags: aetherholm-web:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # PROBED, NOT READ. Both defects this step guards were invisible in the config and obvious
+      # in a response: nginx's add_header is all-or-nothing per level, and try_files is a file
+      # lookup rather than an internal redirect. Reading the file suggests both are fine.
+      # Curling it does not.
+      - name: The image serves the app, 404s what it does not own, and sends the headers it promises
+        run: |
+          set -uo pipefail
+          docker run -d --name ci-aetherholm-web -p 127.0.0.1:8080:8080 aetherholm-web:ci
+          for _ in $(seq 1 30); do
+            code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/ || true)
+            [ "$code" = "200" ] && break
+            sleep 1
+          done
+          [ "${code:-}" = "200" ] || { echo "::error::the image returned ${code:-no answer} for /"; docker logs --tail 60 ci-aetherholm-web; exit 1; }
+
+          fail=0
+
+          # A route this app OWNS must survive a hard refresh. /chronicle is DEEP_LINK_PATH in
+          # src/lib/routes.ts, and test/routes.test.ts checks this file against it — a real,
+          # unprotected route, since the probe has no token.
+          deep=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/chronicle || true)
+          [ "$deep" = "200" ] || { echo "::error::an owned route returned $deep — it must be served the shell"; fail=1; }
+
+          # A route it does NOT own must answer 404 while still serving the shell, so the reader
+          # gets a real page and the status line tells the truth.
+          unknown=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/nope/not/a/route || true)
+          [ "$unknown" = "404" ] || { echo "::error::an unknown address returned $unknown; it must be 404"; fail=1; }
+          curl -s -m 5 http://127.0.0.1:8080/nope/not/a/route | grep -q '<div id="root">' \
+            || { echo "::error::the 404 did not serve the app shell"; fail=1; }
+
+          check() { # url, header, expected-substring, label
+            got=$(curl -sI "$1" | tr -d '\r' | grep -i "^$2:" | cut -d' ' -f2- || true)
+            case "${got:-}" in
+              "") echo "::error::$4 is missing $2"; fail=1 ;;
+              *"$3"*) echo "  ok   $4: $2: $got" ;;
+              *) echo "::error::$4 has the wrong $2 (got '${got:-nothing}', wanted '$3')"; fail=1 ;;
+            esac
+          }
+
+          asset=$(curl -s http://127.0.0.1:8080/ | grep -oE '/assets/[^"]+\.js' | head -1)
+          for target in "http://127.0.0.1:8080/" "http://127.0.0.1:8080/chronicle" "http://127.0.0.1:8080$asset"; do
+            [ -n "$asset" ] || [ "$target" != "http://127.0.0.1:8080" ] || continue
+            check "$target" X-Content-Type-Options "nosniff" "$target"
+            check "$target" X-Frame-Options "SAMEORIGIN" "$target"
+            check "$target" Referrer-Policy "strict-origin-when-cross-origin" "$target"
+          done
+          check "http://127.0.0.1:8080/" Cache-Control "no-store" "the shell"
+          check "http://127.0.0.1:8080/chronicle" Cache-Control "no-store" "an enumerated route"
+          [ -n "$asset" ] && check "http://127.0.0.1:8080$asset" Cache-Control "immutable" "a hashed asset"
+
+          # The brand chrome is SERVED by the image, not merely committed: the web template's
+          # Dockerfile once did not copy public/, and four frontends shipped iconless images
+          # while their own brand tests passed.
+          for asset in favicon-32x32.png favicon-192x192.png og-1200x630.png; do
+            code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080/$asset" || true)
+            [ "$code" = "200" ] || { echo "::error::/$asset returned $code from the image"; fail=1; }
+          done
+
+          docker rm -f ci-aetherholm-web >/dev/null 2>&1 || true
+          exit $fail
+      - name: Down
+        if: always()
+        run: docker rm -f ci-aetherholm-web || true
+
+  hygiene:
+    # The org's reusable secret check. Cheap, and it catches the failure that cannot be undone: a
+    # secret pushed to a repository is compromised the moment it lands.
+    uses: cloudsforge-online/micro-org/.github/workflows/secret-hygiene.yml@main
+    permissions:
+      contents: read

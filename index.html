@@ -1,0 +1,61 @@
+<!doctype html>
+<!--
+  data-cf-product picks the accent ramp and data-cf-substrate the ash ramp, both from
+  @cloudsforge/ui/tokens.css. They are on <html> and set STATICALLY rather than by React, because
+  a page that paints before the attributes land flashes the default ember and then changes colour.
+
+  `worlds`, because Aetherholm is a Forge Worlds title: a title wears its product's accent rather
+  than claiming its own, exactly as micro-emberkin-web does (its index.html sets the same value,
+  and the registry gives both titles Worlds' #6d9a49 — ui/packages/ui/src/surfaces.ts:437).
+  `cool`, because this game's ground is a storm-lit sky: the quench ramp pulls the shared ash
+  towards blue-grey without restating a single hex.
+-->
+<html lang="en-GB" data-cf-product="worlds" data-cf-substrate="cool">
+  <head>
+    <meta charset="utf-8" />
+    <!--
+      Played on phones as much as desks. Zoom is NOT disabled — a pinch-to-zoom lock is an
+      accessibility failure, and the estate's rules do not stop being rules because the page has
+      a map on it.
+    -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="colour-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Aetherholm — build a sky-city, command airship fleets, and contest an archipelago that seals into history."
+    />
+    <!--
+      The build that produced this bundle. Stamped by the Dockerfile, read by src/lib/obs.ts, and
+      the reason an error report can be pinned to the deploy that introduced it. It is an identity
+      rather than a configuration: it names the artefact, it does not tell it where it is running.
+    -->
+    <meta name="cf-release" content="dev" />
+    <!--
+      The template's generic favicons, on purpose. micro-aetherholm-assets does not exist yet —
+      the art run is the next phase (docs/ecosystem/20-aetherholm.md §11) — and the choice was
+      between shipping no icon (the defect three frontends actually shipped) and shipping the
+      estate's generic chrome until the title's own lands. The README records the swap that is
+      owed; test/brand-chrome.test.ts holds the gate meanwhile.
+    -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192x192.png" />
+
+    <title>Aetherholm</title>
+
+    <!-- Relative on purpose: one bundle serves localhost, preview and the apex, and this file
+         names no hostname. Crawlers resolve it against the page they fetched. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Aetherholm" />
+    <meta property="og:description" content="A sky-island strategy MMO. Hold the Aether Spires when the season seals. A Forge Worlds title." />
+    <meta property="og:image" content="/og-1200x630.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
