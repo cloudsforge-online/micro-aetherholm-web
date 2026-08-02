@@ -95,6 +95,16 @@ jobs:
           sparse-checkout: |
             src
 
+      # The auth scope registry, because the README's known-gaps entry about the unregistered
+      # `aetherholm:write` scope is a claim with three citations in it.
+      - uses: actions/checkout@v4
+        with:
+          repository: cloudsforge-online/micro-contracts
+          path: contracts
+          token: ${{ secrets.ESTATE_READ_TOKEN }}
+          sparse-checkout: |
+            packages/auth
+
       # Pinned, because the checkout lives at aetherholm-web/ and the action looks for the
       # packageManager field in the workspace root, where there is no package.json.
       - uses: pnpm/action-setup@v4

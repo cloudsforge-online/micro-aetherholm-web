@@ -160,6 +160,14 @@ does not edit `micro-aetherholm`.
   (`aetherholm/src/content.ts:197-235`) are served nowhere, so the queue forms honestly say
   "charged at queue time" instead of showing a number this client would have to invent. Ship
   costs are shown, from the served table.
+- **`aetherholm:write` is not in the auth scope registry** (cross-repo gap, tracked upstream).
+  The `user` mechanism's service path demands it (`WRITE_SCOPE`, `aetherholm/src/server.ts:87`,
+  gated at `:937`), but `contracts/packages/auth/src/index.ts` registers only
+  `aetherholm:provision` (`:176`) and `aetherholm:read` (`:181`) — its own audit note
+  (`contracts/packages/auth/src/index.ts:163-169`) records ~30 such scopes still missing, so
+  identity cannot mint a credential that takes that path today. This client is unaffected — it
+  always acts as the signed-in user — but a service integrating against the mechanism table
+  should know the service lane is currently unmintable.
 - **The launch preview ignores the shared-lane discount** (this repository, deliberate). See
   "Honest numbers": the client cannot know claim state at server routing time, so it prices the
   undiscounted path — wrong only in the player's favour, and labelled.

@@ -30,7 +30,7 @@ const here = fileURLToPath(new URL('..', import.meta.url))
  * unchecked. The estate checks each `micro-<name>` out as `<name>`; both spellings resolve to
  * the same directory.
  */
-const SIBLINGS: readonly string[] = ['aetherholm', 'ui', 'identity', 'worlds']
+const SIBLINGS: readonly string[] = ['aetherholm', 'ui', 'identity', 'worlds', 'contracts']
 
 /** Where a sibling is checked out. `micro-aetherholm` and `aetherholm` are the same directory. */
 function siblingRoot(name: string): string | undefined {
