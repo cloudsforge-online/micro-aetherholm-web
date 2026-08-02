@@ -148,14 +148,15 @@ history (the report screen shows "your battles"), `GET /v1/alliances` is the dir
 costs the engine charges — the queue forms show the engine's own numbers, computed nowhere
 else. What remains:
 
-- **`aetherholm:write` is not in the auth scope registry** (cross-repo gap, tracked upstream).
-  The `user` mechanism's service path demands it (`WRITE_SCOPE`, `aetherholm/src/server.ts:101`,
-  gated at `:937`), but `contracts/packages/auth/src/index.ts` registers only
-  `aetherholm:provision` (`:176`) and `aetherholm:read` (`:181`) — its own audit note
-  (`contracts/packages/auth/src/index.ts:163-169`) records ~30 such scopes still missing, so
-  identity cannot mint a credential that takes that path today. This client is unaffected — it
-  always acts as the signed-in user — but a service integrating against the mechanism table
-  should know the service lane is currently unmintable.
+- **`aetherholm:write` was not in the auth scope registry** (cross-repo gap, closed
+  2026-08-02). The `user` mechanism's service path demands it (`WRITE_SCOPE`,
+  `aetherholm/src/server.ts:101`, gated at `:1034` — this entry used to cite `:937`, which was
+  stale), and until micro-contracts `0287fa1` the registry lacked it, so identity could not
+  mint a credential that took that path. The registry is now total against the estate's gates —
+  all 39 missing scopes registered with citations — and kept total mechanically: micro-org's
+  `service-ci.yml` derives every scope a repository's gates demand and fails its build on one
+  the registry lacks. The service lane is mintable. This client is unaffected either way — it
+  always acts as the signed-in user.
 - **The launch preview ignores the shared-lane discount** (this repository, deliberate). See
   "Honest numbers": the client cannot know claim state at server routing time, so it prices the
   undiscounted path — wrong only in the player's favour, and labelled.
