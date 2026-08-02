@@ -78,7 +78,7 @@ export const NON_INDEX_PATHS: readonly string[] = ROUTES.filter((r) => r.path !=
  * A route the CI image job may deep-link to and expect a 200.
  *
  * A REAL route, and one that does not require a session — the probe has no token. `/chronicle`
- * is also the one screen whose data is anonymous by design (`aetherholm/src/server.ts:800`), so
+ * is also the one screen whose data is anonymous by design (`aetherholm/src/server.ts:897`), so
  * the address a stranger is most likely to be handed is the one the probe proves survives a hard
  * refresh.
  */

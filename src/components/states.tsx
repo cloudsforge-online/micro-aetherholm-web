@@ -8,7 +8,7 @@
  *   FAILED    — the query did not answer. Retrying may work. The request id is what support needs.
  *   FORBIDDEN — the query was understood and refused. Retrying will never work. On this app that
  *               is usually not a missing role at all: another player's city or an in-flight fleet
- *               answers 403 BY DESIGN (`aetherholm/src/server.ts:466-469`, `:641-645`) — the
+ *               answers 403 BY DESIGN (`aetherholm/src/server.ts:480-483`, `:641-645`) — the
  *               economy and the sky are the secrets, not the existence. The copy says so.
  *
  * A spinner that never resolves, an empty list that was actually a timeout, and a "no results"

@@ -9,8 +9,13 @@
  * it does no domain work, fetches nothing, and the server's own settlement remains the truth the
  * moment any write answers.
  *
- * WHAT THE FORMS DO NOT SHOW: building and research costs. The service serves content for
- * airships only (`GET /v1/content/airships`, `aetherholm/src/server.ts:490`); building and
+ * The forms show REAL costs now: `GET /v1/content/buildings` and `/v1/content/research`
+ * (`aetherholm/src/server.ts:508`, `:526`) serve values computed by the exact functions the
+ * engine charges from, closing the gap this header used to record below. The old text, kept for
+ * the reasoning it carried:
+ *
+ * WHAT THE FORMS DID NOT SHOW: building and research costs. The service serves content for
+ * airships only (`GET /v1/content/airships`, `aetherholm/src/server.ts:544`); building and
  * research cost curves live server-side (`aetherholm/src/content.ts:197-235`) with no route. A
  * cost this client computed from a private copy would drift the day the curves move to the
  * assets repository, so the forms say "charged at queue time" and the reply's settled stocks
@@ -32,6 +37,10 @@ import {
   queueShip,
   type AirshipSpec,
   type City,
+  fetchBuildingContent,
+  fetchResearchContent,
+  type BuildingContent,
+  type ResearchContent,
 } from '../lib/aetherholm.ts'
 import {
   RESOURCES,
@@ -135,6 +144,12 @@ function CityDetail({
   now: Date
   onChanged: () => void
 }) {
+  const [buildContent, setBuildContent] = useState<Record<string, BuildingContent>>({})
+  const [researchContent, setResearchContent] = useState<Record<string, ResearchContent>>({})
+  useEffect(() => {
+    fetchBuildingContent().then(setBuildContent).catch(() => setBuildContent({}))
+    fetchResearchContent().then(setResearchContent).catch(() => setResearchContent({}))
+  }, [])
   const stocks = useMemo(
     () => projectStocks(city.stocks, city.rates, city.storageCap, city.settledAt, now),
     [city, now],
@@ -198,19 +213,35 @@ function CityDetail({
       <div className="ah-forms">
         <QueueForm
           title="Queue a building"
-          options={BUILDING_TYPES.map((t) => ({ value: t, label: label(t) }))}
+          options={BUILDING_TYPES.map((t) => {
+            const c = buildContent[t]
+            return {
+              value: t,
+              label: c
+                ? `${label(t)} — L1: ${c.baseCost['aether']}⚡ ${c.baseCost['cloudstone']}🪨 (cost × level)`
+                : label(t),
+            }
+          })}
           submit={(target, key) => queueBuilding(city.id, target, key)}
           onDone={onChanged}
-          note="Cost is charged at queue time from your settled stocks; the reply shows the position after the charge."
+          note="Costs shown are the engine\u2019s own, served from the source it charges from: base \u00d7 next level. The reply shows your settled position after the charge."
         />
         <QueueForm
           title="Queue research"
           options={Object.entries(RESEARCH_NODES).flatMap(([branch, nodes]) =>
-            nodes.map((node) => ({ value: node, label: `${branch} — ${label(node)}` })),
+            nodes.map((node) => {
+              const c = researchContent[node]
+              return {
+                value: node,
+                label: c
+                  ? `${branch} — ${label(node)} — ${c.cost['aether']}⚡, ${formatDuration(c.durationSeconds)}`
+                  : `${branch} — ${label(node)}`,
+              }
+            }),
           )}
           submit={(target, key) => queueResearch(city.id, target, key)}
           onDone={onChanged}
-          note="Cost is charged at queue time; deeper nodes cost and take more."
+          note="Exact node costs and durations above are served, not computed here."
         />
         <QueueForm
           title="Lay a keel"

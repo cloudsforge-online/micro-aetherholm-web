@@ -3,22 +3,22 @@
  *
  * The rule is Emberkin's, inherited with its reasoning: a client that can resolve a battle can
  * lie about one. This page holds no combat rules; it shows the stored report exactly as
- * `GET /v1/battles/:id` returns it (`aetherholm/src/server.ts:649`) — both orders of battle, the
+ * `GET /v1/battles/:id` returns it (`aetherholm/src/server.ts:737`) — both orders of battle, the
  * result object verbatim, and THE DIGEST, displayed in full. The digest is the determinism claim
  * (docs/ecosystem/20-aetherholm.md §4, §9.1): sha256 over the canonicalised inputs and result,
  * pinned append-only at the database (`aetherholm/src/migrations.ts:574`). Showing it is what
  * makes "the same battle re-resolves to the same bytes" a thing a player can quote, not a thing
  * they are asked to believe.
  *
- * Reports are opened BY ID because the service serves no listing of a player's battles — a
- * genuine gap, recorded in the README. Live battles are the participants' own (the route
- * authenticates unless the season is sealed, server.ts:681-691); sealed ones are public history
- * and open without a session.
+ * Reports open from YOUR HISTORY now — `GET /v1/battles` (`aetherholm/src/server.ts:703`)
+ * closed the listing gap this header used to record — or by pasted id, which stays because a
+ * sealed battle is public history anyone may cite. Live battles are the participants' own;
+ * sealed ones open without a session.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { noticeFor, type ErrorNotice } from '../lib/api.ts'
-import { fetchBattle, type Battle } from '../lib/aetherholm.ts'
+import { fetchBattle, listBattles, type Battle, type BattleSummary } from '../lib/aetherholm.ts'
 import { formatMultiplier } from '../lib/format.ts'
 import { Empty, Failed, Forbidden, Loading } from '../components/states.tsx'
 
@@ -55,6 +55,13 @@ function OobTable({ title, oob }: { title: string; oob: unknown }) {
 
 export function BattlesPage() {
   const [params, setParams] = useSearchParams()
+  const [history, setHistory] = useState<BattleSummary[] | null>(null)
+  const [historyNotice, setHistoryNotice] = useState<ErrorNotice | null>(null)
+  useEffect(() => {
+    listBattles()
+      .then(setHistory)
+      .catch((err: unknown) => setHistoryNotice(noticeFor(err, 'Your battle history could not be loaded.')))
+  }, [])
   const requested = params.get('id') ?? ''
   const [input, setInput] = useState(requested)
   const [battle, setBattle] = useState<Battle | null>(null)
@@ -87,6 +94,28 @@ export function BattlesPage() {
           and resolves nothing.
         </p>
       </header>
+
+      <section className="ah-history" aria-label="Your battles">
+        <h2>Your battles</h2>
+        {historyNotice ? (
+          <p className="ah-note" role="status">{historyNotice.message}</p>
+        ) : history === null ? (
+          <p className="ah-note">Loading your history…</p>
+        ) : history.length === 0 ? (
+          <p className="ah-note">No battles yet. A fleet that never launched has a perfect record.</p>
+        ) : (
+          <ul className="ah-history__list">
+            {history.map((b) => (
+              <li key={b.id}>
+                <button type="button" className="cf-btn" onClick={() => setParams({ id: b.id })}>
+                  {b.mission} — {b.outcome}
+                </button>{' '}
+                <span className="cf-num ah-history__when">{new Date(b.occurredAt).toLocaleString()}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <form
         className="ah-form ah-form--inline"

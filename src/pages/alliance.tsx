@@ -4,13 +4,14 @@
  * THE ONE THING THIS SCREEN MUST NOT DO is create a community. An alliance IS a
  * `micro-community` community (docs/ecosystem/20-aetherholm.md §6): proposals, votes, officers,
  * timelocks and the treasury live there, and the game service stores only the binding —
- * `communityId` is required and never minted (`aetherholm/src/server.ts:719-726`). So the
+ * `communityId` is required and never minted (`aetherholm/src/server.ts:807-814`). So the
  * founding form here asks for the id of a community that already exists, says where governance
  * lives, and sends exactly that. A "create community" button on this page would be the second
  * voting system the design forbids.
  *
- * Discovery is by id, because the service serves no route that lists alliances or answers
- * "which alliance am I in" — a genuine gap, recorded in the README. After founding or opening
+ * Discovery is the DIRECTORY now — `GET /v1/alliances` (`aetherholm/src/server.ts:830`) lists
+ * the world with the caller's own membership marked, closing the gap this header used to
+ * record. The by-id lookup stays for a pasted id. After founding or opening
  * one, the screen keeps it for the session in React state only.
  */
 import { useCallback, useEffect, useState } from 'react'
@@ -27,6 +28,8 @@ import {
   type Alliance,
   type Island,
   type Season,
+  listAlliances,
+  type AllianceDirectoryEntry,
 } from '../lib/aetherholm.ts'
 import { useSession } from '../lib/auth.tsx'
 import { Empty, Failed, Loading } from '../components/states.tsx'
@@ -43,6 +46,12 @@ export function AlliancePage() {
   const [busy, setBusy] = useState(false)
 
   const [lookupId, setLookupId] = useState(requested)
+  const [directory, setDirectory] = useState<AllianceDirectoryEntry[] | null>(null)
+  useEffect(() => {
+    listAlliances()
+      .then(setDirectory)
+      .catch(() => setDirectory(null))
+  }, [alliance])
   const [name, setName] = useState('')
   const [communityId, setCommunityId] = useState('')
   const [claimIslandId, setClaimIslandId] = useState('')
@@ -102,6 +111,27 @@ export function AlliancePage() {
       </header>
 
       {notice && <Failed notice={notice} />}
+
+      <section className="ah-directory" aria-label="Alliances of this world">
+        <h2>Alliances of this world</h2>
+        {directory === null ? (
+          <p className="ah-note">The directory could not be loaded.</p>
+        ) : directory.length === 0 ? (
+          <p className="ah-note">No alliances yet — the first banner is unclaimed.</p>
+        ) : (
+          <ul className="ah-directory__list">
+            {directory.map((a) => (
+              <li key={a.id}>
+                <button type="button" className="cf-btn" onClick={() => setParams({ id: a.id })}>
+                  {a.name}
+                </button>{' '}
+                <span className="cf-num">{a.memberCount}</span> member{a.memberCount === 1 ? '' : 's'}
+                {a.mine ? <strong className="ah-directory__mine"> — yours</strong> : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <form
         className="ah-form ah-form--inline"

@@ -3,7 +3,7 @@
  * serves.
  *
  * Every read on this page goes out with `auth: false` (src/lib/aetherholm.ts): sealed seasons
- * are public history (`aetherholm/src/server.ts:796-798`), and sending a token to a route that
+ * are public history (`aetherholm/src/server.ts:893-895`), and sending a token to a route that
  * cannot use one would be a needless credential on the wire. A signed-out visitor gets the whole
  * page, which is the point — the chronicle is the game showing itself to people who have not
  * installed it (docs/ecosystem/20-aetherholm.md §10.1).
