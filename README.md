@@ -133,7 +133,7 @@ and the favicons.
 (`docs/ecosystem/20-aetherholm.md` §11) — so `public/` ships the **estate's generic favicons
 and og card from `micro-web-template`**, linked in both directions and probed in the image.
 The title's real chrome (favicons, og, wordmark — the "Title chrome" row of doc §8) lands with
-the assets repository, and swapping the four files is the whole of that change.
+the assets repository — **done**: the four files in `public/` are the generated title chrome, byte-identical to `micro-aetherholm-assets/assets/title/`, and the brand-chrome suite verifies them in both directions as before.
 `test/brand-chrome.test.ts` is the template's, unweakened.
 
 ## Known gaps — this repository's and the service's
