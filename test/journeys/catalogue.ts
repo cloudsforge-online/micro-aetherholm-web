@@ -33,18 +33,23 @@ import {
 import type { Scenario } from './scenario.ts'
 
 /**
- * The estate's one design-system contrast defect, where this surface renders it.
+ * Nothing, and the empty list is kept rather than the two calls unwired.
  *
- * `--cf-fg-mute` is `#63757a` and measures 3.54:1 on the panel surface — under the 4.5:1 AA
- * threshold for normal text. It is a `micro-ui` token. `assertKnownStillBroken` asserts the rule
- * is STILL failing as well as that nothing else is, so it cannot outlive the defect.
+ * This surface sets `data-cf-substrate="cool"`, and on that substrate `--cf-fg-mute` resolved to
+ * `#63757a` — 3.54:1 on the panel `#151d21`, under the 4.5:1 WCAG 2.2 AA floor for normal text.
+ * That was a `micro-ui` token, so it was recorded here rather than forked locally.
+ *
+ * `micro-ui` `2f990be` retuned the cool ramp — `--cf-khaki` `#63757a` → `#7d9399` (5.29:1), with
+ * `--cf-bone-dim` `#96a5a6` → `#abbcbd` (8.67:1) so the muted step did not close on the dimmed
+ * one — and this suite went red exactly as `assertKnownStillBroken` promises, naming the entry to
+ * delete. Deleted after watching that happen, not on the strength of the upstream commit message.
+ *
+ * The list stays, empty: `assertAxeClean` then tolerates nothing at all, which is the stronger
+ * assertion, and a future exclusion is one array entry rather than a re-plumbing. An entry costs a
+ * `rule` and an `owner` naming who can fix it — and must never be added without first watching it
+ * fail, because an unearned exclusion silently suppresses that rule wherever it next appears.
  */
-const KNOWN_A11Y: readonly KnownViolation[] = [
-  {
-    rule: 'color-contrast',
-    owner: 'micro-ui — --cf-fg-mute (#63757a) on the panel surface (#151d21) is 3.54:1, against 4.5:1',
-  },
-]
+const KNOWN_A11Y: readonly KnownViolation[] = []
 
 const SIGNED_IN = { 'cf.accessToken': 'test-access', 'cf.refreshToken': 'test-refresh' }
 const ME = { user: { id: 'u_1', handle: 'captain', roles: ['user'] }, session: {}, organisations: [] }
