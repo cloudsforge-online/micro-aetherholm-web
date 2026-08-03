@@ -30,7 +30,17 @@ const here = fileURLToPath(new URL('..', import.meta.url))
  * unchecked. The estate checks each `micro-<name>` out as `<name>`; both spellings resolve to
  * the same directory.
  */
-const SIBLINGS: readonly string[] = ['aetherholm', 'ui', 'identity', 'worlds', 'contracts']
+const SIBLINGS: readonly string[] = [
+  'aetherholm',
+  'ui',
+  'identity',
+  'worlds',
+  'contracts',
+  // The browser telemetry sink. `src/lib/obs.ts` cites its record shape — `fromWire`, `RUM_KINDS`
+  // and the migration's CHECK constraint — because that contract is the reason every event this
+  // bundle sent was silently discarded, and a contract quoted from memory is how it went wrong.
+  'lantern',
+]
 
 /** Where a sibling is checked out. `micro-aetherholm` and `aetherholm` are the same directory. */
 function siblingRoot(name: string): string | undefined {
