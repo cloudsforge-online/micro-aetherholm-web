@@ -15,18 +15,21 @@ import { useEffect, useState } from 'react'
 import { CloudsForgeBar } from '@cloudsforge/ui'
 import { NavLink, Outlet } from 'react-router-dom'
 import { PRODUCT } from '../lib/hosts.ts'
-import { fetchReadiness } from '../lib/aetherholm.ts'
+import { fetchReadiness, type Readiness } from '../lib/aetherholm.ts'
 import { useSession } from '../lib/auth.tsx'
 import { NAV } from '../lib/routes.ts'
 
 export function AppShell() {
   const { account, signIn, signOut } = useSession()
-  const [ready, setReady] = useState(true)
+  // Starts 'unknown' rather than 'ready': before the probe answers we have established nothing,
+  // and 'unknown' and 'ready' render identically (no banner), so the initial value cannot flash a
+  // claim we cannot support.
+  const [readiness, setReadiness] = useState<Readiness>('unknown')
 
   useEffect(() => {
     let live = true
     void fetchReadiness().then((r) => {
-      if (live) setReady(r.ready)
+      if (live) setReadiness(r.readiness)
     })
     return () => {
       live = false
@@ -63,7 +66,14 @@ export function AppShell() {
         </div>
       </nav>
 
-      {!ready && (
+      {/*
+        `=== 'degraded'`, NOT `!ready`. Only the service saying so puts this banner on screen.
+        Under the old two-state boolean an unreachable probe was indistinguishable from a service
+        that had answered "not ready", so when the gateway stopped routing `/readyz` this banner
+        appeared for every visitor of a perfectly healthy game. A degradation warning that is
+        sometimes wrong is a degradation warning nobody reads.
+      */}
+      {readiness === 'degraded' && (
         <div className="ah-degraded" role="status">
           <span className="ah-degraded__icon" aria-hidden="true">
             ▲

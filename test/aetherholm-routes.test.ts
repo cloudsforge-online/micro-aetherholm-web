@@ -437,16 +437,52 @@ describe('fetchReadiness — GET /readyz (server.ts:314)', () => {
     assert.equal(lastCall().headers['authorization'], undefined)
   })
 
-  it('reads the 503 body as not-ready rather than throwing (server.ts:316)', async () => {
-    stub = installFetch(() => json(503, { ready: false, checks: [] }))
-    assert.deepEqual(await fetchReadiness(), { ready: false })
+  it('reads a 200 saying ready as ready', async () => {
+    stub = installFetch(() => json(200, { ready: true }))
+    assert.deepEqual(await fetchReadiness(), { readiness: 'ready' })
   })
 
-  it('reports not-ready when the service cannot be reached at all', async () => {
+  it('reads the 503 body as not-ready rather than throwing (server.ts:316)', async () => {
+    stub = installFetch(() => json(503, { ready: false, checks: [] }))
+    assert.deepEqual(await fetchReadiness(), { readiness: 'degraded' })
+  })
+
+  it('reads a 200 whose body says not-ready as not-ready', async () => {
+    stub = installFetch(() => json(200, { ready: false }))
+    assert.deepEqual(await fetchReadiness(), { readiness: 'degraded' })
+  })
+
+  /* ══════════════════════════════════════════════════════════════════════════════════════════
+   * THE TWO CASES BELOW USED TO ASSERT `{ ready: false }`, AND THAT ASSERTION WAS THE DEFECT.
+   *
+   * They pinned the old two-state contract, under which "the service told us it is not ready"
+   * and "we never reached the service" were the same answer. On the live estate that turned a
+   * gateway routing gap into a product-wide lie: `GET /readyz` is not under `/v1`, the gateway
+   * routes only `PathPrefix(/v1)` to micro-aetherholm, so the probe hit the static file server
+   * that serves this bundle and came back 404 — and every visitor was told "Aetherholm is not
+   * answering ready just now" while the service answered `{"ready":true}` on its own port.
+   *
+   * This is a CHANGED SPECIFICATION, not a relaxed one: `unknown` is a strictly stronger claim
+   * than the `false` it replaces, because it is the true one. A banner that cries degradation
+   * when nothing is degraded is the banner nobody reads on the day it is right.
+   * ══════════════════════════════════════════════════════════════════════════════════════════ */
+
+  it('a 404 is UNKNOWN, not not-ready — the probe never reached the service', async () => {
+    // Exactly what the live gateway returned: the SPA's own nginx answering a path it does not
+    // route, with an HTML body rather than a readiness document.
+    stub = installFetch(() => json(404, { error: { code: 'not_found', message: 'not found' } }))
+    assert.deepEqual(
+      await fetchReadiness(),
+      { readiness: 'unknown' },
+      'a 404 from the file server was reported as the game being degraded',
+    )
+  })
+
+  it('an unreachable service is UNKNOWN — a probe that did not complete establishes nothing', async () => {
     stub = installFetch(() => {
       throw new Error('ECONNREFUSED')
     })
-    assert.deepEqual(await fetchReadiness(), { ready: false })
+    assert.deepEqual(await fetchReadiness(), { readiness: 'unknown' })
   })
 })
 

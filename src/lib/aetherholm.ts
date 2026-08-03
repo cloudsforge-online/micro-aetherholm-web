@@ -71,6 +71,11 @@
  * preview being wrong loses nobody anything but surprise.
  */
 import { ApiError, aetherholm } from './api.ts'
+// For the readiness probe only: an unreachable probe is reported rather than swallowed, because a
+// swallowed one is how a gateway routing gap stayed invisible while every visitor was told the
+// game was degraded. See `fetchReadiness`.
+import { APP_NAME, apiBase } from './hosts.ts'
+import { report } from './obs.ts'
 
 /* ---- guards -------------------------------------------------------- */
 
@@ -268,16 +273,65 @@ export interface SealedBattle {
 /* ---- health -------------------------------------------------------- */
 
 /**
+ * What the readiness probe established. THREE outcomes, not two.
+ *
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ * "THE SERVICE SAID IT IS NOT READY" AND "I COULD NOT ASK" ARE DIFFERENT FACTS.
+ *
+ * This function used to return `{ ready: boolean }` and answer `false` to both, while its own
+ * docstring said the opposite: "503 carries a body and is an ANSWER (not-ready), not a failure —
+ * only an unreachable service is." The comment was right and the code did not implement it.
+ *
+ * It cost a false alarm on the live estate. `GET /readyz` is not under `/v1`, and the gateway
+ * routes only `Host(aetherholm.<apex>) && PathPrefix(/v1)` to this service — so the probe landed
+ * on the static file server that serves this very bundle and came back 404. Every visitor was
+ * shown "Aetherholm is not answering ready just now. The chronicle still reads; play may fail."
+ * while the service was answering `{"ready":true}` perfectly well on its own port. A banner that
+ * cries degradation when nothing is degraded is worse than no banner: it is the one that gets
+ * ignored on the day it is true.
+ *
+ * So only an ANSWER FROM THE SERVICE can produce `degraded`. A 404, a refused connection, a
+ * timeout or a proxy's HTML page all produce `unknown`, which the shell renders as nothing at all
+ * — because none of them is evidence about whether the game works, and the reads that actually
+ * matter have their own failure states.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ */
+export type Readiness =
+  /** 200 with `ready: true`. */
+  | 'ready'
+  /** The service answered and said no — 503, or a 200 whose body says `ready: false`. */
+  | 'degraded'
+  /** The probe never reached the service. This is a statement about the PROBE, not the game. */
+  | 'unknown'
+
+/**
  * GET /readyz (`aetherholm/src/server.ts:365`). Unauthenticated; 503 carries a body and is an
  * ANSWER (not-ready), not a failure — only an unreachable service is.
  */
-export async function fetchReadiness(): Promise<{ ready: boolean }> {
+export async function fetchReadiness(): Promise<{ readiness: Readiness }> {
   try {
     const body = await aetherholm<{ ready?: boolean }>('/readyz', { auth: false })
-    return { ready: body?.ready === true }
+    return { readiness: body?.ready === true ? 'ready' : 'degraded' }
   } catch (err) {
-    if (err instanceof ApiError && err.status === 503) return { ready: false }
-    return { ready: false }
+    // The service answering 503 IS the service answering. `micro-aetherholm` returns the readiness
+    // body with that status, so this is the not-ready path and not an error path.
+    if (err instanceof ApiError && err.status === 503) return { readiness: 'degraded' }
+
+    // Anything else means the probe did not reach the service. Reported rather than swallowed:
+    // this is precisely how a gateway that stopped routing `/readyz` stayed invisible for a night
+    // while every user was told the game was degraded. Silence here would restore that.
+    report({
+      app: APP_NAME,
+      type: 'ReadinessUnreachable',
+      message:
+        err instanceof ApiError
+          ? `GET /readyz answered ${err.status} — the probe did not reach micro-aetherholm`
+          : `GET /readyz did not complete`,
+      stack: err instanceof Error ? (err.stack ?? null) : null,
+      ...(err instanceof ApiError ? { statusCode: err.status } : {}),
+      context: { base: apiBase() },
+    })
+    return { readiness: 'unknown' }
   }
 }
 

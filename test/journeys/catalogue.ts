@@ -22,7 +22,7 @@
  * on screen are the ones the response carried, and never that they are the right numbers.
  */
 import assert from 'node:assert/strict'
-import { assertMounted, open, type Stubs } from './browser.ts'
+import { assertMounted, renderOnlyWithStubbedNetwork, type Stubs } from './browser.ts'
 import {
   assertAxeClean,
   assertKnownStillBroken,
@@ -168,7 +168,7 @@ export const CATALOGUE: readonly Scenario[] = [
         assert.equal(status, 404, `${path} answered ${status}; it must 404`)
       }
 
-      const session = await open(surface.origin, { path: '/battles/22222222-2222-4222-8222-222222222222', storage: SIGNED_IN, stubs: BASE })
+      const session = await renderOnlyWithStubbedNetwork(surface.origin, { path: '/battles/22222222-2222-4222-8222-222222222222', storage: SIGNED_IN, stubs: BASE })
       try {
         assert.equal(session.status, 404)
         await assertMounted(session)
@@ -185,7 +185,7 @@ export const CATALOGUE: readonly Scenario[] = [
     tier: 2,
     asserts: 'presentation',
     async run(surface) {
-      const session = await open(surface.origin, { storage: SIGNED_IN, stubs: BASE })
+      const session = await renderOnlyWithStubbedNetwork(surface.origin, { storage: SIGNED_IN, stubs: BASE })
       try {
         await assertMounted(session)
         // The count is the assertion, against the response in this same run. A map that draws a
@@ -239,7 +239,7 @@ export const CATALOGUE: readonly Scenario[] = [
       'served, and the assertion is that this client refuses to offer a commit before it has ' +
       'quoted one. What the server charges is the server’s business and is shown separately.',
     async run(surface) {
-      const session = await open(surface.origin, { path: '/fleets', storage: SIGNED_IN, stubs: BASE })
+      const session = await renderOnlyWithStubbedNetwork(surface.origin, { path: '/fleets', storage: SIGNED_IN, stubs: BASE })
       try {
         const text = await assertMounted(session)
         // The price tag is the rule. With no city and no composed fleet there is no preview, so
@@ -273,7 +273,7 @@ export const CATALOGUE: readonly Scenario[] = [
     asserts: 'presentation',
     gate: true,
     async run(surface) {
-      const session = await open(surface.origin, {
+      const session = await renderOnlyWithStubbedNetwork(surface.origin, {
         path: '/battles?id=22222222-2222-4222-8222-222222222222',
         storage: SIGNED_IN,
         stubs: BASE,
@@ -312,7 +312,7 @@ export const CATALOGUE: readonly Scenario[] = [
     serverRule: 'aetherholm requires a communityId and never mints one',
     ownedBy: 'aetherholm-web/src/lib/aetherholm.ts#foundAlliance',
     async run(surface) {
-      const session = await open(surface.origin, { path: '/alliance', storage: SIGNED_IN, stubs: BASE })
+      const session = await renderOnlyWithStubbedNetwork(surface.origin, { path: '/alliance', storage: SIGNED_IN, stubs: BASE })
       try {
         const text = await assertMounted(session)
         // The founding form takes a community id. A "create community" button here would be the
@@ -366,7 +366,7 @@ export const CATALOGUE: readonly Scenario[] = [
     async run(surface) {
       // No session at all: the chronicle is the game showing itself to people who have not
       // installed it.
-      const session = await open(surface.origin, { path: '/chronicle', stubs: BASE })
+      const session = await renderOnlyWithStubbedNetwork(surface.origin, { path: '/chronicle', stubs: BASE })
       try {
         const text = await assertMounted(session)
         assert.ok(text.includes('The Still Year'), 'no sealed season rendered for an anonymous visitor')
@@ -382,7 +382,7 @@ export const CATALOGUE: readonly Scenario[] = [
       // …and with a session in hand, the chronicle reads STILL go out without one. Sending a
       // credential to a route that does not read one is the defect: it is a needless token on the
       // wire and in somebody's access log.
-      const signedIn = await open(surface.origin, { path: '/chronicle', storage: SIGNED_IN, stubs: BASE })
+      const signedIn = await renderOnlyWithStubbedNetwork(surface.origin, { path: '/chronicle', storage: SIGNED_IN, stubs: BASE })
       try {
         await assertMounted(signedIn)
         const withAuth = signedIn
@@ -403,7 +403,7 @@ export const CATALOGUE: readonly Scenario[] = [
     tier: 1,
     asserts: 'client-request',
     async run(surface) {
-      const session = await open(surface.origin, {
+      const session = await renderOnlyWithStubbedNetwork(surface.origin, {
         path: '/#cf_code=handoff-code-123',
         stubs: [['POST /auth/handoff/redeem', { json: { accessToken: 'a', refreshToken: 'r' } }], ...BASE],
       })
@@ -429,7 +429,7 @@ export const CATALOGUE: readonly Scenario[] = [
     async run(surface) {
       const seen = new Set<string>()
       for (const path of [...OWNED, '/nope']) {
-        const session = await open(surface.origin, { path, storage: SIGNED_IN, stubs: BASE })
+        const session = await renderOnlyWithStubbedNetwork(surface.origin, { path, storage: SIGNED_IN, stubs: BASE })
         try {
           await assertMounted(session)
           for (const id of await assertAxeClean(session.page, path, KNOWN_A11Y)) seen.add(id)
@@ -447,7 +447,7 @@ export const CATALOGUE: readonly Scenario[] = [
     asserts: 'presentation',
     async run(surface) {
       for (const path of OWNED) {
-        const session = await open(surface.origin, { path, storage: SIGNED_IN, stubs: BASE })
+        const session = await renderOnlyWithStubbedNetwork(surface.origin, { path, storage: SIGNED_IN, stubs: BASE })
         try {
           await assertMounted(session)
           await assertLandmarks(session.page, path)
@@ -455,6 +455,79 @@ export const CATALOGUE: readonly Scenario[] = [
         } finally {
           await session.close()
         }
+      }
+    },
+  },
+
+  /* ---- the degradation banner tells the truth about what it knows -------- */
+  {
+    id: 'BJ-AET-06',
+    title:
+      'the degradation banner appears only when the SERVICE said it is degraded, and never merely because the readiness probe could not be reached',
+    tier: 1,
+    asserts: 'presentation',
+    gate: true,
+    noServerRule:
+      'both outcomes are decisions of this bundle about a response it already has in hand. What ' +
+      'micro-aetherholm answers on /readyz is stubbed here in both directions; the assertion is ' +
+      'which of them this client turns into a banner, and that rule lives entirely in ' +
+      'src/lib/aetherholm.ts and src/components/shell.tsx.',
+    async run(surface) {
+      const BANNER = 'not answering ready'
+
+      /*
+       * BASE's own `GET /readyz` entry is REMOVED rather than shadowed.
+       *
+       * `renderOnlyWithStubbedNetwork()` walks the stub table in order and the FIRST match answers, so appending an
+       * override after BASE does nothing at all — BASE's `{ ready: true }` wins and the page is
+       * healthy in every case. The first draft of this scenario did exactly that: the 404 half
+       * passed against a page that had never seen a 404, and only the 503 half's failure gave it
+       * away. A scenario that arranges a condition it does not actually produce is the same
+       * defect as the harness this tier was written to replace.
+       */
+      const withReadyz = (reply: { status: number; json: unknown }): typeof BASE => [
+        ...BASE.filter(([pattern]) => pattern !== 'GET /readyz'),
+        ['GET /readyz', reply],
+      ]
+
+      // ══════════════════════════════════════════════════════════════════════════════════════
+      // THE CASE THAT WAS LIVE ON THE ESTATE. `GET /readyz` is not under `/v1`, and the gateway
+      // routes only `PathPrefix(/v1)` to micro-aetherholm — so the probe hit the static file
+      // server that serves this very bundle and came back 404. `fetchReadiness` mapped every
+      // exception to `{ ready: false }`, so every visitor of a perfectly healthy game was told
+      // it was degraded. Neither the DOM tests nor the route tests could see it: one never
+      // rendered the shell, the other asserted the request rather than the banner.
+      // ══════════════════════════════════════════════════════════════════════════════════════
+      const unreachable = await renderOnlyWithStubbedNetwork(surface.origin, {
+        storage: SIGNED_IN,
+        stubs: withReadyz({ status: 404, json: { error: { code: 'not_found' } } }),
+      })
+      try {
+        const text = await assertMounted(unreachable)
+        assert.ok(
+          !text.includes(BANNER),
+          'a 404 on the readiness probe put a degradation banner on a healthy game — the probe ' +
+            'establishes nothing about the service when it never reaches it',
+        )
+      } finally {
+        await unreachable.close()
+      }
+
+      // The converse, so this cannot be passing because the banner is simply gone. A 503 IS the
+      // service answering, and it must still be shown.
+      const degraded = await renderOnlyWithStubbedNetwork(surface.origin, {
+        storage: SIGNED_IN,
+        stubs: withReadyz({ status: 503, json: { ready: false, checks: [] } }),
+      })
+      try {
+        const text = await assertMounted(degraded)
+        assert.ok(
+          text.includes(BANNER),
+          'the service answered 503 not-ready and the banner did not appear — the warning has ' +
+            'been disabled rather than corrected',
+        )
+      } finally {
+        await degraded.close()
       }
     },
   },
