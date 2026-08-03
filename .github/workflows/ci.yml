@@ -85,6 +85,26 @@ jobs:
           sparse-checkout: |
             src
 
+      # The telemetry sink, because `src/lib/obs.ts` now cites it by line.
+      #
+      # This bundle posts RUM to micro-lantern, and the shape it must send is not a convention —
+      # it is a CHECK constraint (`rum_kind_known`) over a closed set of kinds, with an envelope
+      # keyed `samples` rather than `events`. All sixteen frontends shipped a byte-identical
+      # `obs.ts` posting the wrong path with the wrong envelope and the wrong record key, and it
+      # went unnoticed because a discarded batch still answered 202: the caller was told it had
+      # stored something while every record was dropped. The citations exist so that shape can
+      # never silently drift again, and they are worth nothing unless something reads them.
+      #
+      # Checked out rather than downgrading the gate to a notice, which is the other way this
+      # repository's two siblings resolved it. A citation nobody verifies is a comment.
+      - uses: actions/checkout@v4
+        with:
+          repository: cloudsforge-online/micro-lantern
+          path: lantern
+          token: ${{ secrets.ESTATE_READ_TOKEN }}
+          sparse-checkout: |
+            src
+
       # The title client, because "the descriptor is worlds' bridge's read" is a claim with a
       # citation in it — and it is the reason GET /v1/title is declined rather than called.
       - uses: actions/checkout@v4
