@@ -348,7 +348,11 @@ export async function open(origin: string, options: PageOptions = {}): Promise<S
       headers: request.headers(),
       body: request.postData(),
     }
-    if (!isOwnAsset(sent.url, origin)) requests.push(sent)
+    // EVERY request, including this surface's own. `apiCalls()` filters to the cross-origin ones;
+    // a scenario that needs to know the page fetched one of its OWN files — the art manifest,
+    // a model — reads `collected.requests`. Recording only cross-origin requests made "did the
+    // credits page fetch the manifest, or are the words baked in?" unanswerable.
+    requests.push(sent)
 
     // ANYTHING ON THIS SURFACE'S OWN ORIGIN GOES TO THE SURFACE, always and before the stub table.
     //
