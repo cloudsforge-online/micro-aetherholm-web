@@ -1,5 +1,11 @@
 # micro-aetherholm-web
 
+[![ci](https://github.com/cloudsforge-online/micro-aetherholm-web/actions/workflows/ci.yml/badge.svg)](https://github.com/cloudsforge-online/micro-aetherholm-web/actions/workflows/ci.yml)
+![node](https://img.shields.io/badge/node-%3E%3D22-5FA04E?logo=node.js&logoColor=white)
+![typescript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![module](https://img.shields.io/badge/module-ESM-F7DF1E?logo=javascript&logoColor=black)
+![tests](https://img.shields.io/badge/tests-headless%20Chromium-2EAD33?logo=googlechrome&logoColor=white)
+
 The game client for **Aetherholm**, the third Forge Worlds title
 (`docs/ecosystem/20-aetherholm.md` §5 is the design): the archipelago map on the wind lattice,
 the city view with live lazy-accrual stocks, fleet control with the Aether cost shown before the
@@ -169,3 +175,10 @@ else. What remains:
 `check` and `image` CI jobs exist only for that reason and are deleted the day the org's
 reusable `web-ci.yml` can resolve the dependency and check out the sibling service for the
 citation verification — the calling convention is in the header of `.github/workflows/ci.yml`.
+
+---
+
+## Provenance
+
+The code in this repository was written by **Claude Opus 5** and **Claude Fable 5**, assets
+generated with **FLUX 2 Pro**, under human direction and review.
