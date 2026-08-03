@@ -96,33 +96,33 @@ interface Route {
  * checks below can be mechanical: a wrong citation fails and names itself.
  */
 export const SURFACE: readonly Route[] = [
-  { method: 'GET', path: '/readyz', line: 328, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/seasons/current', line: 396, auth: 'bearer', idempotent: false },
-  { method: 'GET', path: '/v1/archipelagos/:id/islands', line: 415, auth: 'bearer', idempotent: false },
-  { method: 'GET', path: '/v1/archipelagos/:id/lanes', line: 572, auth: 'bearer', idempotent: false },
-  { method: 'GET', path: '/v1/content/airships', line: 544, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/content/buildings', line: 508, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/content/research', line: 526, auth: 'none', idempotent: false },
-  { method: 'POST', path: '/v1/cities', line: 429, auth: 'user', idempotent: false },
-  { method: 'GET', path: '/v1/cities', line: 454, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/cities/:id', line: 473, auth: 'owner', idempotent: false },
-  { method: 'POST', path: '/v1/cities/:id/buildings', line: 488, auth: 'user-queue', idempotent: true },
-  { method: 'POST', path: '/v1/cities/:id/research', line: 492, auth: 'user-queue', idempotent: true },
-  { method: 'POST', path: '/v1/cities/:id/ships', line: 496, auth: 'user-queue', idempotent: true },
-  { method: 'POST', path: '/v1/fleets', line: 587, auth: 'user', idempotent: true },
-  { method: 'GET', path: '/v1/fleets', line: 670, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/fleets/:id', line: 688, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/battles', line: 703, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/battles/:id', line: 737, auth: 'sealed-public', idempotent: false },
-  { method: 'GET', path: '/v1/alliances', line: 830, auth: 'bearer', idempotent: false },
-  { method: 'POST', path: '/v1/alliances', line: 803, auth: 'user', idempotent: false },
-  { method: 'GET', path: '/v1/alliances/:id', line: 839, auth: 'bearer', idempotent: false },
-  { method: 'POST', path: '/v1/alliances/:id/members', line: 849, auth: 'user', idempotent: false },
-  { method: 'DELETE', path: '/v1/alliances/:id/members', line: 862, auth: 'user', idempotent: false },
-  { method: 'POST', path: '/v1/alliances/:id/claims', line: 875, auth: 'user', idempotent: false },
-  { method: 'GET', path: '/v1/chronicle/seasons', line: 897, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/chronicle/seasons/:id', line: 913, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/chronicle/seasons/:id/battles', line: 930, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/readyz', line: 365, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/seasons/current', line: 432, auth: 'bearer', idempotent: false },
+  { method: 'GET', path: '/v1/archipelagos/:id/islands', line: 451, auth: 'bearer', idempotent: false },
+  { method: 'GET', path: '/v1/archipelagos/:id/lanes', line: 608, auth: 'bearer', idempotent: false },
+  { method: 'GET', path: '/v1/content/airships', line: 580, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/content/buildings', line: 544, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/content/research', line: 562, auth: 'none', idempotent: false },
+  { method: 'POST', path: '/v1/cities', line: 465, auth: 'user', idempotent: false },
+  { method: 'GET', path: '/v1/cities', line: 490, auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/cities/:id', line: 509, auth: 'owner', idempotent: false },
+  { method: 'POST', path: '/v1/cities/:id/buildings', line: 524, auth: 'user-queue', idempotent: true },
+  { method: 'POST', path: '/v1/cities/:id/research', line: 528, auth: 'user-queue', idempotent: true },
+  { method: 'POST', path: '/v1/cities/:id/ships', line: 532, auth: 'user-queue', idempotent: true },
+  { method: 'POST', path: '/v1/fleets', line: 623, auth: 'user', idempotent: true },
+  { method: 'GET', path: '/v1/fleets', line: 706, auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/fleets/:id', line: 724, auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/battles', line: 739, auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/battles/:id', line: 773, auth: 'sealed-public', idempotent: false },
+  { method: 'GET', path: '/v1/alliances', line: 866, auth: 'bearer', idempotent: false },
+  { method: 'POST', path: '/v1/alliances', line: 839, auth: 'user', idempotent: false },
+  { method: 'GET', path: '/v1/alliances/:id', line: 875, auth: 'bearer', idempotent: false },
+  { method: 'POST', path: '/v1/alliances/:id/members', line: 885, auth: 'user', idempotent: false },
+  { method: 'DELETE', path: '/v1/alliances/:id/members', line: 898, auth: 'user', idempotent: false },
+  { method: 'POST', path: '/v1/alliances/:id/claims', line: 911, auth: 'user', idempotent: false },
+  { method: 'GET', path: '/v1/chronicle/seasons', line: 933, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/chronicle/seasons/:id', line: 949, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/chronicle/seasons/:id/battles', line: 966, auth: 'none', idempotent: false },
 ]
 
 /**
@@ -132,10 +132,10 @@ export const SURFACE: readonly Route[] = [
  * going quiet. The REASONS are in the header of src/lib/aetherholm.ts, keyed by these citations.
  */
 export const DECLINED: readonly Route[] = [
-  { method: 'GET', path: '/livez', line: 326, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/metrics', line: 333, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/title', line: 348, auth: 'none', idempotent: false },
-  { method: 'POST', path: '/v1/provision', line: 350, auth: 'provision', idempotent: false },
+  { method: 'GET', path: '/livez', line: 363, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/metrics', line: 370, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/title', line: 388, auth: 'none', idempotent: false },
+  { method: 'POST', path: '/v1/provision', line: 393, auth: 'provision', idempotent: false },
 ]
 
 const ALL: readonly Route[] = [...SURFACE, ...DECLINED]
@@ -339,22 +339,54 @@ describe('the cited lines are the lines that register the routes', () => {
     assert.ok(defines.length >= 27, `expected aetherholm's route list, found ${defines.length} defines`)
   })
 
+  /*
+   * The two paths micro-aetherholm registers through a CONSTANT rather than a literal.
+   *
+   * They are `@cloudsforge/contracts-worlds` exports — part of the worlds-title contract, spelled
+   * once for every title — so the value is read out of the contracts package rather than assumed
+   * here. A constant renamed, moved or repointed makes the assertion below fail, which is the
+   * whole reason the value is resolved instead of trusted.
+   */
+  const WORLDS_CONTRACT_PATHS: Record<string, string> = {
+    TITLE_DESCRIPTOR_PATH: '/v1/title',
+    PROVISION_PATH: '/v1/provision',
+  }
+
   for (const route of ALL) {
     it(`${route.method} ${route.path} is registered at aetherholm/src/server.ts:${route.line}`, () => {
       const line = lines[route.line - 1] ?? ''
-      assert.match(
-        line,
-        new RegExp(`define\\('${route.method}',\\s*'${route.path.replace(/[/:]/g, '\\$&')}'`),
+      /*
+       * A LITERAL PATH **or** a named constant whose value is that path.
+       *
+       * micro-aetherholm now registers /v1/title and /v1/provision through
+       * `TITLE_DESCRIPTOR_PATH` and `PROVISION_PATH` — they are part of the worlds-title contract
+       * and are spelled once. A regex that only accepted a literal reported both as unregistered,
+       * which is the opposite of true. The constant is resolved out of the same file rather than
+       * assumed, so a constant pointing somewhere else still fails.
+       */
+      const escaped = route.path.replace(/[/:]/g, '\\$&')
+      const literal = new RegExp(`define\\('${route.method}',\\s*'${escaped}'`)
+      const named = /define\('[A-Z]+',\s*([A-Z_]+)/.exec(line)
+      const viaConstant =
+        named !== null &&
+        WORLDS_CONTRACT_PATHS[named[1] ?? ''] === route.path &&
+        new RegExp(`define\\('${route.method}',`).test(line)
+      assert.ok(
+        literal.test(line) || viaConstant,
         `aetherholm/src/server.ts:${route.line} is:\n  ${line.trim()}`,
       )
     })
   }
 
   it('this bundle knows about every route aetherholm serves — called or declined', () => {
+    // A literal path OR a named `@cloudsforge/contracts-worlds` constant. The literal-only version
+    // of this regex counted 29 of the service's 31 routes and then complained that the tables
+    // disagreed in size — a check reporting a real number as a discrepancy, because it could not
+    // see two routes registered through a shared constant.
     const registered = lines
-      .map((l) => /^\s{4}define\('([A-Z]+)',\s*'([^']+)'/.exec(l))
+      .map((l) => /^\s{4}define\('([A-Z]+)',\s*(?:'([^']+)'|([A-Z_]+))/.exec(l))
       .filter((m): m is RegExpExecArray => m !== null)
-      .map((m) => `${m[1]} ${m[2]}`)
+      .map((m) => `${m[1]} ${m[2] ?? WORLDS_CONTRACT_PATHS[m[3] ?? ''] ?? m[3]}`)
     const known = ALL.map((r) => `${r.method} ${r.path}`)
     assert.deepEqual(
       registered.filter((r) => !known.includes(r)),

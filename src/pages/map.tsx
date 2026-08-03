@@ -156,7 +156,19 @@ export function MapPage() {
         <svg
           className="ah-map__svg"
           viewBox={`0 0 ${SIZE} ${SIZE}`}
-          role="img"
+          /*
+            `role="group"`, NOT `role="img"`.
+            
+            `img` makes the whole subtree presentational, and this subtree contains nine
+            `role="button"` island targets with `tabIndex={0}`. So assistive technology was told
+            the map is a single picture while the controls inside it were still in the tab order:
+            axe reports it as `nested-interactive`, and a screen-reader user reading the map as an
+            image would find focus landing on things they had not been told about. `group` is what
+            a labelled container of interactive elements is, and the label is unchanged.
+            
+            Found by running axe against the rendered page (test/browser-journeys.test.ts).
+          */
+          role="group"
           aria-label="The archipelago: islands and wind lanes"
         >
           <defs>

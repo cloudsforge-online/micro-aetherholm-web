@@ -98,16 +98,47 @@ export function CitiesPage() {
     return () => clearInterval(timer)
   }, [])
 
+  /*
+   * THE PAGE HEAD IS RENDERED IN EVERY STATE, not only when there is a city.
+   *
+   * It used to be inside the city view alone, so /cities carried NO HEADING AT ALL while it was
+   * loading, while it had failed, and for any player who has not founded yet — which is every new
+   * player. A page with no heading gives a screen-reader user nothing to navigate by and nothing
+   * to confirm which page they are on, and it is invisible to anything that reads the source: the
+   * heading is right there, three states away. Found by walking the landmarks of every route in a
+   * browser (test/browser-journeys.test.ts, BJ-A11Y-12).
+   */
+  const head = (
+    <header className="ah-page-head">
+      <h1>Cities</h1>
+    </header>
+  )
+
   if (notice) {
-    return notice.forbidden ? <Forbidden notice={notice} /> : <Failed notice={notice} onRetry={load} />
+    return (
+      <>
+        {head}
+        {notice.forbidden ? <Forbidden notice={notice} /> : <Failed notice={notice} onRetry={load} />}
+      </>
+    )
   }
-  if (cities === undefined) return <Loading label="Settling the ledgers" />
+  if (cities === undefined) {
+    return (
+      <>
+        {head}
+        <Loading label="Settling the ledgers" />
+      </>
+    )
+  }
   if (cities.length === 0) {
     return (
-      <Empty
-        title="You hold no cities this season"
-        hint="Found one from the archipelago map. The first seven days are under aegis."
-      />
+      <>
+        {head}
+        <Empty
+          title="You hold no cities this season"
+          hint="Found one from the archipelago map. The first seven days are under aegis."
+        />
+      </>
     )
   }
 
