@@ -40,6 +40,13 @@ const SIBLINGS: readonly string[] = [
   // and the migration's CHECK constraint — because that contract is the reason every event this
   // bundle sent was silently discarded, and a contract quoted from memory is how it went wrong.
   'lantern',
+  // The estate's own tooling. `.github/workflows/ci.yml` cites `org/tools/registry.ts` for how a
+  // release manifest derives this repository's image name and `org/tools/cfctl.ts` for the
+  // generator and the `--verify` gate, because the `publish` job exists to satisfy them. Without
+  // this entry those three citations were read as paths inside THIS repository and reported
+  // missing — the same list micro-trade-web, micro-explorer-web, micro-network-site and
+  // micro-devportal-web already carry `org` in.
+  'org',
 ]
 
 /** Where a sibling is checked out. `micro-aetherholm` and `aetherholm` are the same directory. */
