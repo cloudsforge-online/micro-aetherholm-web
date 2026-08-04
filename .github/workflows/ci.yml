@@ -150,6 +150,19 @@ jobs:
           sparse-checkout: |
             packages/auth
 
+      # The estate's tooling, because the `publish` job at the end of this file cites it by line:
+      # `org/tools/registry.ts` for how a release manifest derives this repository's image name, and
+      # `org/tools/cfctl.ts` for the generator and the `--verify` gate that job exists to satisfy.
+      # The citation sweep below treats a cited repository that is NOT checked out as fatal — a
+      # green run must not imply more than it measured — so citing micro-org means checking it out.
+      - uses: actions/checkout@v4
+        with:
+          repository: cloudsforge-online/micro-org
+          path: org
+          token: ${{ secrets.ESTATE_READ_TOKEN }}
+          sparse-checkout: |
+            tools
+
       # Pinned, because the checkout lives at aetherholm-web/ and the action looks for the
       # packageManager field in the workspace root, where there is no package.json.
       - uses: pnpm/action-setup@v4
