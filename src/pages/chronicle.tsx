@@ -3,7 +3,7 @@
  * serves.
  *
  * Every read on this page goes out with `auth: false` (src/lib/aetherholm.ts): sealed seasons
- * are public history (`aetherholm/src/server.ts:893-895`), and sending a token to a route that
+ * are public history (`aetherholm/src/server.ts:911-913`), and sending a token to a route that
  * cannot use one would be a needless credential on the wire. A signed-out visitor gets the whole
  * page, which is the point — the chronicle is the game showing itself to people who have not
  * installed it (docs/ecosystem/20-aetherholm.md §10.1).
@@ -27,6 +27,7 @@ import {
   type SealedBattle,
 } from '../lib/aetherholm.ts'
 import { formatMultiplier, shortDigest } from '../lib/format.ts'
+import { keyart, splash, uiIcon } from '../lib/art.ts'
 import { Empty, Failed, Loading } from '../components/states.tsx'
 
 export function ChroniclePage() {
@@ -54,12 +55,32 @@ function SeasonList({ onOpen }: { onOpen: (id: string) => void }) {
 
   useEffect(load, [load])
 
+  const chronicleGlyph = uiIcon('chronicle')
+
   if (notice) return <Failed notice={notice} onRetry={load} />
   if (seasons === undefined) return <Loading label="Opening the chronicle" />
 
+  const hero = keyart('hero')
+
   return (
     <div className="ah-chronicle">
-      <header className="ah-page-head">
+      {/*
+        THE HERO GOES HERE AND NOWHERE ELSE, and the reason is which page a stranger lands on.
+
+        The chronicle is this game's one anonymous surface — every read on it goes out with
+        `auth: false`, and doc 20 §10.1 calls it "the game showing itself to people who have not
+        installed it". Every other route in this client is behind `ProtectedRoute`, so a visitor
+        with no session never reaches one: putting the 1920×768 key art on the archipelago screen
+        would have shown it only to players who are already playing.
+
+        It is `<img>` rather than a CSS background so that beacon's decoded-image tier can see it
+        on the one page it can load without signing in.
+      */}
+      {hero && (
+        <img className="ah-chronicle__hero" src={hero} alt="" aria-hidden="true" fetchPriority="high" />
+      )}
+      <header className="ah-page-head ah-page-head--glyphed">
+        {chronicleGlyph && <img className="ah-page-head__glyph" src={chronicleGlyph} alt="" aria-hidden="true" />}
         <h1>The chronicle</h1>
         <p className="ah-page-head__meta">
           Sealed seasons, public and immutable. No account needed; nothing here can be changed —
@@ -68,7 +89,13 @@ function SeasonList({ onOpen }: { onOpen: (id: string) => void }) {
       </header>
 
       {seasons.length === 0 && (
-        <Empty title="No season has sealed yet" hint="At day 120 the archipelago freezes and appears here." />
+        /* `season-seal`: the archipelago caught mid-freeze, turning to amber glass. It paints the
+           exact event this page exists to list, on the run where none has happened yet. */
+        <Empty
+          title="No season has sealed yet"
+          hint="At day 120 the archipelago freezes and appears here."
+          art={splash('season-seal')}
+        />
       )}
       {seasons.length > 0 && (
         <div className="ah-scroll">

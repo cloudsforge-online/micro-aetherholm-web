@@ -10,12 +10,12 @@
  * moment any write answers.
  *
  * The forms show REAL costs now: `GET /v1/content/buildings` and `/v1/content/research`
- * (`aetherholm/src/server.ts:508`, `:526`) serve values computed by the exact functions the
+ * (`aetherholm/src/server.ts:526`, `:526`) serve values computed by the exact functions the
  * engine charges from, closing the gap this header used to record below. The old text, kept for
  * the reasoning it carried:
  *
  * WHAT THE FORMS DID NOT SHOW: building and research costs. The service serves content for
- * airships only (`GET /v1/content/airships`, `aetherholm/src/server.ts:544`); building and
+ * airships only (`GET /v1/content/airships`, `aetherholm/src/server.ts:562`); building and
  * research cost curves live server-side (`aetherholm/src/content.ts:197-235`) with no route. A
  * cost this client computed from a private copy would drift the day the curves move to the
  * assets repository, so the forms say "charged at queue time" and the reply's settled stocks
@@ -52,6 +52,7 @@ import {
   toBigInt,
 } from '../lib/format.ts'
 import { Empty, Failed, Forbidden, Loading } from '../components/states.tsx'
+import { buildingArt, queueIcon, resourceIcon, shipIcon, statusIcon } from '../lib/art.ts'
 
 /** The 20 building types, as the schema spells them (`aetherholm/src/content.ts:23-44`). */
 const BUILDING_TYPES = [
@@ -70,6 +71,26 @@ const RESEARCH_NODES: Readonly<Record<string, readonly string[]>> = {
 }
 
 const label = (snake: string): string => snake.replace(/_/g, ' ')
+
+/**
+ * A generated glyph beside a word, or nothing at all.
+ *
+ * ────────────────────────────────────────────────────────────────────────────────────────────────
+ * THE `alt` IS EMPTY AND THE WORD IS ALWAYS THERE. Every one of these sits next to the label it
+ * illustrates — "aether" beside the aether icon, "skyhall" beside the skyhall sprite — so giving
+ * the image its own accessible name would make a screen reader say the same word twice in a row,
+ * in every row of a four-row table. The picture is redundant BY DESIGN: it is there so a player
+ * can find a row without reading it, which is a service to sighted scanning and to nobody else.
+ *
+ * `src` is `string | null` from `lib/art.ts`, and `null` renders NOTHING rather than a fallback
+ * image. A resource the art set has never heard of shows its name, unadorned, which is what a
+ * missing picture should look like.
+ * ────────────────────────────────────────────────────────────────────────────────────────────────
+ */
+function Glyph({ src, className }: { src: string | null; className: string }) {
+  if (!src) return null
+  return <img className={className} src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+}
 
 export function CitiesPage() {
   const [cities, setCities] = useState<City[] | undefined>(undefined)
@@ -196,7 +217,13 @@ function CityDetail({
         <h1>{city.name}</h1>
         <p className="ah-page-head__meta">
           Plot {city.plot} · {city.band} band
-          {aegisSeconds > 0 && <> · under aegis for {formatDuration(aegisSeconds)}</>}
+          {aegisSeconds > 0 && (
+            <>
+              {' · '}
+              <Glyph src={statusIcon('aegis')} className="ah-glyph ah-glyph--inline" />
+              under aegis for {formatDuration(aegisSeconds)}
+            </>
+          )}
         </p>
       </header>
 
@@ -216,7 +243,10 @@ function CityDetail({
         <tbody>
           {RESOURCES.map((resource) => (
             <tr key={resource}>
-              <th scope="row">{resource}</th>
+              <th scope="row" className="ah-cell--glyphed">
+                <Glyph src={resourceIcon(resource)} className="ah-glyph" />
+                {resource}
+              </th>
               <td className="ah-num">
                 <code className="cf-num">{formatAmount(stocks[resource])}</code>
               </td>
@@ -234,6 +264,10 @@ function CityDetail({
         <ul className="ah-queue">
           {pending.map((item) => (
             <li key={item.id}>
+              {/* Three kinds, three glyphs, and the mapping is a checked table rather than a
+                  template string — see `queueIcon` in lib/art.ts for why that distinction has
+                  teeth here and nowhere else in this file. */}
+              <Glyph src={queueIcon(item.kind)} className="ah-glyph" />
               <span className="ah-queue__kind">{item.kind}</span> {label(item.target)} — done in{' '}
               {formatDuration(secondsUntil(item.completesAt, now))}
             </li>
@@ -292,6 +326,7 @@ function CityDetail({
         <ul className="ah-garrison">
           {city.ships.map((s) => (
             <li key={s.class}>
+              <Glyph src={shipIcon(s.class)} className="ah-glyph" />
               {label(s.class)} × <code className="cf-num">{groupDigits(s.count)}</code>
             </li>
           ))}
@@ -317,7 +352,12 @@ function CityDetail({
           <tbody>
             {Object.entries(airships).map(([cls, spec]) => (
               <tr key={cls}>
-                <th scope="row">{label(cls)}</th>
+                <th scope="row" className="ah-cell--glyphed">
+                  {/* Keyed on the class the SERVICE sent, never on a list held here — an
+                      eleventh hull would arrive with no icon rather than with the wrong one. */}
+                  <Glyph src={shipIcon(cls)} className="ah-glyph" />
+                  {label(cls)}
+                </th>
                 <td>{spec.role}</td>
                 <td className="ah-num"><code className="cf-num">{groupDigits(spec.cost['aether'] ?? '0')}</code></td>
                 <td className="ah-num"><code className="cf-num">{groupDigits(spec.cost['cloudstone'] ?? '0')}</code></td>
@@ -334,10 +374,19 @@ function CityDetail({
       <h2>Buildings</h2>
       {city.buildings.length === 0 && <p className="ah-dim">Bare plots so far.</p>}
       {city.buildings.length > 0 && (
-        <ul className="ah-garrison">
+        /*
+         * The one place in this client where the generated art is the CONTENT rather than a
+         * glyph beside a word. Twenty building types, twenty 512² sprites, and the slugs are the
+         * type names verbatim — so this list is keyed on `b.type` straight off the wire with no
+         * translation step to get wrong. A type the art set does not know renders as its name on
+         * a bare tile; see `buildingArt` in lib/art.ts.
+         */
+        <ul className="ah-buildings">
           {city.buildings.map((b) => (
-            <li key={b.type}>
-              {label(b.type)} · level {b.level}
+            <li key={b.type} className="ah-buildings__item">
+              <Glyph src={buildingArt(b.type)} className="ah-buildings__sprite" />
+              <span className="ah-buildings__name">{label(b.type)}</span>
+              <span className="ah-buildings__level">level {b.level}</span>
             </li>
           ))}
         </ul>

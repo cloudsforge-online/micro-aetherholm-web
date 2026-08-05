@@ -4,7 +4,7 @@
  *
  * The service's whole economy is `bigint` with floor arithmetic — "a float near an amount
  * eventually rounds a settlement" (`aetherholm/src/content.ts:12-14`) — and amounts travel as
- * decimal strings on the wire (`aetherholm/src/server.ts:503`, the airships comment; every
+ * decimal strings on the wire (`aetherholm/src/server.ts:521`, the airships comment; every
  * stocks field). `Number()` is exact only below 2^53; a Grand Hauler convoy's season of Aether
  * can pass that, and the first place the rounding would appear is the one place players check
  * numbers against each other. So: parse with BigInt, add with BigInt, format from BigInt, and

@@ -4,9 +4,9 @@
  * The Aether cost of a launch is shown BEFORE the commit (docs/ecosystem/20-aetherholm.md §5),
  * and it is computed here from exactly the inputs the server charges from:
  *
- *   * the lanes, as `GET /v1/archipelagos/:id/lanes` serves them (`aetherholm/src/server.ts:572`)
+ *   * the lanes, as `GET /v1/archipelagos/:id/lanes` serves them (`aetherholm/src/server.ts:590`)
  *     — per-direction `travelSeconds`, already rolled from the season seed;
- *   * the class table, as `GET /v1/content/airships` serves it (`aetherholm/src/server.ts:544`),
+ *   * the class table, as `GET /v1/content/airships` serves it (`aetherholm/src/server.ts:562`),
  *     which is `AIRSHIPS` in `aetherholm/src/content.ts:302-313` verbatim — `speedBp` and
  *     `liftPerHour` are the two numbers this file reads.
  *
@@ -109,7 +109,7 @@ export interface LaunchPreview {
 
 /**
  * Price a launch. Returns null when either leg has no route — which the server would answer with
- * 409 `no_route` (`aetherholm/src/server.ts:304`), so the composer disables the commit instead
+ * 409 `no_route` (`aetherholm/src/server.ts:322`), so the composer disables the commit instead
  * of sending a request whose refusal is already known.
  */
 export function previewLaunch(

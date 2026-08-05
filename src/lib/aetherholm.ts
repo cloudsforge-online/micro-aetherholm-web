@@ -10,46 +10,55 @@
  *
  * ── The surface, called (23 routes) ───────────────────────────────────────────────────────────
  *
- *   GET    /readyz                            aetherholm/src/server.ts:365
- *   GET    /v1/seasons/current                aetherholm/src/server.ts:432
- *   GET    /v1/archipelagos/:id/islands       aetherholm/src/server.ts:451
- *   GET    /v1/archipelagos/:id/lanes         aetherholm/src/server.ts:608
- *   GET    /v1/content/airships               aetherholm/src/server.ts:580
- *   POST   /v1/cities                         aetherholm/src/server.ts:465
- *   GET    /v1/cities                         aetherholm/src/server.ts:490
- *   GET    /v1/cities/:id                     aetherholm/src/server.ts:509
- *   POST   /v1/cities/:id/buildings           aetherholm/src/server.ts:524   Idempotency-Key
- *   POST   /v1/cities/:id/research            aetherholm/src/server.ts:528   Idempotency-Key
- *   POST   /v1/cities/:id/ships               aetherholm/src/server.ts:532   Idempotency-Key
- *   POST   /v1/fleets                         aetherholm/src/server.ts:623   Idempotency-Key
- *   GET    /v1/fleets                         aetherholm/src/server.ts:706
- *   GET    /v1/fleets/:id                     aetherholm/src/server.ts:724
- *   GET    /v1/battles/:id                    aetherholm/src/server.ts:773
- *   POST   /v1/alliances                      aetherholm/src/server.ts:839
- *   GET    /v1/alliances/:id                  aetherholm/src/server.ts:875
- *   POST   /v1/alliances/:id/members          aetherholm/src/server.ts:885
- *   DELETE /v1/alliances/:id/members          aetherholm/src/server.ts:898
- *   POST   /v1/alliances/:id/claims           aetherholm/src/server.ts:911
- *   GET    /v1/chronicle/seasons              aetherholm/src/server.ts:933
- *   GET    /v1/chronicle/seasons/:id          aetherholm/src/server.ts:949
- *   GET    /v1/chronicle/seasons/:id/battles  aetherholm/src/server.ts:966
+ *   GET    /readyz                            aetherholm/src/server.ts:383
+ *   GET    /v1/seasons/current                aetherholm/src/server.ts:450
+ *   GET    /v1/archipelagos/:id/islands       aetherholm/src/server.ts:469
+ *   GET    /v1/archipelagos/:id/lanes         aetherholm/src/server.ts:626
+ *   GET    /v1/content/airships               aetherholm/src/server.ts:598
+ *   POST   /v1/cities                         aetherholm/src/server.ts:483
+ *   GET    /v1/cities                         aetherholm/src/server.ts:508
+ *   GET    /v1/cities/:id                     aetherholm/src/server.ts:527
+ *   POST   /v1/cities/:id/buildings           aetherholm/src/server.ts:542   Idempotency-Key
+ *   POST   /v1/cities/:id/research            aetherholm/src/server.ts:546   Idempotency-Key
+ *   POST   /v1/cities/:id/ships               aetherholm/src/server.ts:550   Idempotency-Key
+ *   POST   /v1/fleets                         aetherholm/src/server.ts:641   Idempotency-Key
+ *   GET    /v1/fleets                         aetherholm/src/server.ts:724
+ *   GET    /v1/fleets/:id                     aetherholm/src/server.ts:742
+ *   GET    /v1/battles/:id                    aetherholm/src/server.ts:791
+ *   POST   /v1/alliances                      aetherholm/src/server.ts:857
+ *   GET    /v1/alliances/:id                  aetherholm/src/server.ts:893
+ *   POST   /v1/alliances/:id/members          aetherholm/src/server.ts:903
+ *   DELETE /v1/alliances/:id/members          aetherholm/src/server.ts:916
+ *   POST   /v1/alliances/:id/claims           aetherholm/src/server.ts:929
+ *   GET    /v1/chronicle/seasons              aetherholm/src/server.ts:951
+ *   GET    /v1/chronicle/seasons/:id          aetherholm/src/server.ts:967
+ *   GET    /v1/chronicle/seasons/:id/battles  aetherholm/src/server.ts:984
  *
- * ── Declined, with reasons (4 routes) ─────────────────────────────────────────────────────────
+ * ── Declined, with reasons (5 routes) ─────────────────────────────────────────────────────────
  *
- *   GET  /livez      aetherholm/src/server.ts:363 — the orchestrator's probe. It answers whether
+ *   GET  /livez      aetherholm/src/server.ts:381 — the orchestrator's probe. It answers whether
  *                    the process exists, not whether the game works; the one health read a page
  *                    has a use for is /readyz, and this client reads that instead.
- *   GET  /metrics    aetherholm/src/server.ts:370 — Prometheus text for a scraper. A browser
+ *   GET  /metrics    aetherholm/src/server.ts:388 — Prometheus text for a scraper. A browser
  *                    parsing an exposition format would be reimplementing a scrape pipeline that
  *                    already exists, badly, on a phone.
- *   GET  /v1/title   aetherholm/src/server.ts:388 — the title descriptor is `worlds`' bridge's
+ *   GET  /v1/title   aetherholm/src/server.ts:406 — the title descriptor is `worlds`' bridge's
  *                    read (worlds/src/titleclient.ts:122): a capability statement for
  *                    provisioning. This client learns nothing from it that the page it is
  *                    rendering does not already prove.
- *   POST /v1/provision  aetherholm/src/server.ts:393 — service-token only, scope
+ *   POST /v1/provision  aetherholm/src/server.ts:411 — service-token only, scope
  *                    `aetherholm:provision`, and refused for user tokens outright
  *                    (server.ts:338-343). A browser must never hold that credential; a client
  *                    that could provision worlds would be a free-worlds endpoint with a UI.
+ *   POST /v1/events  aetherholm/src/server.ts:1004 — the inbound erasure webhook, called by
+ *                    identity's relay when a user is deleted. Its credential is an HMAC over the
+ *                    RAW REQUEST BYTES, verified before the body is parsed, and a bad or absent
+ *                    signature is 403 — not 401, because there is no token to go and find. A
+ *                    browser holds no such secret and, if it did, the only thing it could do with
+ *                    this route is erase a player's cities, fleets and alliance memberships.
+ *                    Listed here rather than left out: the service grew this route on
+ *                    2026-08-05 and a route nobody has read is exactly what this table exists to
+ *                    make impossible.
  *
  * ── The one rule with a body count ────────────────────────────────────────────────────────────
  *
@@ -85,7 +94,7 @@ const UUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a
  * Refuse a malformed id BEFORE the wire.
  *
  * Every `:id` route on the service validates with the same pattern and answers 400
- * (`aetherholm/src/server.ts:154`, e.g. `:462`), so nothing catastrophic happens without this —
+ * (`aetherholm/src/server.ts:155`, e.g. `:462`), so nothing catastrophic happens without this —
  * but this client's addresses ARE these ids, and a typo that becomes a round trip and a 400 reads
  * as "the server rejected me" rather than "I mistyped". Thrown synchronously, so the test can
  * assert no request existed.
@@ -138,6 +147,28 @@ export interface Island {
   band: string
   plots: number
   freePlots: number
+  /**
+   * Whether this island is an Aether Spire — the victory objective the whole season contests.
+   *
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   * THIS FIELD WAS ON THE WIRE AND THIS INTERFACE DROPPED IT, FOR AS LONG AS THE MAP HAS EXISTED.
+   *
+   * The archipelago screen carried a note apologising that "the islands route does not expose the
+   * flag the service keeps", and the map's header argued at length that marking spires would mean
+   * reimplementing `spireIdxsFor` client-side. Both were true when they were written and neither
+   * was true when they were read: the service selects the column and returns it —
+   * `aetherholm/src/seasons.ts:227` declares it on `IslandSummary`, `:235` selects `i.is_spire`,
+   * `:248` maps it — and its own comment records that the fix was made BECAUSE this client
+   * reported the gap. The service moved; this line did not follow, so the field arrived on every
+   * response and was discarded at the type boundary. Doc 20 §5 calls the spires the one thing the
+   * archipelago screen must show, and it showed a sentence explaining why it could not.
+   *
+   * Reported as micro-org#176. The lesson is narrow and worth keeping: a gap recorded in prose
+   * goes stale silently, because nothing re-reads prose. The map now marks spires and
+   * `test/aetherholm.test.ts`'s route citations are what would notice if the route changed back.
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   */
+  spire: boolean
 }
 
 export interface Lane {
@@ -305,7 +336,7 @@ export type Readiness =
   | 'unknown'
 
 /**
- * GET /readyz (`aetherholm/src/server.ts:365`). Unauthenticated; 503 carries a body and is an
+ * GET /readyz (`aetherholm/src/server.ts:383`). Unauthenticated; 503 carries a body and is an
  * ANSWER (not-ready), not a failure — only an unreachable service is.
  */
 export async function fetchReadiness(): Promise<{ readiness: Readiness }> {
@@ -338,7 +369,7 @@ export async function fetchReadiness(): Promise<{ readiness: Readiness }> {
 /* ---- the world, read ----------------------------------------------- */
 
 /**
- * GET /v1/seasons/current (`aetherholm/src/server.ts:432`). Authenticated: a user token passes as
+ * GET /v1/seasons/current (`aetherholm/src/server.ts:450`). Authenticated: a user token passes as
  * itself; the route's `aetherholm:read` scope check is for services. The 404 code
  * `no_open_season` (server.ts:386) is an answer — the world has not opened — not a failure.
  */
@@ -351,7 +382,7 @@ export async function fetchCurrentSeason(): Promise<Season | null> {
   }
 }
 
-/** GET /v1/archipelagos/:id/islands (`aetherholm/src/server.ts:451`). */
+/** GET /v1/archipelagos/:id/islands (`aetherholm/src/server.ts:469`). */
 export async function fetchIslands(archipelagoId: string): Promise<Island[]> {
   const body = await aetherholm<{ islands?: Island[] }>(
     `/v1/archipelagos/${encodeURIComponent(assertUuid(archipelagoId, 'archipelago id'))}/islands`,
@@ -360,7 +391,7 @@ export async function fetchIslands(archipelagoId: string): Promise<Island[]> {
 }
 
 /**
- * GET /v1/archipelagos/:id/lanes (`aetherholm/src/server.ts:608`). The ask itself backfills a
+ * GET /v1/archipelagos/:id/lanes (`aetherholm/src/server.ts:626`). The ask itself backfills a
  * pre-lattice world from its stored seed (server.ts:524, `ensureLattice`), so an empty answer is
  * a 404, never a world quietly without winds.
  */
@@ -372,7 +403,7 @@ export async function fetchLanes(archipelagoId: string): Promise<Lane[]> {
 }
 
 /**
- * GET /v1/content/airships (`aetherholm/src/server.ts:580`). Public — the handler takes no
+ * GET /v1/content/airships (`aetherholm/src/server.ts:598`). Public — the handler takes no
  * principal — so no token is sent: a credential on a route that cannot read it is a needless
  * credential on the wire. These are the SAME constants the service charges from
  * (`aetherholm/src/content.ts:302-313`, served through server.ts:544-570), which is what makes
@@ -388,7 +419,7 @@ export async function fetchAirships(): Promise<Record<string, AirshipSpec>> {
 /* ---- city play ------------------------------------------------------ */
 
 /**
- * POST /v1/cities (`aetherholm/src/server.ts:490`). No Idempotency-Key: the service reads none on
+ * POST /v1/cities (`aetherholm/src/server.ts:508`). No Idempotency-Key: the service reads none on
  * this route — the partial unique index (one city per player per island) IS the idempotency, and
  * a re-found returns the existing city with 200 rather than 201 (server.ts:434).
  */
@@ -404,14 +435,14 @@ export async function foundCity(input: { islandId: string; plot: number; name: s
   return body.city
 }
 
-/** GET /v1/cities (`aetherholm/src/server.ts:490`). Own list — no `?userId=`: naming another
+/** GET /v1/cities (`aetherholm/src/server.ts:508`). Own list — no `?userId=`: naming another
  *  player is an admin's read and this is a player client. */
 export async function fetchCities(): Promise<City[]> {
   const body = await aetherholm<{ cities?: City[] }>('/v1/cities')
   return body?.cities ?? []
 }
 
-/** GET /v1/cities/:id (`aetherholm/src/server.ts:509`). 403 to non-owners is deliberate — the
+/** GET /v1/cities/:id (`aetherholm/src/server.ts:527`). 403 to non-owners is deliberate — the
  *  economy is the secret, not the existence (server.ts:466-469). */
 export async function fetchCity(cityId: string): Promise<City> {
   const body = await aetherholm<{ city: City }>(
@@ -427,7 +458,7 @@ export interface QueueReply {
 }
 
 /**
- * POST /v1/cities/:id/buildings (`aetherholm/src/server.ts:524`). Idempotency-Key REQUIRED — a
+ * POST /v1/cities/:id/buildings (`aetherholm/src/server.ts:542`). Idempotency-Key REQUIRED — a
  * 400 without it (server.ts:875-878) — and a retry replays rather than double-charges. The field
  * is `type` (server.ts:880).
  */
@@ -438,7 +469,7 @@ export async function queueBuilding(cityId: string, type: string, key: string): 
   )
 }
 
-/** POST /v1/cities/:id/research (`aetherholm/src/server.ts:528`). Same shape; the field is
+/** POST /v1/cities/:id/research (`aetherholm/src/server.ts:546`). Same shape; the field is
  *  `node` (server.ts:880). */
 export async function queueResearch(cityId: string, node: string, key: string): Promise<QueueReply> {
   return aetherholm<QueueReply>(
@@ -447,7 +478,7 @@ export async function queueResearch(cityId: string, node: string, key: string): 
   )
 }
 
-/** POST /v1/cities/:id/ships (`aetherholm/src/server.ts:532`). Same shape; the field is `class`
+/** POST /v1/cities/:id/ships (`aetherholm/src/server.ts:550`). Same shape; the field is `class`
  *  (server.ts:880). */
 export async function queueShip(cityId: string, cls: string, key: string): Promise<QueueReply> {
   return aetherholm<QueueReply>(
@@ -478,7 +509,7 @@ export interface LaunchReply {
 }
 
 /**
- * POST /v1/fleets (`aetherholm/src/server.ts:706`). Idempotency-Key REQUIRED (server.ts:535-538).
+ * POST /v1/fleets (`aetherholm/src/server.ts:724`). Idempotency-Key REQUIRED (server.ts:535-538).
  * The Aether cost of this launch was already on screen before this function was called — that is
  * the fleet page's contract, computed in ./lattice.ts from served content — and the service now
  * charges its own arithmetic for the whole round trip (`aetherholm/src/fleets.ts:332-336`),
@@ -505,13 +536,13 @@ export async function launchFleet(input: LaunchInput, key: string): Promise<Laun
   })
 }
 
-/** GET /v1/fleets (`aetherholm/src/server.ts:706`). Own list, same rule as cities. */
+/** GET /v1/fleets (`aetherholm/src/server.ts:724`). Own list, same rule as cities. */
 export async function fetchFleets(): Promise<Fleet[]> {
   const body = await aetherholm<{ fleets?: Fleet[] }>('/v1/fleets')
   return body?.fleets ?? []
 }
 
-/** GET /v1/fleets/:id (`aetherholm/src/server.ts:724`). A fleet in the air is its owner's plan;
+/** GET /v1/fleets/:id (`aetherholm/src/server.ts:742`). A fleet in the air is its owner's plan;
  *  403 to everyone else until the battle report says otherwise (server.ts:641-645). */
 export async function fetchFleet(fleetId: string): Promise<Fleet> {
   const body = await aetherholm<{ fleet: Fleet }>(
@@ -521,7 +552,7 @@ export async function fetchFleet(fleetId: string): Promise<Fleet> {
 }
 
 /**
- * GET /v1/battles/:id (`aetherholm/src/server.ts:773`). The token is attached as always; whether
+ * GET /v1/battles/:id (`aetherholm/src/server.ts:791`). The token is attached as always; whether
  * it is NEEDED depends on the season — a sealed season's battles are public history and the
  * handler authenticates only when the season is still live (server.ts:681-691). The report and
  * its digest are rendered as stored; see the header for why they are never recomputed.
@@ -536,7 +567,7 @@ export async function fetchBattle(battleId: string): Promise<Battle> {
 /* ---- alliances ------------------------------------------------------ */
 
 /**
- * POST /v1/alliances (`aetherholm/src/server.ts:866`). `communityId` is REQUIRED and never
+ * POST /v1/alliances (`aetherholm/src/server.ts:884`). `communityId` is REQUIRED and never
  * minted: an alliance IS a `micro-community` community (docs/ecosystem/20-aetherholm.md §6), and
  * the service will not paper over its absence (server.ts:719-726). This client asks the founder
  * for the community's id; it does not — and must not — create one.
@@ -557,7 +588,7 @@ export async function foundAlliance(input: {
   return body.alliance
 }
 
-/** GET /v1/alliances/:id (`aetherholm/src/server.ts:875`). */
+/** GET /v1/alliances/:id (`aetherholm/src/server.ts:893`). */
 export async function fetchAlliance(allianceId: string): Promise<Alliance> {
   const body = await aetherholm<{ alliance: Alliance }>(
     `/v1/alliances/${encodeURIComponent(assertUuid(allianceId, 'alliance id'))}`,
@@ -565,7 +596,7 @@ export async function fetchAlliance(allianceId: string): Promise<Alliance> {
   return body.alliance
 }
 
-/** POST /v1/alliances/:id/members (`aetherholm/src/server.ts:898`). Joining as oneself; a second
+/** POST /v1/alliances/:id/members (`aetherholm/src/server.ts:916`). Joining as oneself; a second
  *  banner on the same world is 409 `already_aligned`. */
 export async function joinAlliance(allianceId: string): Promise<void> {
   await aetherholm<{ joined: boolean }>(
@@ -574,7 +605,7 @@ export async function joinAlliance(allianceId: string): Promise<void> {
   )
 }
 
-/** DELETE /v1/alliances/:id/members (`aetherholm/src/server.ts:898`). */
+/** DELETE /v1/alliances/:id/members (`aetherholm/src/server.ts:916`). */
 export async function leaveAlliance(allianceId: string): Promise<void> {
   await aetherholm<{ left: boolean }>(
     `/v1/alliances/${encodeURIComponent(assertUuid(allianceId, 'alliance id'))}/members`,
@@ -582,7 +613,7 @@ export async function leaveAlliance(allianceId: string): Promise<void> {
   )
 }
 
-/** POST /v1/alliances/:id/claims (`aetherholm/src/server.ts:911`). First banner wins — the claims
+/** POST /v1/alliances/:id/claims (`aetherholm/src/server.ts:929`). First banner wins — the claims
  *  table's primary key is the island (409 `claim_taken` for the second). */
 export async function claimIsland(allianceId: string, islandId: string): Promise<void> {
   await aetherholm<{ claimed: boolean }>(
@@ -594,7 +625,7 @@ export async function claimIsland(allianceId: string, islandId: string): Promise
 /* ---- the chronicle: anonymous, and read-only by CONSTRUCTION --------- */
 
 /**
- * GET /v1/chronicle/seasons (`aetherholm/src/server.ts:933`). `auth: false`, and that is an
+ * GET /v1/chronicle/seasons (`aetherholm/src/server.ts:951`). `auth: false`, and that is an
  * assertion, not an omission: the chronicle routes are the service's ONLY anonymous data surface
  * (server.ts:796-798) — sealed seasons are public history — and this client sends no token to
  * them, so the anonymity is exercised on every page view rather than merely believed.
@@ -612,7 +643,7 @@ export async function fetchChronicleSeasons(): Promise<ChronicleSeason[]> {
   return body?.seasons ?? []
 }
 
-/** GET /v1/chronicle/seasons/:id (`aetherholm/src/server.ts:949`). Anonymous; 404 unless sealed —
+/** GET /v1/chronicle/seasons/:id (`aetherholm/src/server.ts:967`). Anonymous; 404 unless sealed —
  *  a live season cannot leak through this surface even by id (the query is scoped
  *  `status = 'sealed'`, `aetherholm/src/sealing.ts:301`). */
 export async function fetchChronicle(seasonId: string): Promise<Chronicle | null> {
@@ -627,7 +658,7 @@ export async function fetchChronicle(seasonId: string): Promise<Chronicle | null
   }
 }
 
-/** GET /v1/chronicle/seasons/:id/battles (`aetherholm/src/server.ts:966`). Anonymous; every
+/** GET /v1/chronicle/seasons/:id/battles (`aetherholm/src/server.ts:984`). Anonymous; every
  *  battle verbatim with its digest — the replay browser's data source (doc §10.1). */
 export async function fetchChronicleBattles(seasonId: string): Promise<SealedBattle[]> {
   const body = await aetherholm<{ battles?: SealedBattle[] }>(
@@ -651,7 +682,7 @@ export interface BattleSummary {
 }
 
 /**
- * GET /v1/battles (`aetherholm/src/server.ts:739`). The fleets-list owner pattern: a user reads
+ * GET /v1/battles (`aetherholm/src/server.ts:757`). The fleets-list owner pattern: a user reads
  * their own history, both sides, newest first. This closes the gap the first build reported —
  * reports could be opened from a pasted id or the sealed chronicle and from nowhere else.
  */
@@ -669,7 +700,7 @@ export interface AllianceDirectoryEntry {
 }
 
 /**
- * GET /v1/alliances (`aetherholm/src/server.ts:866`). Bearer: the directory for the open world,
+ * GET /v1/alliances (`aetherholm/src/server.ts:884`). Bearer: the directory for the open world,
  * with the caller's membership marked in the same read — which-am-I-in was the question this
  * screen opened with and previously could not ask.
  */
@@ -691,8 +722,8 @@ export interface ResearchContent {
 }
 
 /**
- * GET /v1/content/buildings (`aetherholm/src/server.ts:544`) and
- * GET /v1/content/research (`aetherholm/src/server.ts:562`). Public like the airship table and
+ * GET /v1/content/buildings (`aetherholm/src/server.ts:562`) and
+ * GET /v1/content/research (`aetherholm/src/server.ts:580`). Public like the airship table and
  * for the same reason: the queue forms must show real numbers BEFORE commit, computed by the
  * exact functions the engine charges from (`aetherholm/src/content.ts:197-235`). cost(level) is
  * base × level — the rule ships on the wire, and the multiplication here is BigInt.

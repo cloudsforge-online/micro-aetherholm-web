@@ -55,7 +55,7 @@ const server = CANDIDATES.find((p) => existsSync(p))
  * pattern, which is what makes the set exhaustive rather than a list of things somebody happened
  * to check for.
  */
-type Auth = 'none' | 'bearer' | 'owner' | 'user' | 'user-queue' | 'provision' | 'sealed-public'
+type Auth = 'none' | 'bearer' | 'owner' | 'user' | 'user-queue' | 'provision' | 'sealed-public' | 'webhook'
 
 /** What a handler body must contain for each mechanism. `none` is handled separately. */
 const MECHANISM: Readonly<Record<Exclude<Auth, 'none'>, RegExp>> = {
@@ -64,7 +64,7 @@ const MECHANISM: Readonly<Record<Exclude<Auth, 'none'>, RegExp>> = {
   // Owner-or-admin for users, read scope for services: authenticate AND an isAdmin branch.
   owner: /await authenticate\(ctx, deps\)[\s\S]*isAdmin\(principal\)[\s\S]*requireScope\(principal, READ_SCOPE\)|await authenticate\(ctx, deps\)[\s\S]*requireScope\(principal, READ_SCOPE\)[\s\S]*isAdmin\(principal\)/,
   // A user acting as themselves; a service must carry aetherholm:write and name x-user-id —
-  // the whole of that lives in requireUser (aetherholm/src/server.ts:1031-1040).
+  // the whole of that lives in requireUser (aetherholm/src/server.ts:1099-1108).
   user: /await requireUser\(ctx, deps\)/,
   // The three queue routes delegate whole: the auth AND the Idempotency-Key requirement live in
   // queueRoute, which its own tests below verify.
@@ -73,6 +73,19 @@ const MECHANISM: Readonly<Record<Exclude<Auth, 'none'>, RegExp>> = {
   provision: /principal\.kind !== 'service'[\s\S]*requireScope\(principal, PROVISION_SCOPE\)/,
   // Public once sealed; authenticate only on the live branch.
   'sealed-public': /season_status !== 'sealed'[\s\S]*await authenticate\(ctx, deps\)/,
+  /*
+   * A SEVENTH MECHANISM, ADDED WHEN THE SERVICE GREW ONE. `POST /v1/events` is the inbound
+   * erasure webhook (`aetherholm/src/server.ts:1004`): the credential is an HMAC over the RAW
+   * BYTES, verified before anything is parsed, and a bad or absent signature is 403 rather than
+   * 401 because there is no token for the caller to go and find.
+   *
+   * It is emphatically NOT `none`. `none` asserts the absence of every other mechanism's pattern,
+   * and this handler would have satisfied that — it calls neither `authenticate` nor
+   * `requireUser` — so filing it under `none` would have recorded a MAC-protected write path as a
+   * public route, in the one table this repository keeps precisely so that nobody has to guess.
+   * That is the shape of mistake the six existing mechanisms were each written to prevent.
+   */
+  webhook: /verifyEventSignature\(raw, deps\.eventAcceptSecrets, presented\)/,
 }
 
 const ANY_MECHANISM = [
@@ -96,33 +109,33 @@ interface Route {
  * checks below can be mechanical: a wrong citation fails and names itself.
  */
 export const SURFACE: readonly Route[] = [
-  { method: 'GET', path: '/readyz', line: 365, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/seasons/current', line: 432, auth: 'bearer', idempotent: false },
-  { method: 'GET', path: '/v1/archipelagos/:id/islands', line: 451, auth: 'bearer', idempotent: false },
-  { method: 'GET', path: '/v1/archipelagos/:id/lanes', line: 608, auth: 'bearer', idempotent: false },
-  { method: 'GET', path: '/v1/content/airships', line: 580, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/content/buildings', line: 544, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/content/research', line: 562, auth: 'none', idempotent: false },
-  { method: 'POST', path: '/v1/cities', line: 465, auth: 'user', idempotent: false },
-  { method: 'GET', path: '/v1/cities', line: 490, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/cities/:id', line: 509, auth: 'owner', idempotent: false },
-  { method: 'POST', path: '/v1/cities/:id/buildings', line: 524, auth: 'user-queue', idempotent: true },
-  { method: 'POST', path: '/v1/cities/:id/research', line: 528, auth: 'user-queue', idempotent: true },
-  { method: 'POST', path: '/v1/cities/:id/ships', line: 532, auth: 'user-queue', idempotent: true },
-  { method: 'POST', path: '/v1/fleets', line: 623, auth: 'user', idempotent: true },
-  { method: 'GET', path: '/v1/fleets', line: 706, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/fleets/:id', line: 724, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/battles', line: 739, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/battles/:id', line: 773, auth: 'sealed-public', idempotent: false },
-  { method: 'GET', path: '/v1/alliances', line: 866, auth: 'bearer', idempotent: false },
-  { method: 'POST', path: '/v1/alliances', line: 839, auth: 'user', idempotent: false },
-  { method: 'GET', path: '/v1/alliances/:id', line: 875, auth: 'bearer', idempotent: false },
-  { method: 'POST', path: '/v1/alliances/:id/members', line: 885, auth: 'user', idempotent: false },
-  { method: 'DELETE', path: '/v1/alliances/:id/members', line: 898, auth: 'user', idempotent: false },
-  { method: 'POST', path: '/v1/alliances/:id/claims', line: 911, auth: 'user', idempotent: false },
-  { method: 'GET', path: '/v1/chronicle/seasons', line: 933, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/chronicle/seasons/:id', line: 949, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/chronicle/seasons/:id/battles', line: 966, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/readyz', line: 383, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/seasons/current', line: 450, auth: 'bearer', idempotent: false },
+  { method: 'GET', path: '/v1/archipelagos/:id/islands', line: 469, auth: 'bearer', idempotent: false },
+  { method: 'GET', path: '/v1/archipelagos/:id/lanes', line: 626, auth: 'bearer', idempotent: false },
+  { method: 'GET', path: '/v1/content/airships', line: 598, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/content/buildings', line: 562, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/content/research', line: 580, auth: 'none', idempotent: false },
+  { method: 'POST', path: '/v1/cities', line: 483, auth: 'user', idempotent: false },
+  { method: 'GET', path: '/v1/cities', line: 508, auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/cities/:id', line: 527, auth: 'owner', idempotent: false },
+  { method: 'POST', path: '/v1/cities/:id/buildings', line: 542, auth: 'user-queue', idempotent: true },
+  { method: 'POST', path: '/v1/cities/:id/research', line: 546, auth: 'user-queue', idempotent: true },
+  { method: 'POST', path: '/v1/cities/:id/ships', line: 550, auth: 'user-queue', idempotent: true },
+  { method: 'POST', path: '/v1/fleets', line: 641, auth: 'user', idempotent: true },
+  { method: 'GET', path: '/v1/fleets', line: 724, auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/fleets/:id', line: 742, auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/battles', line: 757, auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/battles/:id', line: 791, auth: 'sealed-public', idempotent: false },
+  { method: 'GET', path: '/v1/alliances', line: 884, auth: 'bearer', idempotent: false },
+  { method: 'POST', path: '/v1/alliances', line: 857, auth: 'user', idempotent: false },
+  { method: 'GET', path: '/v1/alliances/:id', line: 893, auth: 'bearer', idempotent: false },
+  { method: 'POST', path: '/v1/alliances/:id/members', line: 903, auth: 'user', idempotent: false },
+  { method: 'DELETE', path: '/v1/alliances/:id/members', line: 916, auth: 'user', idempotent: false },
+  { method: 'POST', path: '/v1/alliances/:id/claims', line: 929, auth: 'user', idempotent: false },
+  { method: 'GET', path: '/v1/chronicle/seasons', line: 951, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/chronicle/seasons/:id', line: 967, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/chronicle/seasons/:id/battles', line: 984, auth: 'none', idempotent: false },
 ]
 
 /**
@@ -132,10 +145,18 @@ export const SURFACE: readonly Route[] = [
  * going quiet. The REASONS are in the header of src/lib/aetherholm.ts, keyed by these citations.
  */
 export const DECLINED: readonly Route[] = [
-  { method: 'GET', path: '/livez', line: 363, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/metrics', line: 370, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/title', line: 388, auth: 'none', idempotent: false },
-  { method: 'POST', path: '/v1/provision', line: 393, auth: 'provision', idempotent: false },
+  { method: 'GET', path: '/livez', line: 381, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/metrics', line: 388, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/title', line: 406, auth: 'none', idempotent: false },
+  { method: 'POST', path: '/v1/provision', line: 411, auth: 'provision', idempotent: false },
+  /*
+   * The erasure webhook, and the one entry here that a browser MUST never reach. It is called by
+   * micro-identity's relay with an HMAC the page has no secret for, it erases a player's cities,
+   * fleets and alliance memberships, and the only thing a client could do by calling it is fail
+   * the signature check. Declined rather than absent, so that the route the service grew on
+   * 2026-08-05 is a thing this bundle has READ and refused rather than a thing it never noticed.
+   */
+  { method: 'POST', path: '/v1/events', line: 1004, auth: 'webhook', idempotent: false },
 ]
 
 const ALL: readonly Route[] = [...SURFACE, ...DECLINED]

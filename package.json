@@ -14,7 +14,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "sync-art": "node tools/sync-art.mjs"
   },
   "//": "@cloudsforge/ui is consumed from a sibling path because it is not published yet; see web-template's note. This client adds NO runtime dependency beyond the template's: the archipelago map is plain SVG, because a renderer is a liability a strategy map does not need, and battles are never resolved here at all — see src/lib/aetherholm.ts.",
   "dependencies": {

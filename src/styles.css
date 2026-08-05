@@ -403,10 +403,19 @@ body {
 
 .ah-ships__row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  /* Four columns since the side profile joined the row: the hull, the name, the count and the
+     ceiling. It is `auto` rather than a fixed width so that a row whose class has no picture —
+     `shipProfile` answered null — closes up instead of leaving a hole where art should be. */
+  grid-template-columns: auto 1fr auto auto;
   gap: var(--cf-space-sm);
   align-items: center;
   padding: var(--cf-space-3xs) 0;
+}
+
+.ah-ships__profile {
+  width: 5.5rem;
+  height: auto;
+  border-radius: var(--cf-radius-sm);
 }
 
 .ah-preview {
@@ -503,4 +512,215 @@ body {
   .ah-skip {
     transition: none;
   }
+}
+
+
+/* ---- the generated art -------------------------------------------------
+ *
+ * `micro-aetherholm-assets` produced 101 FLUX 2 Pro images and this client referenced none of
+ * them (micro-org#175). Every rule below exists to put one on screen at a size it was drawn for,
+ * and there is exactly one thing to understand about all of them:
+ *
+ *   NO RULE HERE MAY BE THE ONLY THING HOLDING A LAYOUT UP.
+ *
+ * Every picture in this bundle is optional at the source — `src/lib/art.ts` answers `null` for a
+ * key the asset set does not carry, and the component renders nothing rather than a placeholder.
+ * So each container must look deliberate with its image and deliberate without it. That is why
+ * these are `auto`-sized columns and intrinsic heights rather than fixed boxes with a background:
+ * a fixed box with no picture in it is a hole, and a hole is how a missing asset gets mistaken
+ * for a design.
+ *
+ * The paths themselves are NEVER spelled in this file. They come from the generated catalogue via
+ * lib/art.ts, so there is one place a filename can be wrong and it is one a test reads.
+ */
+
+/* The title lockup under the shared bar: the mark, the wordmark, and the scene they were painted
+   against. `background-size: cover` on a 1536×512 backdrop that must crop freely at every width. */
+.ah-title {
+  border-bottom: 1px solid var(--cf-line);
+  background-color: var(--cf-bg-sunken);
+  background-size: cover;
+  background-position: center;
+}
+
+.ah-title__lockup {
+  max-width: var(--cf-max-w);
+  margin: 0 auto;
+  padding: var(--cf-space-sm) var(--cf-space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--cf-space-sm);
+  text-decoration: none;
+}
+
+.ah-title__mark {
+  width: 2rem;
+  height: 2rem;
+}
+
+.ah-title__wordmark {
+  height: 1.75rem;
+  width: auto;
+}
+
+/* The text stand-in for a wordmark the set does not have. It is styled to READ as the title so
+   that the fallback is a name rather than an apology. */
+.ah-title__fallback {
+  font-family: var(--cf-font-display);
+  font-size: var(--cf-text-lg);
+  color: var(--cf-fg);
+}
+
+/* A glyph beside a word. Sized in `em` so it tracks whatever text it sits next to — a table row,
+   a legend, a heading — instead of needing a variant per context. */
+.ah-glyph {
+  width: 1.25em;
+  height: 1.25em;
+  vertical-align: -0.25em;
+  margin-right: var(--cf-space-2xs);
+  flex: none;
+}
+
+.ah-glyph--inline {
+  margin-left: var(--cf-space-2xs);
+}
+
+.ah-cell--glyphed,
+.ah-heading--glyphed {
+  display: flex;
+  align-items: center;
+  gap: var(--cf-space-3xs);
+}
+
+.ah-page-head--glyphed {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--cf-space-sm);
+}
+
+.ah-page-head--glyphed h1,
+.ah-page-head--glyphed p {
+  grid-column: 2;
+}
+
+.ah-page-head__glyph {
+  width: 2rem;
+  height: 2rem;
+  grid-row: 1 / span 2;
+}
+
+.ah-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cf-space-md);
+}
+
+.ah-legend__item {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The archipelago's spire marker, drawn as an SVG <image> inside the map. It is NOT an
+   HTMLImageElement — see the note at its call site in pages/map.tsx. */
+.ah-map__spire {
+  pointer-events: none;
+}
+
+.ah-map__island.is-spire {
+  stroke: var(--cf-accent);
+  stroke-width: 2;
+}
+
+/* The selected island's archetype painting, above its facts. Full panel width, and its caption is
+   part of the figure because the caption is what keeps the picture honest. */
+.ah-island {
+  margin: 0 0 var(--cf-space-md);
+}
+
+.ah-island__art {
+  width: 100%;
+  height: auto;
+  border-radius: var(--cf-radius);
+  background: var(--cf-bg-sunken);
+}
+
+.ah-spire-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--cf-space-sm);
+  padding: var(--cf-space-3xs) var(--cf-space-2xs);
+  border-radius: var(--cf-radius-sm);
+  border: 1px solid var(--cf-accent);
+  color: var(--cf-accent);
+  font-size: var(--cf-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* The city's buildings, as the twenty sprites rather than as twenty words. */
+.ah-buildings {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: var(--cf-space-sm);
+}
+
+.ah-buildings__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cf-space-3xs);
+  padding: var(--cf-space-sm);
+  border: 1px solid var(--cf-line);
+  border-radius: var(--cf-radius);
+  background: var(--cf-surface);
+  text-align: center;
+}
+
+.ah-buildings__sprite {
+  width: 100%;
+  height: auto;
+  max-width: 6rem;
+}
+
+.ah-buildings__name {
+  font-size: var(--cf-text-sm);
+}
+
+.ah-buildings__level {
+  font-size: var(--cf-text-xs);
+  color: var(--cf-fg-dim);
+}
+
+/* A multi-column list must not split an item across the gutter now that items carry an icon. */
+.ah-garrison li {
+  break-inside: avoid;
+}
+
+/* An empty state's splash. Capped in height rather than in width: these are 1536×640 paintings and
+   an uncapped one would push the sentence — which is the actual message — below the fold. */
+.ah-state__art {
+  width: 100%;
+  max-width: 34rem;
+  height: auto;
+  border-radius: var(--cf-radius-lg);
+}
+
+.ah-state--illustrated {
+  padding-top: var(--cf-space-lg);
+}
+
+/* The chronicle's hero: the one page a signed-out stranger can reach. Bled to the full width of
+   the page column and cropped, because it is a 1920×768 scene and its subject is the middle. */
+.ah-chronicle__hero {
+  display: block;
+  width: 100%;
+  height: 14rem;
+  object-fit: cover;
+  object-position: center;
+  border-radius: var(--cf-radius-lg);
+  margin-bottom: var(--cf-space-lg);
 }

@@ -8,7 +8,7 @@
  *   FAILED    — the query did not answer. Retrying may work. The request id is what support needs.
  *   FORBIDDEN — the query was understood and refused. Retrying will never work. On this app that
  *               is usually not a missing role at all: another player's city or an in-flight fleet
- *               answers 403 BY DESIGN (`aetherholm/src/server.ts:480-483`, `:641-645`) — the
+ *               answers 403 BY DESIGN (`aetherholm/src/server.ts:498-501`, `:641-645`) — the
  *               economy and the sky are the secrets, not the existence. The copy says so.
  *
  * A spinner that never resolves, an empty list that was actually a timeout, and a "no results"
@@ -33,17 +33,39 @@ export function Empty({
   title,
   hint,
   action,
+  art,
 }: {
   /** Say what was asked and found nothing. "No data" describes the screen, not the answer. */
   title: string
   hint?: string | undefined
   action?: ReactNode | undefined
+  /**
+   * A splash for this particular emptiness, from `src/lib/art.ts`. `null` renders the lozenge.
+   *
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   * IT IS `aria-hidden` AND IT HAS AN EMPTY `alt`, ON PURPOSE. The picture says nothing the
+   * `title` and `hint` beside it do not already say in words, so describing it to a screen
+   * reader would make one message arrive twice — and the second copy ("a fresh archipelago at
+   * first light") would be a description of a decoration, offered where the reader is waiting to
+   * be told what to DO. An empty state's information is its sentence; the painting is mood.
+   *
+   * The caller passes `string | null` straight from the art module, so a picture the asset set
+   * does not have degrades to the lozenge rather than to a broken-image glyph. There is
+   * deliberately no default path here: see the header of `src/lib/art.ts` for why a placeholder
+   * is worse than a hole.
+   * ══════════════════════════════════════════════════════════════════════════════════════════
+   */
+  art?: string | null | undefined
 }) {
   return (
-    <div className="ah-state ah-state--empty" role="status">
-      <span className="ah-state__icon" aria-hidden="true">
-        ◇
-      </span>
+    <div className={`ah-state ah-state--empty${art ? ' ah-state--illustrated' : ''}`} role="status">
+      {art ? (
+        <img className="ah-state__art" src={art} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      ) : (
+        <span className="ah-state__icon" aria-hidden="true">
+          ◇
+        </span>
+      )}
       <p className="ah-state__title">{title}</p>
       {hint && <p className="ah-state__hint">{hint}</p>}
       {action && <div className="ah-state__action">{action}</div>}

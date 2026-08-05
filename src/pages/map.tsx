@@ -14,14 +14,21 @@
  * outbound lanes with their labels; the rest stay faint rather than vanishing, because the shape
  * of the lattice is the strategy.
  *
- * SPIRES, honestly: this client CANNOT mark them. The service flags spire islands in its own
- * database (`aetherholm/src/migrations.ts:369` `is_spire`, maintained by
- * `aetherholm/src/lattice.ts:80`) but `GET /v1/archipelagos/:id/islands` does not select the
- * flag — `IslandSummary` (`aetherholm/src/seasons.ts:214-220`) carries id, idx, band and plots
- * only. Marking spires from a client-side reimplementation of `spireIdxsFor` would be this
- * repository maintaining a private copy of world-generation logic, which is the drift the whole
- * citation discipline exists to prevent. So the map says so on screen, and the defect is
- * reported in the README rather than papered over.
+ * SPIRES ARE MARKED, at last, from the server's own flag — `IslandSummary.spire`
+ * (`aetherholm/src/seasons.ts:227`), selected at `:235` and mapped at `:248`. This page used to
+ * carry a paragraph explaining that it could not mark them and a note on screen saying so; the
+ * service had closed that gap and the client's `Island` interface dropped the field on parse, so
+ * the apology outlived the defect by every deploy since. See the field's own header in
+ * `src/lib/aetherholm.ts` and micro-org#176. What has NOT changed is the rule the old paragraph
+ * was defending: the flag is READ, never recomputed. A client-side `spireIdxsFor` would be this
+ * repository keeping a private copy of world generation, which is the drift the citation
+ * discipline exists to prevent.
+ *
+ * The generated art arrives here too (micro-org#175): `icons/status-spire` marks the objective,
+ * `icons/ui-wind-lane` and `icons/ui-lane-junction` label the two things the lattice is made of,
+ * and the selected island shows its band's archetype painting. READ `islandArt` IN lib/art.ts
+ * BEFORE TOUCHING THAT LAST ONE — the band is the server's and the biome is this client's
+ * illustration, and the caption saying so is load-bearing.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { noticeFor, type ErrorNotice } from '../lib/api.ts'
@@ -35,6 +42,7 @@ import {
   type Season,
 } from '../lib/aetherholm.ts'
 import { formatDuration, formatMultiplier } from '../lib/format.ts'
+import { islandArt, islandBiome, splash, statusIcon, uiIcon } from '../lib/art.ts'
 import { Empty, Failed, Loading } from '../components/states.tsx'
 
 const SIZE = 720
@@ -107,6 +115,10 @@ export function MapPage() {
 
   const points = useMemo(() => placeIslands(islands), [islands])
   const selectedIsland = islands.find((i) => i.id === selected) ?? null
+  const spireGlyph = statusIcon('spire')
+  const laneGlyph = uiIcon('wind-lane')
+  const junctionGlyph = uiIcon('lane-junction')
+  const archetype = selectedIsland ? islandArt(selectedIsland.band, selectedIsland.idx) : null
   const outbound = useMemo(
     () => (selected ? lanes.filter((lane) => lane.fromIslandId === selected) : []),
     [lanes, selected],
@@ -131,9 +143,12 @@ export function MapPage() {
   if (season === undefined) return <Loading label="Reading the winds" />
   if (season === null) {
     return (
+      /* `season-dawn`: a fresh archipelago at first light, founding airships fanning out. The
+         screen a player sees between seasons is the one place that painting belongs. */
       <Empty
         title="No season is open yet"
         hint="The world opens when the season does; the chronicle holds every sealed one."
+        art={splash('season-dawn')}
       />
     )
   }
@@ -146,9 +161,15 @@ export function MapPage() {
           Season seed <code className="cf-num">{season.seed}</code> · seals{' '}
           {new Date(season.endsAt).toLocaleDateString()}
         </p>
-        <p className="ah-page-head__note">
-          Spire islands are not marked: the islands route does not expose the flag the service
-          keeps. See the README’s known gaps.
+        <p className="ah-page-head__note ah-legend">
+          <span className="ah-legend__item">
+            {spireGlyph && <img className="ah-glyph" src={spireGlyph} alt="" aria-hidden="true" />}
+            Aether Spire — the season’s objective
+          </span>
+          <span className="ah-legend__item">
+            {laneGlyph && <img className="ah-glyph" src={laneGlyph} alt="" aria-hidden="true" />}
+            Wind lane, drawn once per direction
+          </span>
         </p>
       </header>
 
@@ -203,15 +224,40 @@ export function MapPage() {
               <g key={island.id} transform={`translate(${p.x} ${p.y})`}>
                 <circle
                   r={island.id === selected ? 13 : 9}
-                  className={`ah-map__island ah-map__island--${island.band}${island.id === selected ? ' is-selected' : ''}`}
+                  className={`ah-map__island ah-map__island--${island.band}${island.id === selected ? ' is-selected' : ''}${island.spire ? ' is-spire' : ''}`}
                   role="button"
                   tabIndex={0}
-                  aria-label={`Island ${island.idx}, ${island.band}, ${island.freePlots} free plots`}
+                  /*
+                    The spire is named in the ACCESSIBLE NAME, not only drawn. It is the season's
+                    victory objective, so a reader who cannot see the glyph must still be able to
+                    find the four islands the whole game is about by tabbing the map.
+                  */
+                  aria-label={`Island ${island.idx}, ${island.band}, ${island.freePlots} free plots${island.spire ? ', Aether Spire' : ''}`}
                   onClick={() => setSelected(island.id)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') setSelected(island.id)
                   }}
                 />
+                {/*
+                  An SVG <image>, because an <img> element cannot live inside an <svg>. That has a
+                  consequence worth knowing: it is NOT an HTMLImageElement, so it does not appear
+                  in `document.images` and beacon's decoded-<img> check cannot see it — the same
+                  blind spot that let Tessera serve 392 canvas sprites to nobody. What guards it is
+                  the surface's `imagery` declaration in micro-beacon, which resolves the path in
+                  Chromium from this origin. The legend above renders the same glyph as a real
+                  <img>, so both tiers have something to look at.
+                */}
+                {island.spire && spireGlyph && (
+                  <image
+                    className="ah-map__spire"
+                    href={spireGlyph}
+                    x={-9}
+                    y={-9}
+                    width={18}
+                    height={18}
+                    aria-hidden="true"
+                  />
+                )}
                 <text className="ah-map__label" y="-14" textAnchor="middle">
                   {island.idx}
                 </text>
@@ -226,14 +272,50 @@ export function MapPage() {
           )}
           {selectedIsland && (
             <>
+              {/*
+                ═══════════════════════════════════════════════════════════════════════════════
+                THE BAND IS DATA. THE BIOME IS ILLUSTRATION. THE CAPTION SAYS SO, AND MUST.
+
+                `islandArt` picks `<band>_<biome>` from the twelve archetype paintings. The band
+                comes off the wire and is constrained at the database
+                (`aetherholm/src/migrations.ts:160`). The biome does NOT exist: no route, no
+                column, no document names one — the four are authored in the art set's own
+                ART_BIBLE §3, which says as much. So the archetype is chosen from the island's
+                index, stable for every player and every visit, and the sentence under it tells
+                the reader exactly which half of the picture is a fact.
+
+                Dropping that caption turns a decoration into a claim about terrain the game does
+                not model. If it goes, the picture goes with it. See lib/art.ts.
+                ═══════════════════════════════════════════════════════════════════════════════
+              */}
+              {archetype && (
+                <figure className="ah-island">
+                  <img className="ah-island__art" src={archetype} alt="" aria-hidden="true" decoding="async" />
+                  <figcaption className="ah-dim">
+                    A {selectedIsland.band} island. The game records no terrain, so the{' '}
+                    {islandBiome(selectedIsland.idx)} archetype shown is art direction chosen from
+                    this island’s index — not a fact about it.
+                  </figcaption>
+                </figure>
+              )}
+
               <h2>
                 Island {selectedIsland.idx} <span className="ah-band">{selectedIsland.band}</span>
+                {selectedIsland.spire && (
+                  <span className="ah-spire-tag">
+                    {spireGlyph && <img className="ah-glyph" src={spireGlyph} alt="" aria-hidden="true" />}
+                    Aether Spire
+                  </span>
+                )}
               </h2>
               <p>
                 {selectedIsland.freePlots} of {selectedIsland.plots} plots free.
               </p>
 
-              <h3>Outbound winds</h3>
+              <h3 className="ah-heading--glyphed">
+                {junctionGlyph && <img className="ah-glyph" src={junctionGlyph} alt="" aria-hidden="true" />}
+                Outbound winds
+              </h3>
               {outbound.length === 0 && <p className="ah-dim">No outbound lanes.</p>}
               <ul className="ah-lane-list">
                 {outbound.map((lane) => {

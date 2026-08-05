@@ -105,7 +105,7 @@ describe('every request goes to micro-aetherholm', () => {
   })
 
   it('does NOT carry a token on the public content route', async () => {
-    // `aetherholm/src/server.ts:544` takes no principal. A token on a route that cannot read it
+    // `aetherholm/src/server.ts:562` takes no principal. A token on a route that cannot read it
     // is a needless credential on the wire.
     stub = installFetch(() => json(200, { airships: {} }))
     await fetchAirships()

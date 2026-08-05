@@ -6,16 +6,17 @@
  * The bar marks `worlds` current, because a title is played through Forge Worlds — see PRODUCT
  * in src/lib/hosts.ts.
  *
- * The degradation banner reads `GET /readyz` once per mount (`aetherholm/src/server.ts:328`).
+ * The degradation banner reads `GET /readyz` once per mount (`aetherholm/src/server.ts:346`).
  * `role="status"`, not `alert`: the app still works — the chronicle is static history and reads
  * fine against a degraded service — and a screen reader interrupted on every navigation is worse
  * than being told once, politely.
  */
 import { useEffect, useState } from 'react'
 import { CloudsForgeBar, CloudsForgeFooter } from '@cloudsforge/ui'
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { FOOTER_SURFACE, PRODUCT } from '../lib/hosts.ts'
 import { fetchReadiness, type Readiness } from '../lib/aetherholm.ts'
+import { keyart, titleArt } from '../lib/art.ts'
 import { useSession } from '../lib/auth.tsx'
 import { NAV } from '../lib/routes.ts'
 
@@ -50,6 +51,8 @@ export function AppShell() {
         Skip to the page
       </a>
       <CloudsForgeBar current={PRODUCT} account={account} onSignIn={() => signIn()} onSignOut={signOut} />
+
+      <TitleStrip />
 
       <nav className="ah-nav" aria-label="Game sections">
         <div className="ah-nav__inner">
@@ -96,5 +99,52 @@ export function AppShell() {
       */}
       <CloudsForgeFooter current={FOOTER_SURFACE} account={account} />
     </>
+  )
+}
+
+/**
+ * The title's own lockup: the mark and the wordmark, on the backdrop they were painted against.
+ *
+ * ────────────────────────────────────────────────────────────────────────────────────────────────
+ * WHY THE GAME NAMES ITSELF AT ALL, UNDER A BAR THAT ALREADY SAYS "CLOUDSFORGE".
+ *
+ * `CloudsForgeBar` marks `worlds` current, because a title is played through Forge Worlds — see
+ * PRODUCT in lib/hosts.ts. So before this strip existed, the only name on any screen was the
+ * platform's, and the product a player actually opened was identified by the browser tab. Emberkin
+ * carries its wordmark for the same reason and has since its art landed.
+ *
+ * THE WORDMARK IS THE `<h1>`-LEVEL NAME AND IT IS AN IMAGE, so it carries real `alt` text — unlike
+ * the empty-state splashes, which are decoration and are hidden. A reader who cannot see it must
+ * still be told which game this is. It is NOT marked up as a heading: every page already renders
+ * its own `<h1>`, and a second one above it would give the document two competing titles.
+ *
+ * The backdrop is `keyart/wordmark-backdrop`, the 1536×512 scene the wordmark was composed
+ * against, applied as a CSS background rather than a fourth `<img>` — it is a texture, it must
+ * crop freely at every width, and it must never be a thing a screen reader announces.
+ * ────────────────────────────────────────────────────────────────────────────────────────────────
+ */
+function TitleStrip() {
+  const mark = titleArt('mark')
+  const wordmark = titleArt('wordmark')
+  const backdrop = keyart('wordmark-backdrop')
+
+  return (
+    <div
+      className="ah-title"
+      // Inline because the value comes from the generated catalogue: a URL in the stylesheet would
+      // be a second place the asset path is spelled, and the one that no test reads.
+      style={backdrop ? { backgroundImage: `url(${backdrop})` } : undefined}
+    >
+      <Link className="ah-title__lockup" to="/">
+        {mark && <img className="ah-title__mark" src={mark} alt="" aria-hidden="true" />}
+        {wordmark ? (
+          <img className="ah-title__wordmark" src={wordmark} alt="Aetherholm" />
+        ) : (
+          // The set has no wordmark: say the name in text rather than show nothing. This is the
+          // `null` discipline of lib/art.ts at its only load-bearing call site.
+          <span className="ah-title__fallback">Aetherholm</span>
+        )}
+      </Link>
+    </div>
   )
 }

@@ -41,6 +41,7 @@ import {
   toBigInt,
 } from '../lib/format.ts'
 import { Empty, Failed, Forbidden, Loading } from '../components/states.tsx'
+import { shipProfile, splash, uiIcon } from '../lib/art.ts'
 
 const label = (snake: string): string => snake.replace(/_/g, ' ')
 
@@ -86,14 +87,23 @@ export function FleetsPage() {
   }
   if (fleets === undefined) return <Loading label="Sighting the sky" />
 
+  const fleetGlyph = uiIcon('fleet')
+
   return (
     <div className="ah-fleets">
-      <header className="ah-page-head">
+      <header className="ah-page-head ah-page-head--glyphed">
+        {fleetGlyph && <img className="ah-page-head__glyph" src={fleetGlyph} alt="" aria-hidden="true" />}
         <h1>Fleets</h1>
       </header>
 
       {fleets.length === 0 && (
-        <Empty title="Nothing in the air" hint="Compose a fleet below. The cost shows before you commit." />
+        /* `trade-flotilla`: a convoy of freight haulers riding a lane. The one splash in the set
+           that paints what this page is for, on the one screen where a player has none of it. */
+        <Empty
+          title="Nothing in the air"
+          hint="Compose a fleet below. The cost shows before you commit."
+          art={splash('trade-flotilla')}
+        />
       )}
       {fleets.length > 0 && (
         <div className="ah-scroll">
@@ -281,10 +291,32 @@ function Composer({
 
         <fieldset className="ah-ships">
           <legend>Ships — your garrison is the ceiling</legend>
+          {/*
+            THE SIDE PROFILES, WHICH IS THE WHOLE REASON THE `ships` SET IS 1024×512 AND NOT
+            SQUARE. Ten hulls, drawn broadside, and this is the screen where a player chooses
+            between them — the class table on /cities prices them and this one is where the
+            silhouette does work no number can: a skiff and a flagship are two words and two very
+            different shapes. The 256² `shipicons` are used instead wherever the ship is a row in
+            a table rather than a thing being picked.
+
+            Keyed on the class string the SERVICE sent (`GET /v1/content/airships`), never on a
+            list spelled here, and `shipProfile` answers null for a hull the art set predates.
+          */}
           {Object.entries(airships).map(([cls, spec]) => {
             const held = garrison.get(cls) ?? 0n
+            const profile = shipProfile(cls)
             return (
               <label key={cls} className="ah-ships__row">
+                {profile && (
+                  <img
+                    className="ah-ships__profile"
+                    src={profile}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
                 <span>
                   {label(cls)} <span className="ah-dim">({spec.role}, holds {groupDigits(spec.cargo)})</span>
                 </span>

@@ -105,7 +105,7 @@ export class ApiError extends Error {
  * Pull the sentence, the code and the request id out of a service's error body.
  *
  * The estate's envelope is **nested** — `{error: {code, message, requestId}}`, built by
- * `errorReply()` in every service; aetherholm's own is `aetherholm/src/server.ts:1072`. Both
+ * `errorReply()` in every service; aetherholm's own is `aetherholm/src/server.ts:1140`. Both
  * shapes are accepted rather than only the nested one, because a proxy or an older service on the
  * rollback path may still answer flat, and a client that only understands the current estate is a
  * client that breaks during the migration it was written for.
@@ -248,7 +248,7 @@ export interface RequestOptions {
    * Extra request headers.
    *
    * Here for one reason, and it is a correctness one: every queue submission and every fleet
-   * launch REQUIRES an `Idempotency-Key` and is a 400 without it (`aetherholm/src/server.ts:973`,
+   * launch REQUIRES an `Idempotency-Key` and is a 400 without it (`aetherholm/src/server.ts:991`,
    * `:536-538`). A launch that is retried without the header charges the treasury — and puts a
    * second fleet in the air — a second time.
    *
