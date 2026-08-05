@@ -546,20 +546,30 @@ body {
 .ah-title__lockup {
   max-width: var(--cf-max-w);
   margin: 0 auto;
-  padding: var(--cf-space-sm) var(--cf-space-md);
+  padding: var(--cf-space-md);
   display: flex;
   align-items: center;
   gap: var(--cf-space-sm);
   text-decoration: none;
 }
 
+/*
+ * SIZED FROM A SCREENSHOT OF THE DEPLOYED PAGE, not from a guess in a stylesheet.
+ *
+ * The first version was a 2rem mark and a 1.75rem wordmark, which reasoned correctly about not
+ * competing with the shared bar above it and produced a title nobody could read: the wordmark is
+ * warm lettering on the dark scene it was painted against, and at 1.75rem it reads as a smudge at
+ * the exact moment a player is working out which of the estate's seventeen surfaces they opened.
+ * A product name too small to read is the same defect as no product name, which is what this
+ * strip was added to fix.
+ */
 .ah-title__mark {
-  width: 2rem;
-  height: 2rem;
+  width: 2.75rem;
+  height: 2.75rem;
 }
 
 .ah-title__wordmark {
-  height: 1.75rem;
+  height: 2.5rem;
   width: auto;
 }
 
