@@ -12,8 +12,8 @@ export function NotFoundPage() {
       <span className="ah-state__icon" aria-hidden="true">
         ◇
       </span>
-      <p className="ah-state__title">There is nothing at this address</p>
-      <p className="ah-state__hint">The winds know these places:</p>
+      <p className="ah-state__title">Nothing is charted at this address</p>
+      <p className="ah-state__hint">The winds do know these:</p>
       <ul className="ah-notfound">
         {ROUTES.map((route) => (
           <li key={route.path}>

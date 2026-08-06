@@ -93,8 +93,9 @@ export function BattlesPage() {
         {battleGlyph && <img className="ah-page-head__glyph" src={battleGlyph} alt="" aria-hidden="true" />}
         <h1>Battle reports</h1>
         <p className="ah-page-head__meta">
-          Rendered from the server’s stored report and digest — this client holds no combat rules
-          and resolves nothing.
+          Every fight is worked out on the server and written down once. What you read here is
+          that record, exactly as it was stored. This page owns no combat rules and decides
+          nothing.
         </p>
       </header>
 
@@ -105,7 +106,7 @@ export function BattlesPage() {
         ) : history === null ? (
           <p className="ah-note">Loading your history…</p>
         ) : history.length === 0 ? (
-          <p className="ah-note">No battles yet. A fleet that never launched has a perfect record.</p>
+          <p className="ah-note">You have not been in a fight. A fleet that stays in harbour keeps an unbeaten record.</p>
         ) : (
           <ul className="ah-history__list">
             {history.map((b) => (
@@ -145,7 +146,7 @@ export function BattlesPage() {
       {notice && (notice.forbidden ? (
         <Forbidden
           notice={notice}
-          title="A live battle belongs to its participants"
+          title="This fight is not yours to read"
         />
       ) : (
         <Failed notice={notice} />
@@ -155,7 +156,7 @@ export function BattlesPage() {
            battle open is the one screen in this client that is ABOUT combat and shows none. */
         <Empty
           title="No report open"
-          hint="Paste a battle id. Sealed seasons’ reports open without an account; live ones are the participants’ own."
+          hint="Paste in a battle id. Anything from a sealed season reads without an account; a fight still in play belongs to the people who were in it."
           art={splash('spire-war')}
         />
       )}
@@ -172,10 +173,11 @@ export function BattlesPage() {
           </p>
 
           <div className="ah-report__digest">
-            <h3>Digest — the determinism claim</h3>
+            <h3>The fingerprint, and what it proves</h3>
             <p className="ah-dim">
-              sha256 over the canonicalised inputs and result. The same seed and the same orders of
-              battle re-resolve to these exact bytes; the database refuses any edit to the report.
+              It is taken over the inputs and the outcome together. Feed the same seed and the
+              same two fleets back in and you get these exact bytes again. The database will not
+              accept an edit to a stored report, so nobody can quietly improve one.
             </p>
             <code className="cf-num ah-digest">{battle.digest}</code>
           </div>
@@ -185,7 +187,7 @@ export function BattlesPage() {
             <OobTable title={`Defender (${battle.defenderUserId})`} oob={battle.defenderOob} />
           </div>
 
-          <h3>Result, as stored</h3>
+          <h3>What happened, as it was written down</h3>
           <pre className="ah-json">{JSON.stringify(battle.result, null, 2)}</pre>
         </article>
       )}

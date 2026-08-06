@@ -26,37 +26,37 @@ export const ROUTES: readonly RouteDef[] = [
   {
     path: '/',
     nav: 'Archipelago',
-    blurb: 'The islands on the wind lattice: lanes, their direction multipliers, and where to found.',
+    blurb: 'The islands, the winds between them, what each direction costs, and where you can settle.',
     protected: true,
   },
   {
     path: '/cities',
     nav: 'Cities',
-    blurb: 'Your sky-cities: live stocks, build and research queues, the shipyard.',
+    blurb: 'Your floating cities: what they hold, what they are building, and what is on the slipway.',
     protected: true,
   },
   {
     path: '/fleets',
     nav: 'Fleets',
-    blurb: 'Compose from the ten classes, see the Aether cost before you commit, watch arrivals.',
+    blurb: 'Put a fleet together from ten classes, price the trip before you agree to it, then track it.',
     protected: true,
   },
   {
     path: '/battles',
     nav: null,
-    blurb: 'A battle report: both orders of battle, the stored result, and its digest.',
+    blurb: 'One fight in full: who brought what, how it ended, and the fingerprint that pins it.',
     protected: false,
   },
   {
     path: '/alliance',
     nav: 'Alliance',
-    blurb: 'Your banner: a micro-community binding, island claims, beacons and shared lanes.',
+    blurb: 'Your banner: the community behind it, the islands you hold, and the lanes you share.',
     protected: true,
   },
   {
     path: '/chronicle',
     nav: 'Chronicle',
-    blurb: 'Sealed seasons — public history, readable without an account.',
+    blurb: 'Every season that has finished, open to read and impossible to change.',
     protected: false,
   },
 ]

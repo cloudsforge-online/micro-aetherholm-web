@@ -100,8 +100,8 @@ export function FleetsPage() {
         /* `trade-flotilla`: a convoy of freight haulers riding a lane. The one splash in the set
            that paints what this page is for, on the one screen where a player has none of it. */
         <Empty
-          title="Nothing in the air"
-          hint="Compose a fleet below. The cost shows before you commit."
+          title="You have nothing in the air"
+          hint="Put a fleet together below. You see exactly what the trip costs before you agree to it."
           art={splash('trade-flotilla')}
         />
       )}
@@ -143,7 +143,7 @@ export function FleetsPage() {
       {cities.length > 0 ? (
         <Composer cities={cities} islands={islands} lanes={lanes} airships={airships} onLaunched={load} />
       ) : (
-        <p className="ah-dim">Found a city first; a fleet needs a harbour.</p>
+        <p className="ah-dim">Settle a city first. Ships have to fly from somewhere.</p>
       )}
     </div>
   )
@@ -290,7 +290,7 @@ function Composer({
         </div>
 
         <fieldset className="ah-ships">
-          <legend>Ships — your garrison is the ceiling</legend>
+          <legend>Ships — you cannot send more than you have</legend>
           {/*
             THE SIDE PROFILES, WHICH IS THE WHOLE REASON THE `ships` SET IS 1024×512 AND NOT
             SQUARE. Ten hulls, drawn broadside, and this is the screen where a player chooses
@@ -339,7 +339,7 @@ function Composer({
 
         {mission === 'transfer' && (
           <fieldset className="ah-cargo">
-            <legend>Cargo — decimal amounts, carried in freight holds only</legend>
+            <legend>Cargo — only freighters have room for this</legend>
             {RESOURCES.map((resource) => (
               <label key={resource} className="ah-ships__row">
                 <span>{resource}</span>
@@ -359,14 +359,14 @@ function Composer({
         <div className="ah-preview" aria-live="polite">
           {preview === null && (
             <p className="ah-dim">
-              Pick ships and a destination to price the launch. No route, no price, no button.
+              Choose your ships and where they are going and we will price it. Until then there is nothing to quote and nothing to press.
             </p>
           )}
           {preview !== null && (
             <>
               <p className="ah-preview__cost">
-                Aether cost: <code className="cf-num">{formatAmount(preview.aetherLift)}</code> — charged
-                at launch for the whole round trip.
+                Aether: <code className="cf-num">{formatAmount(preview.aetherLift)}</code>, taken
+                from your treasury as they leave, covering the journey both ways.
               </p>
               <p>
                 Out {formatDuration(preview.travelSeconds)} · back {formatDuration(preview.returnSeconds)} ·
@@ -374,15 +374,16 @@ function Composer({
                 {overHold && <strong className="ah-warn"> — cargo exceeds the hold; the launch would be refused</strong>}
               </p>
               <p className="ah-dim">
-                Priced from the served class table and lanes, the same constants the server charges
-                by. Alliance shared lanes can only make the true cost lower, never higher.
+                These figures come from the same ship and lane numbers the server bills against.
+                If your alliance shares a lane on this route the real charge falls; it never climbs
+                above what you are shown here.
               </p>
             </>
           )}
         </div>
 
         <button type="submit" className="cf-btn cf-btn--ember" disabled={!canLaunch}>
-          {busy ? 'Launching…' : 'Launch — the cost above is the commitment'}
+          {busy ? 'Launching…' : 'Launch — you are agreeing to the cost above'}
         </button>
         {message && <p role="status">{message}</p>}
       </form>

@@ -105,8 +105,10 @@ export function AlliancePage() {
       <header className="ah-page-head">
         <h1>Alliance</h1>
         <p className="ah-page-head__meta">
-          An alliance is a micro-community community wearing a banner. Governance — votes,
-          officers, the treasury — happens in Community; this game stores the binding and the play.
+          An alliance is a CloudsForge community that has taken up a banner in this world. The
+          running of it — votes, officers, the money — happens over in Community, where you may
+          already have one. Aetherholm only records which community holds which banner, and what
+          they do with it here.
         </p>
       </header>
 
@@ -117,7 +119,7 @@ export function AlliancePage() {
         {directory === null ? (
           <p className="ah-note">The directory could not be loaded.</p>
         ) : directory.length === 0 ? (
-          <p className="ah-note">No alliances yet — the first banner is unclaimed.</p>
+          <p className="ah-note">Nobody has raised a banner. The first one is yours if you want it.</p>
         ) : (
           <ul className="ah-directory__list">
             {directory.map((a) => (
@@ -168,7 +170,7 @@ export function AlliancePage() {
                 type="button"
                 className="cf-btn cf-btn--ember"
                 disabled={busy}
-                onClick={() => void act(() => joinAlliance(alliance.id), 'Joined. One banner per player per world.')}
+                onClick={() => void act(() => joinAlliance(alliance.id), 'You are in. One banner each, per world.')}
               >
                 Join
               </button>
@@ -215,7 +217,7 @@ export function AlliancePage() {
                 if (claimIslandId) {
                   void act(
                     () => claimIsland(alliance.id, claimIslandId),
-                    'Claimed. The first banner planted wins; shared lanes follow the claims.',
+                    'Claimed. First banner in the ground takes it, and the shared lanes follow from there.',
                   )
                 }
               }}
@@ -245,7 +247,7 @@ export function AlliancePage() {
 
           <h3>Beacons</h3>
           <p className="ah-dim">
-            Islands where a member city flies a Guild Beacon — the alliance’s visible presence.
+            Islands where one of your members flies a Guild Beacon. This is how the alliance shows on the map.
           </p>
           {alliance.beacons.length === 0 && <p className="ah-dim">None lit.</p>}
           <ul className="ah-garrison">
@@ -256,8 +258,8 @@ export function AlliancePage() {
           </ul>
 
           <h3>Shared lanes</h3>
-          <p className="ah-dim">Lanes between two claimed islands — members fly them at a discount.</p>
-          {alliance.sharedLanes.length === 0 && <p className="ah-dim">None yet; claims come first.</p>}
+          <p className="ah-dim">A lane running between two islands you both hold. Members pay less to fly it.</p>
+          {alliance.sharedLanes.length === 0 && <p className="ah-dim">None. Claim the islands at either end and the lane follows.</p>}
           <ul className="ah-garrison">
             {alliance.sharedLanes.map((lane) => {
               const from = islands.find((i) => i.id === lane.fromIslandId)
@@ -276,8 +278,9 @@ export function AlliancePage() {
         <section className="ah-alliance__found">
           <h2>Found an alliance</h2>
           <p className="ah-dim">
-            You need a micro-community community FIRST — this client never creates one. Bring its
-            id; founding binds the banner to it, and that community’s governance is the alliance’s.
+            Bring a community you already have, because this page will not make one for you. Paste
+            its id below and the banner binds to it. However that community makes decisions is how
+            the alliance makes them.
           </p>
           <form
             className="ah-form"
@@ -311,7 +314,7 @@ export function AlliancePage() {
       )}
 
       {!alliance && season === null && (
-        <Empty title="No season is open" hint="Alliances live inside a season’s archipelago." />
+        <Empty title="No season is running" hint="An alliance only exists inside a season, on a season’s islands." />
       )}
 
       {message && <p role="status">{message}</p>}

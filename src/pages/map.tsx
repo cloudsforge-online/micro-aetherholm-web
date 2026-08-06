@@ -146,8 +146,8 @@ export function MapPage() {
       /* `season-dawn`: a fresh archipelago at first light, founding airships fanning out. The
          screen a player sees between seasons is the one place that painting belongs. */
       <Empty
-        title="No season is open yet"
-        hint="The world opens when the season does; the chronicle holds every sealed one."
+        title="No season is running"
+        hint="The archipelago exists only inside a season. Until one starts, the Chronicle is where the world is — every sealed season, open to anybody."
         art={splash('season-dawn')}
       />
     )
@@ -161,14 +161,26 @@ export function MapPage() {
           Season seed <code className="cf-num">{season.seed}</code> · seals{' '}
           {new Date(season.endsAt).toLocaleDateString()}
         </p>
+        <p className="ah-page-head__meta">
+          Aetherholm is a strategy game about cities that float. You settle a plot on an island,
+          work out how to feed it, build airships, and fly them down wind lanes to trade with or
+          take from everybody else. A season runs 120 days and then freezes for good in the
+          Chronicle, where anybody can read it without an account.
+        </p>
+        <p className="ah-page-head__meta">
+          It is one of the titles inside Forge Worlds, so the account you signed in with also plays
+          Emberkin and Tessera. Your inventory, your achievements and the heraldry you win at the
+          end of a season follow you between all three. Nothing here is sold for advantage: what a
+          city can do is what you built.
+        </p>
         <p className="ah-page-head__note ah-legend">
           <span className="ah-legend__item">
             {spireGlyph && <img className="ah-glyph" src={spireGlyph} alt="" aria-hidden="true" />}
-            Aether Spire — the season’s objective
+            Aether Spire — what the season is fought over
           </span>
           <span className="ah-legend__item">
             {laneGlyph && <img className="ah-glyph" src={laneGlyph} alt="" aria-hidden="true" />}
-            Wind lane, drawn once per direction
+            A wind lane. Each direction is drawn on its own, because they do not cost the same
           </span>
         </p>
       </header>
@@ -268,7 +280,7 @@ export function MapPage() {
 
         <aside className="ah-map__panel">
           {!selectedIsland && (
-            <Empty title="Select an island" hint="Its winds, plots and founding form appear here." />
+            <Empty title="Pick an island" hint="Choose one on the map and its winds, its free plots and the form to settle there appear here." />
           )}
           {selectedIsland && (
             <>
@@ -292,9 +304,9 @@ export function MapPage() {
                 <figure className="ah-island">
                   <img className="ah-island__art" src={archetype} alt="" aria-hidden="true" decoding="async" />
                   <figcaption className="ah-dim">
-                    A {selectedIsland.band} island. The game records no terrain, so the{' '}
-                    {islandBiome(selectedIsland.idx)} archetype shown is art direction chosen from
-                    this island’s index — not a fact about it.
+                    A {selectedIsland.band} island. The game keeps no terrain of its own, so the{' '}
+                    {islandBiome(selectedIsland.idx)} scene above was picked from this island&apos;s
+                    number to give it a face. Enjoy it; do not plan around it.
                   </figcaption>
                 </figure>
               )}
@@ -359,10 +371,10 @@ export function MapPage() {
                   />
                 </label>
                 <button type="submit" className="cf-btn cf-btn--ember" disabled={founding || cityName.length === 0}>
-                  {founding ? 'Founding…' : 'Found city'}
+                  {founding ? 'Settling…' : 'Settle here'}
                 </button>
                 <p className="ah-dim">
-                  A new city holds a free 7-day aegis. It is never sold, to anyone, ever.
+                  Settle and nobody can attack you for seven days. That protection comes with the city, costs nothing, and is not for sale at any price to anybody.
                 </p>
                 {foundNotice && <p role="status">{foundNotice}</p>}
               </form>
