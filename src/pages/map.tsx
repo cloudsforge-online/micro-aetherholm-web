@@ -173,6 +173,13 @@ export function MapPage() {
           end of a season follow you between all three. Nothing here is sold for advantage: what a
           city can do is what you built.
         </p>
+        <p className="ah-page-head__meta">
+          All of it runs on Hearth, a chain with a real EVM behind it — Solidity deploys, and
+          MetaMask, ethers, viem, Hardhat and Foundry work against it unmodified. Its currency,
+          EMBER, is what the rest of the ecosystem pays in, and you can mine it from a browser tab
+          on a key that never leaves your own machine. EMBER carries no monetary value, and nothing
+          here is an offer to buy or sell.
+        </p>
         <p className="ah-page-head__note ah-legend">
           <span className="ah-legend__item">
             {spireGlyph && <img className="ah-glyph" src={spireGlyph} alt="" aria-hidden="true" />}
