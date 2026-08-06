@@ -3,14 +3,14 @@
  *
  * The rule is Emberkin's, inherited with its reasoning: a client that can resolve a battle can
  * lie about one. This page holds no combat rules; it shows the stored report exactly as
- * `GET /v1/battles/:id` returns it (`aetherholm/src/server.ts:755`) — both orders of battle, the
+ * `GET /v1/battles/:id` returns it (`aetherholm/src/server.ts`) — both orders of battle, the
  * result object verbatim, and THE DIGEST, displayed in full. The digest is the determinism claim
  * (docs/ecosystem/20-aetherholm.md §4, §9.1): sha256 over the canonicalised inputs and result,
- * pinned append-only at the database (`aetherholm/src/migrations.ts:574`). Showing it is what
+ * pinned append-only at the database (`aetherholm/src/migrations.ts`). Showing it is what
  * makes "the same battle re-resolves to the same bytes" a thing a player can quote, not a thing
  * they are asked to believe.
  *
- * Reports open from YOUR HISTORY now — `GET /v1/battles` (`aetherholm/src/server.ts:721`)
+ * Reports open from YOUR HISTORY now — `GET /v1/battles` (`aetherholm/src/server.ts`)
  * closed the listing gap this header used to record — or by pasted id, which stays because a
  * sealed battle is public history anyone may cite. Live battles are the participants' own;
  * sealed ones open without a session.

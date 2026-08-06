@@ -6,7 +6,7 @@
  * The bar marks `worlds` current, because a title is played through Forge Worlds — see PRODUCT
  * in src/lib/hosts.ts.
  *
- * The degradation banner reads `GET /readyz` once per mount (`aetherholm/src/server.ts:346`).
+ * The degradation banner reads `GET /readyz` once per mount (`aetherholm/src/server.ts`).
  * `role="status"`, not `alert`: the app still works — the chronicle is static history and reads
  * fine against a degraded service — and a screen reader interrupted on every navigation is worse
  * than being told once, politely.

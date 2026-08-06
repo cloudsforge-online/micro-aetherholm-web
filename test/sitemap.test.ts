@@ -53,8 +53,8 @@ const nginx = readFileSync(new URL('../nginx.conf', import.meta.url), 'utf8')
  * to a wall — the "dead URL" failure the module header above is about, in its politest form.
  *
  * On this surface that leaves `/battles` and `/chronicle`: a sealed season is public history
- * anyone may read (`aetherholm/src/server.ts:915`) and a sealed battle report opens without a
- * session (`aetherholm/src/server.ts:681`). Which SEASON and which BATTLE are query strings on
+ * anyone may read (`aetherholm/src/server.ts`) and a sealed battle report opens without a
+ * session (`aetherholm/src/server.ts`). Which SEASON and which BATTLE are query strings on
  * those two addresses — one per report, minted by the service — and an unbounded family of them
  * pasted into a config file would be stale the moment a fleet launched.
  */

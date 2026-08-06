@@ -122,7 +122,7 @@ describe('the stylesheet names only tokens that exist', () => {
        * @cloudsforge/ui 1.1 introduced a full severity ramp — `--cf-good`/`--cf-warn`/
        * `--cf-critical`, each with an `-ink` step for text laid ON the fill and a `-text` step for
        * the fill's colour used as WORDS — and `--cf-critical` is now the 3:1 fill, defined at
-       * `ui/packages/ui/src/tokens.css:360`. So it moved from the wrong list to the right one, and
+       * `ui/packages/ui/src/tokens.css`. So it moved from the wrong list to the right one, and
        * its `-text` sibling moved with it.
        *
        * `--cf-border`, `--cf-warning` and `--cf-font` are still typos and still guarded: they are

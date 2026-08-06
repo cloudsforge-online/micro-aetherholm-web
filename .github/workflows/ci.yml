@@ -24,13 +24,13 @@
 #
 # Re-checked against micro-org rather than believed:
 #
-#   * the single checkout is fixed. web-ci.yml:88-115 checks the app out into `app/`, micro-ui into
+#   * the single checkout is fixed. web-ci.yml checks the app out into `app/`, micro-ui into
 #     `ui/` beside it, and installs THE SIBLING FIRST, because `link:` resolves to the sibling's own
 #     node_modules — the shape of the `check:` job below. micro-ui is public now, so even the
 #     `estate_token` fallback to `github.token` resolves.
-#   * the deep-route probe is fixed, and inverted. web-ci.yml:290-297 REQUIRES an unknown path to
+#   * the deep-route probe is fixed, and inverted. web-ci.yml REQUIRES an unknown path to
 #     answer 404 and names `try_files $uri /index.html` as the thing not to do; the 200 is now asked
-#     only of the optional `deep-link-path` input (:299-309), a route the app really has.
+#     only of the optional `deep-link-path` input, a route the app really has.
 #
 # So the two things that made a bespoke `check:` and `image:` unavoidable are gone. This file is
 # still not deleted, because what remains is not a workaround: `rules:` (line 416 below) was
@@ -150,7 +150,7 @@ jobs:
           sparse-checkout: |
             packages/auth
 
-      # The estate's tooling, because the `publish` job at the end of this file cites it by line:
+      # The estate's tooling, because the `publish` job at the end of this file cites it:
       # `org/tools/registry.ts` for how a release manifest derives this repository's image name, and
       # `org/tools/cfctl.ts` for the generator and the `--verify` gate that job exists to satisfy.
       # The citation sweep below treats a cited repository that is NOT checked out as fatal — a
@@ -202,17 +202,15 @@ jobs:
             echo "::error::micro-aetherholm was not checked out; the route citations were never verified"
             exit 1
           }
-          # ── The line is READ out of the test, never written down here ──────────────────────────
+          # ── THERE IS NO LINE NUMBER TO READ ANY MORE, AND THAT IS THE POINT ───────────────────
           #
-          # Hardcoding a number in this file makes a THIRD copy of a citation that already lives
-          # in two places, and the copy is the one that goes stale: the day the launch route
-          # moves and somebody correctly updates the table, a hardcoded grep would accuse a
-          # correct test of being fake. Deriving it keeps this step honest.
-          cited=$(grep -oE "path: '/v1/fleets', line: [0-9]+" test/aetherholm.test.ts | grep -oE '[0-9]+$' | head -1)
-          [ -n "${cited:-}" ] || {
-            echo "::error::no citation for POST /v1/fleets in test/aetherholm.test.ts; the surface table has changed shape"
-            exit 1
-          }
+          # This step used to pull the launch route's cited line out of the test and grep the
+          # output for it. The line number was itself the defect: it named a position in a file
+          # that a DIFFERENT repository owns, so an edit near micro-aetherholm's imports moved
+          # every route below it and turned this repository red while nothing here was wrong.
+          # The test now finds each route by searching for its `define(` and asserts that it
+          # exists, which is the fact worth having and the one that survives the service being
+          # edited.
           out=$(node --import tsx --test test/aetherholm.test.ts 2>&1 || true)
           # ── Read from "$out" directly; never pipe a suite's output into `grep -q` ─────────────
           #
@@ -232,16 +230,17 @@ jobs:
             echo "::error::the route cross-check skipped itself while micro-aetherholm was present"
             exit 1
           fi
-          grep -q "is registered at aetherholm/src/server.ts:${cited}" <<<"$out" || {
+          grep -q "is registered in aetherholm/src/server.ts" <<<"$out" || {
             echo "::error::the route cross-check did not run against aetherholm/src/server.ts"
             exit 1
           }
-          # Twenty-three called routes plus four declined ones, each asserted against its own
-          # line. DEDUPED before counting: node:test names each subtest twice — once as it runs
-          # and once in the summary — and a raw grep -c reports double.
-          count=$(printf '%s\n' "$out" | grep -oE 'is registered at aetherholm/src/server\.ts:[0-9]+' | sort -u | wc -l | tr -d ' ')
+          # Twenty-three called routes plus four declined ones, each looked up in the service.
+          # DEDUPED before counting: node:test names each subtest twice — once as it runs and once
+          # in the summary — and a raw grep -c reports double. The method and path are what make
+          # each line distinct now that no line number does.
+          count=$(printf '%s\n' "$out" | grep -oE '[A-Z]+ [^ ]+ is registered in aetherholm/src/server\.ts' | sort -u | wc -l | tr -d ' ')
           [ "$count" -ge 27 ] || {
-            echo "::error::only $count route citations were verified; the surface has twenty-seven"
+            echo "::error::only $count routes were looked up in the service; the surface has twenty-seven"
             exit 1
           }
           # And the MECHANISM half really ran too: a suite that verified every citation and
@@ -259,12 +258,17 @@ jobs:
             echo "::error::only $mech routes had their authentication mechanism checked"
             exit 1
           }
-          echo "ok: $count cited routes verified against the service that serves them, mechanisms included"
+          echo "ok: $count routes verified against the service that serves them, mechanisms included"
 
-      # …and the cross-check can fail. Bend one citation and require the suite to go red, so an
-      # aetherholm.test.ts reduced to assertions that always pass cannot look like a verified
-      # client.
-      - name: …and it would have noticed a wrong citation
+      # …and the cross-check can fail. Name a route the service does not serve and require the
+      # suite to go red, so an aetherholm.test.ts reduced to assertions that always pass cannot
+      # look like a verified client.
+      #
+      # This step used to bend a cited LINE by one, which proved the test read a POSITION. The
+      # position was the defect — micro-aetherholm was free to move every route without changing
+      # one of them — so the mutation now proves the stronger thing: that the test reads the
+      # SERVICE, and notices a route that is not registered there at all.
+      - name: …and it would have noticed a route the service does not serve
         working-directory: aetherholm-web
         run: |
           set -euo pipefail
@@ -272,27 +276,20 @@ jobs:
           restore() { cp "$RUNNER_TEMP/aetherholm.test.ts.orig" test/aetherholm.test.ts; }
           trap restore EXIT
 
-          # Read the cited line and bend THAT, rather than naming a number here: a sed that
-          # names a line the file no longer carries is a silent no-op, and this step would then
-          # accuse a correct test of being fake. The cmp below makes "the mutation happened" a
-          # checked fact rather than an assumption.
-          cited=$(grep -oE "path: '/v1/fleets', line: [0-9]+" test/aetherholm.test.ts | grep -oE '[0-9]+$' | head -1)
-          [ -n "${cited:-}" ] || {
-            echo "::error::no citation for POST /v1/fleets in test/aetherholm.test.ts"
-            exit 1
-          }
-          bent=$((cited + 1))
-          sed -i "s|path: '/v1/fleets', line: ${cited}|path: '/v1/fleets', line: ${bent}|" test/aetherholm.test.ts
+          # The cmp below makes "the mutation happened" a checked fact rather than an assumption:
+          # a sed whose pattern the file no longer carries is a silent no-op, and this step would
+          # then accuse a correct test of being fake.
+          sed -i "s|path: '/v1/fleets', auth: 'user'|path: '/v1/flotillas', auth: 'user'|" test/aetherholm.test.ts
           if cmp -s test/aetherholm.test.ts "$RUNNER_TEMP/aetherholm.test.ts.orig"; then
             echo "::error::the mutation changed nothing, so this step proves nothing"
             exit 1
           fi
 
           if node --import tsx --test test/aetherholm.test.ts >/dev/null 2>&1; then
-            echo "::error::the cross-check passed with POST /v1/fleets cited at ${bent} instead of ${cited} — it is not reading the service"
+            echo "::error::the cross-check passed with POST /v1/flotillas, which micro-aetherholm does not serve — it is not reading the service"
             exit 1
           fi
-          echo "ok: moving one citation from ${cited} to ${bent} turns the suite red, so a pass is evidence"
+          echo "ok: naming a route the service does not serve turns the suite red, so a pass is evidence"
 
       # …and the MECHANISM half can fail too, which is a different claim from the citation half.
       # Prove it can go red by claiming the launch route — the one that charges a treasury — is
@@ -306,7 +303,7 @@ jobs:
           trap restore EXIT
 
           before=$(grep -c "auth: 'none'" test/aetherholm.test.ts)
-          sed -i "s|path: '/v1/fleets', line: \([0-9]*\), auth: 'user'|path: '/v1/fleets', line: \1, auth: 'none'|" test/aetherholm.test.ts
+          sed -i "s|path: '/v1/fleets', auth: 'user'|path: '/v1/fleets', auth: 'none'|" test/aetherholm.test.ts
           after=$(grep -c "auth: 'none'" test/aetherholm.test.ts)
           [ "$after" -gt "$before" ] || {
             echo "::error::the mutation changed nothing, so this step proves nothing"
@@ -484,22 +481,31 @@ jobs:
         # silently delete the rule.
         run: test -f test/routes.test.ts && grep -q 'nginx.conf' test/routes.test.ts
 
-      - name: Every route this client calls cites the line that serves it
+      - name: Every route this client calls is named in the one file that cites the service
         # The rule test/aetherholm.test.ts enforces, restated so that deleting the test does not
-        # delete it. Every request path in the client must live in the one file that also carries
-        # the `aetherholm/src/server.ts:<line>` citations.
+        # delete it. Every request path in the client must live in the one file whose header
+        # tabulates the surface against `aetherholm/src/server.ts`.
+        #
+        # This counted `aetherholm/src/server.ts:<line>` and required twenty-seven of them. The
+        # line number was the defect: it named a position in a file micro-aetherholm owns and is
+        # free to edit, so a route moving broke every citation here at once. What is counted now is
+        # the METHOD AND PATH of each route in that header, which no edit to the service can move.
         run: |
           set -uo pipefail
-          cites=$(grep -coE 'aetherholm/src/server\.ts:[0-9]+' src/lib/aetherholm.ts || true)
-          if [ "${cites:-0}" -lt 27 ]; then
-            echo "::error::src/lib/aetherholm.ts carries ${cites:-0} lines of route citation; the surface has twenty-seven routes"
+          named=$(grep -coE '^ \*   (GET|POST|PUT|PATCH|DELETE) +/' src/lib/aetherholm.ts || true)
+          if [ "${named:-0}" -lt 27 ]; then
+            echo "::error::src/lib/aetherholm.ts tabulates ${named:-0} routes; the surface has twenty-seven"
             exit 1
           fi
+          grep -q 'aetherholm/src/server.ts' src/lib/aetherholm.ts || {
+            echo "::error::src/lib/aetherholm.ts no longer says which service source its table was read from"
+            exit 1
+          }
           if grep -rn --include='*.tsx' -E "aetherholm<[^>]*>\(\s*[\`'\"]/" src; then
             echo "::error::a page calls the service directly; every call goes through src/lib/aetherholm.ts, where it is cited"
             exit 1
           fi
-          echo "ok: ${cites} citation lines, and no uncited call site"
+          echo "ok: ${named} routes tabulated against the service, and no uncited call site"
 
       - name: An Idempotency-Key goes to four routes and no others
         # aetherholm requires the header on the three queue submissions and the launch, and reads
@@ -708,12 +714,12 @@ jobs:
   # already drifted:
   #
   #   generator  `cfctl release` pins one image per deployable, the name from
-  #              org/tools/registry.ts:367-369 (`ghcr.io/<org>/<repo.repo>`, which is why the package
+  #              org/tools/registry.ts (`ghcr.io/<org>/<repo.repo>`, which is why the package
   #              is micro-<app> and not <app>) and the tag from that repository's package.json
-  #              version, org/tools/cfctl.ts:962-968.
+  #              version, org/tools/cfctl.ts.
   #   verifier   `cfctl release --verify` runs `docker manifest inspect` on EVERY entry and returns
-  #              non-zero if one cannot be pulled, org/tools/cfctl.ts:997-1038.
-  #   deployer   deploy/scripts/release-deploy.sh:99-124 refuses to change anything while any image
+  #              non-zero if one cannot be pulled, org/tools/cfctl.ts.
+  #   deployer   deploy/scripts/release-deploy.sh refuses to change anything while any image
   #              is missing.
   #
   # A frontend with no producer was therefore a manifest entry that could never verify.

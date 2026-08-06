@@ -3,8 +3,8 @@
  * through BigInt, never `Number()`.
  *
  * The service's whole economy is `bigint` with floor arithmetic — "a float near an amount
- * eventually rounds a settlement" (`aetherholm/src/content.ts:12-14`) — and amounts travel as
- * decimal strings on the wire (`aetherholm/src/server.ts:521`, the airships comment; every
+ * eventually rounds a settlement" (`aetherholm/src/content.ts`) — and amounts travel as
+ * decimal strings on the wire (`aetherholm/src/server.ts`, the airships comment; every
  * stocks field). `Number()` is exact only below 2^53; a Grand Hauler convoy's season of Aether
  * can pass that, and the first place the rounding would appear is the one place players check
  * numbers against each other. So: parse with BigInt, add with BigInt, format from BigInt, and
@@ -36,7 +36,7 @@ export function formatAmount(value: bigint): string {
 /**
  * What a stock has become `elapsedMs` after `settledAt`, clamped to `[0, cap]`.
  *
- * The same arithmetic as the service's `accrue` (`aetherholm/src/economy.ts:34-39`): floor
+ * The same arithmetic as the service's `accrue` (`aetherholm/src/economy.ts`): floor
  * seconds, floor of rate×seconds/3600, clamp to the cap, and NEGATIVE ELAPSED TIME ACCRUES
  * NOTHING — a client clock behind the server's must not show a stock shrinking. This is a
  * PROJECTION for display between reads; the server settles from its own clock on every write,

@@ -2,28 +2,28 @@
  * The city view: live stocks, the queues, the shipyard.
  *
  * STOCKS TICK WITHOUT A REQUEST. The service's economy is lazy — no tick, computed on read from
- * `(lastSettledAt, rates, caps)` (`aetherholm/src/economy.ts:88`) — and the city view it returns
- * carries all of those fields (`aetherholm/src/cities.ts:92-110`). So this page projects the
+ * `(lastSettledAt, rates, caps)` (`aetherholm/src/economy.ts`) — and the city view it returns
+ * carries all of those fields (`aetherholm/src/cities.ts`). So this page projects the
  * stocks forward every second with the SAME floor arithmetic (`projectStocks`, mirrored from
- * `aetherholm/src/economy.ts:34-39`) instead of polling. The interval below repaints a number;
+ * `aetherholm/src/economy.ts`) instead of polling. The interval below repaints a number;
  * it does no domain work, fetches nothing, and the server's own settlement remains the truth the
  * moment any write answers.
  *
  * The forms show REAL costs now: `GET /v1/content/buildings` and `/v1/content/research`
- * (`aetherholm/src/server.ts:526`, `:526`) serve values computed by the exact functions the
+ * (`aetherholm/src/server.ts`) serve values computed by the exact functions the
  * engine charges from, closing the gap this header used to record below. The old text, kept for
  * the reasoning it carried:
  *
  * WHAT THE FORMS DID NOT SHOW: building and research costs. The service serves content for
- * airships only (`GET /v1/content/airships`, `aetherholm/src/server.ts:562`); building and
- * research cost curves live server-side (`aetherholm/src/content.ts:197-235`) with no route. A
+ * airships only (`GET /v1/content/airships`, `aetherholm/src/server.ts`); building and
+ * research cost curves live server-side (`aetherholm/src/content.ts`) with no route. A
  * cost this client computed from a private copy would drift the day the curves move to the
  * assets repository, so the forms say "charged at queue time" and the reply's settled stocks
  * show exactly what it cost. Recorded in the README's known gaps; ship costs ARE served, so the
  * shipyard shows them.
  *
  * The type/node/class vocabularies below are the CONTRACT counts of doc §4 — 20 buildings, 32
- * nodes, 10 classes — spelled as `aetherholm/src/content.ts:23-44` and `:55-96` spell them; the
+ * nodes, 10 classes — spelled as `aetherholm/src/content.ts` spells them; the
  * shipyard's list comes from the content route at runtime, never from here.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -54,7 +54,7 @@ import {
 import { Empty, Failed, Forbidden, Loading } from '../components/states.tsx'
 import { buildingArt, queueIcon, resourceIcon, shipIcon, statusIcon } from '../lib/art.ts'
 
-/** The 20 building types, as the schema spells them (`aetherholm/src/content.ts:23-44`). */
+/** The 20 building types, as the schema spells them (`aetherholm/src/content.ts`). */
 const BUILDING_TYPES = [
   'skyhall', 'well_rig', 'cloudstone_quarry', 'skysteel_forge', 'terrace_farm',
   'warehouse', 'vault', 'residences', 'aerodock', 'launch_rails',
@@ -62,7 +62,7 @@ const BUILDING_TYPES = [
   'trade_gantry', 'guild_beacon', 'charthouse', 'infirmary', 'hall_of_banners',
 ] as const
 
-/** The 32 research nodes in their 4 branches (`aetherholm/src/content.ts:55-96`). */
+/** The 32 research nodes in their 4 branches (`aetherholm/src/content.ts`). */
 const RESEARCH_NODES: Readonly<Record<string, readonly string[]>> = {
   economy: ['well_lore', 'cistern_craft', 'quarry_songs', 'ledger_discipline', 'terraced_bounty', 'vault_locks', 'guild_charters', 'deep_veins'],
   aeronautics: ['gasbag_trim', 'keel_balance', 'wind_reading', 'lift_theory', 'aether_burners', 'storm_rigging', 'long_hauls', 'flagship_doctrine'],

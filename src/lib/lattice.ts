@@ -4,14 +4,14 @@
  * The Aether cost of a launch is shown BEFORE the commit (docs/ecosystem/20-aetherholm.md §5),
  * and it is computed here from exactly the inputs the server charges from:
  *
- *   * the lanes, as `GET /v1/archipelagos/:id/lanes` serves them (`aetherholm/src/server.ts:590`)
+ *   * the lanes, as `GET /v1/archipelagos/:id/lanes` serves them (`aetherholm/src/server.ts`)
  *     — per-direction `travelSeconds`, already rolled from the season seed;
- *   * the class table, as `GET /v1/content/airships` serves it (`aetherholm/src/server.ts:562`),
- *     which is `AIRSHIPS` in `aetherholm/src/content.ts:302-313` verbatim — `speedBp` and
+ *   * the class table, as `GET /v1/content/airships` serves it (`aetherholm/src/server.ts`),
+ *     which is `AIRSHIPS` in `aetherholm/src/content.ts` verbatim — `speedBp` and
  *     `liftPerHour` are the two numbers this file reads.
  *
- * The arithmetic mirrors `launchFleet` (`aetherholm/src/fleets.ts:291-296` for time,
- * `:332-336` for lift) step for step: the fleet flies at its SLOWEST ship's `speedBp`; each leg
+ * The arithmetic mirrors `launchFleet` (`aetherholm/src/fleets.ts`, for time and for
+ * lift) step for step: the fleet flies at its SLOWEST ship's `speedBp`; each leg
  * is `floor(pathSeconds × speedBp / 10000)` with a 1-second floor; and the lift charge is
  * `ceil(liftPerHourTotal × (outbound + return) / 3600)` in BigInt — the `+ 3599n) / 3600n`
  * ceiling, spelled the same way so the two cannot round apart.
@@ -21,7 +21,8 @@
  * outcome of any kind is computed here — see the header of ./aetherholm.ts.
  *
  * ONE HONEST GAP: alliance shared lanes. Members fly lanes between two claimed islands at a 10%
- * discount (`aetherholm/src/fleets.ts:53` `SHARED_LANE_DISCOUNT_BP = 9000`, applied at `:206`).
+ * discount (`aetherholm/src/fleets.ts` `SHARED_LANE_DISCOUNT_BP = 9000`, applied when
+ * both ends are claimed).
  * Whether a given lane is shared depends on the alliance's claims at the moment the SERVER
  * routes the fleet, which this client cannot promise to know first. The preview therefore prices
  * the undiscounted path and says so in copy — the true cost is never HIGHER than the number
@@ -39,7 +40,7 @@ export interface PathResult {
 
 /**
  * Shortest path by travel time — Dijkstra with the same deterministic tie-break (smaller island
- * id first) as the service's `shortestPath` (`aetherholm/src/lattice.ts:109`), so the route this
+ * id first) as the service's `shortestPath` (`aetherholm/src/lattice.ts`), so the route this
  * client draws is the route the server flies.
  */
 export function shortestPath(
@@ -109,7 +110,7 @@ export interface LaunchPreview {
 
 /**
  * Price a launch. Returns null when either leg has no route — which the server would answer with
- * 409 `no_route` (`aetherholm/src/server.ts:322`), so the composer disables the commit instead
+ * 409 `no_route` (`aetherholm/src/server.ts`), so the composer disables the commit instead
  * of sending a request whose refusal is already known.
  */
 export function previewLaunch(
@@ -138,7 +139,7 @@ export function previewLaunch(
   }
   if (!any) return null
 
-  // The same floors and the same ceiling as aetherholm/src/fleets.ts:294-295 and :336.
+  // The same floors and the same ceiling as `launchFleet` in aetherholm/src/fleets.ts.
   const travelSeconds = Math.max(1, Math.floor((outbound.seconds * speedBp) / 10000))
   const returnSeconds = Math.max(1, Math.floor((back.seconds * speedBp) / 10000))
   const aetherLift = (liftPerHour * BigInt(travelSeconds + returnSeconds) + 3599n) / 3600n

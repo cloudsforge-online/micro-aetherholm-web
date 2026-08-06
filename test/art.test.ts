@@ -80,7 +80,7 @@ const manifest = JSON.parse(read('public/art/MANIFEST.json')) as {
 }
 
 /**
- * The 20 building types, spelled as `aetherholm/src/content.ts:23-44` spells them.
+ * The 20 building types, spelled as `aetherholm/src/content.ts` spells them.
  *
  * A SECOND COPY OF THE LIST IN `src/pages/cities.tsx`, ON PURPOSE. That page's copy is what the
  * queue form offers; this one is what the art is checked against. If they drift, the sprite check
@@ -96,7 +96,7 @@ const BUILDING_TYPES = [
 ] as const
 
 /**
- * The 10 airship classes (`aetherholm/src/content.ts:242-253`).
+ * The 10 airship classes (`aetherholm/src/content.ts`).
  *
  * This client deliberately holds NO runtime copy — the class table arrives from
  * `GET /v1/content/airships` and `shipProfile`/`shipIcon` take whatever string it sent. The list
@@ -108,7 +108,7 @@ const AIRSHIP_CLASSES = [
   'ironclad', 'breaker', 'hauler', 'grand_hauler', 'flagship',
 ] as const
 
-/** The three altitude bands, constrained at `aetherholm/src/migrations.ts:160`. */
+/** The three altitude bands, constrained at `aetherholm/src/migrations.ts`. */
 const BANDS = ['shallows', 'midreach', 'highwind'] as const
 
 describe('the manifest', () => {

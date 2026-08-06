@@ -2,7 +2,7 @@
  * Honest numbers, proven: every amount moves through BigInt and the projection can never show a
  * number the server would refuse to settle.
  *
- * The projection mirrors `accrue` (`aetherholm/src/economy.ts:34-39`), whose own properties are
+ * The projection mirrors `accrue` (`aetherholm/src/economy.ts`), whose own properties are
  * "never settle negative or above cap" (docs/ecosystem/20-aetherholm.md §9.2). The same
  * properties are swept here across random rate/cap/elapsed triples, because a display that shows
  * a stock the CHECK constraint would refuse is a display teaching players numbers that are not

@@ -18,28 +18,32 @@ shipped defect.
 > **What it refuses.** This client **resolves no battle**: a client that can resolve a battle
 > can lie about one (the rule `micro-emberkin-web` earned by deleting its inherited engine), so
 > reports render from the server's stored result and sha256 digest
-> (`aetherholm/src/server.ts:755`) and nothing in `src/` holds a combat rule, a seeded PRNG or a
+> (`aetherholm/src/server.ts`) and nothing in `src/` holds a combat rule, a seeded PRNG or a
 > hash. It **creates no community**: an alliance IS a `micro-community` community, and founding
-> one sends the id of a community that already exists (`aetherholm/src/server.ts:825-832`) — a
+> one sends the id of a community that already exists (`aetherholm/src/server.ts`) — a
 > "create community" control here would be the second governance system the design forbids. It
 > **mutates no history**: the chronicle wrappers are GET-only by test and by CI rule, matching
 > the database triggers that refuse UPDATE and DELETE on sealed rows
-> (`aetherholm/src/migrations.ts:667`, `:679`). And it **sells nothing**: no surface implies a
+> (`aetherholm/src/migrations.ts`). And it **sells nothing**: no surface implies a
 > purchasable advantage, the aegis is stated on the founding form to be never sold, and CI greps
 > the stripped source for purchasable-power vocabulary.
 
 ## The surface it is built against
 
-Every call goes through `src/lib/aetherholm.ts`, where each wrapper cites the
-`aetherholm/src/server.ts` line it was verified against — read out of the service's source, not
-its README (the README's table was re-verified line by line against `src/server.ts` and found
-accurate; the lines below are the measurement, not the copy). `test/aetherholm.test.ts` re-reads
-a real `micro-aetherholm` checkout and fails if a route is not registered at the cited line or
-authenticates by a different mechanism; CI then bends one citation and one mechanism and
-requires the suite to go red, deriving the line from the table rather than hardcoding it.
+Every call goes through `src/lib/aetherholm.ts`, where each wrapper cites the file it was
+verified against — `aetherholm/src/server.ts`, read out of the service's source rather than out
+of its README. It used to cite a LINE in that file, and the line is what kept turning this
+repository red for an edit made in a different one: a service grows an import near the top and
+every route below it moves, so twenty-seven correct citations break at once, during a release,
+because nothing runs this suite when that service changes. `test/aetherholm.test.ts` now re-reads
+a real `micro-aetherholm` checkout and finds each route by SEARCHING for the `define(` that
+registers it, failing if a route is not registered at all or authenticates by a different
+mechanism. That is strictly stronger: a route that moves cannot break it, and a route that is
+removed still does. CI then renames one route to one the service does not serve, flips one
+mechanism, and requires the suite to go red for each.
 
 Mechanisms, recorded per route (never a boolean — the three queue handlers delegate their
-authentication to `queueRoute`, `aetherholm/src/server.ts:981`, and a boolean grep would call
+authentication to `queueRoute`, `aetherholm/src/server.ts`, and a boolean grep would call
 them public):
 
 | Mechanism | Meaning |
@@ -47,8 +51,8 @@ them public):
 | `none` | no principal read; public |
 | `bearer` | any user token; a service needs `aetherholm:read` |
 | `owner` | bearer, then owner-or-admin for users; service reads with `aetherholm:read` |
-| `user` | `requireUser`: a user acts as themselves; a service needs `aetherholm:write` **and** an `x-user-id` (`aetherholm/src/server.ts:1099-1108`) |
-| `user-queue` | `user`, via `queueRoute`, which also refuses a submission without an `Idempotency-Key` (`aetherholm/src/server.ts:990-1043`) |
+| `user` | `requireUser`: a user acts as themselves; a service needs `aetherholm:write` **and** an `x-user-id` (`aetherholm/src/server.ts`) |
+| `user-queue` | `user`, via `queueRoute`, which also refuses a submission without an `Idempotency-Key` (`aetherholm/src/server.ts`) |
 | `provision` | service token with `aetherholm:provision` only; user tokens refused outright |
 | `sealed-public` | public once the season is sealed; participants-or-admin while live |
 
@@ -56,38 +60,38 @@ Called (23):
 
 | Method | Path | Mechanism | Idempotency-Key | Verified at |
 | --- | --- | --- | --- | --- |
-| `GET` | `/readyz` | none | — | `aetherholm/src/server.ts:346` |
-| `GET` | `/v1/seasons/current` | bearer | — | `aetherholm/src/server.ts:414` |
-| `GET` | `/v1/archipelagos/:id/islands` | bearer | — | `aetherholm/src/server.ts:433` |
-| `GET` | `/v1/archipelagos/:id/lanes` | bearer | — | `aetherholm/src/server.ts:590` |
-| `GET` | `/v1/content/airships` | none | — | `aetherholm/src/server.ts:562` |
-| `POST` | `/v1/cities` | user | — (the partial unique index is the idempotency) | `aetherholm/src/server.ts:447` |
-| `GET` | `/v1/cities` | owner | — | `aetherholm/src/server.ts:472` |
-| `GET` | `/v1/cities/:id` | owner | — | `aetherholm/src/server.ts:491` |
-| `POST` | `/v1/cities/:id/buildings` | user-queue | **required** | `aetherholm/src/server.ts:506` |
-| `POST` | `/v1/cities/:id/research` | user-queue | **required** | `aetherholm/src/server.ts:510` |
-| `POST` | `/v1/cities/:id/ships` | user-queue | **required** | `aetherholm/src/server.ts:514` |
-| `POST` | `/v1/fleets` | user | **required** (inline, `:535-538`) | `aetherholm/src/server.ts:605` |
-| `GET` | `/v1/fleets` | owner | — | `aetherholm/src/server.ts:688` |
-| `GET` | `/v1/fleets/:id` | owner | — | `aetherholm/src/server.ts:706` |
-| `GET` | `/v1/battles/:id` | sealed-public | — | `aetherholm/src/server.ts:755` |
-| `POST` | `/v1/alliances` | user | — | `aetherholm/src/server.ts:821` |
-| `GET` | `/v1/alliances/:id` | bearer | — | `aetherholm/src/server.ts:857` |
-| `POST` | `/v1/alliances/:id/members` | user | — | `aetherholm/src/server.ts:867` |
-| `DELETE` | `/v1/alliances/:id/members` | user | — | `aetherholm/src/server.ts:880` |
-| `POST` | `/v1/alliances/:id/claims` | user | — | `aetherholm/src/server.ts:893` |
-| `GET` | `/v1/chronicle/seasons` | none — **anonymous by design** | — | `aetherholm/src/server.ts:915` |
-| `GET` | `/v1/chronicle/seasons/:id` | none | — | `aetherholm/src/server.ts:931` |
-| `GET` | `/v1/chronicle/seasons/:id/battles` | none | — | `aetherholm/src/server.ts:948` |
+| `GET` | `/readyz` | none | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/seasons/current` | bearer | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/archipelagos/:id/islands` | bearer | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/archipelagos/:id/lanes` | bearer | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/content/airships` | none | — | `aetherholm/src/server.ts` |
+| `POST` | `/v1/cities` | user | — (the partial unique index is the idempotency) | `aetherholm/src/server.ts` |
+| `GET` | `/v1/cities` | owner | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/cities/:id` | owner | — | `aetherholm/src/server.ts` |
+| `POST` | `/v1/cities/:id/buildings` | user-queue | **required** | `aetherholm/src/server.ts` |
+| `POST` | `/v1/cities/:id/research` | user-queue | **required** | `aetherholm/src/server.ts` |
+| `POST` | `/v1/cities/:id/ships` | user-queue | **required** | `aetherholm/src/server.ts` |
+| `POST` | `/v1/fleets` | user | **required** (inline) | `aetherholm/src/server.ts` |
+| `GET` | `/v1/fleets` | owner | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/fleets/:id` | owner | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/battles/:id` | sealed-public | — | `aetherholm/src/server.ts` |
+| `POST` | `/v1/alliances` | user | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/alliances/:id` | bearer | — | `aetherholm/src/server.ts` |
+| `POST` | `/v1/alliances/:id/members` | user | — | `aetherholm/src/server.ts` |
+| `DELETE` | `/v1/alliances/:id/members` | user | — | `aetherholm/src/server.ts` |
+| `POST` | `/v1/alliances/:id/claims` | user | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/chronicle/seasons` | none — **anonymous by design** | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/chronicle/seasons/:id` | none | — | `aetherholm/src/server.ts` |
+| `GET` | `/v1/chronicle/seasons/:id/battles` | none | — | `aetherholm/src/server.ts` |
 
 Declined (4), with the reasons in the header of `src/lib/aetherholm.ts`:
 
 | Method | Path | Why not | Verified at |
 | --- | --- | --- | --- |
-| `GET` | `/livez` | the orchestrator's probe; the page reads `/readyz` | `aetherholm/src/server.ts:344` |
-| `GET` | `/metrics` | Prometheus text is a scraper's, not a browser's | `aetherholm/src/server.ts:351` |
-| `GET` | `/v1/title` | the descriptor is worlds' bridge's read (`worlds/src/titleclient.ts:122`) | `aetherholm/src/server.ts:366` |
-| `POST` | `/v1/provision` | service-token only; a browser must never hold `aetherholm:provision` | `aetherholm/src/server.ts:368` |
+| `GET` | `/livez` | the orchestrator's probe; the page reads `/readyz` | `aetherholm/src/server.ts` |
+| `GET` | `/metrics` | Prometheus text is a scraper's, not a browser's | `aetherholm/src/server.ts` |
+| `GET` | `/v1/title` | the descriptor is worlds' bridge's read (`worlds/src/titleclient.ts`) | `aetherholm/src/server.ts` |
+| `POST` | `/v1/provision` | service-token only; a browser must never hold `aetherholm:provision` | `aetherholm/src/server.ts` |
 
 The chronicle's anonymity is **exercised, not believed**: the three chronicle wrappers pass
 `auth: false`, `test/aetherholm-routes.test.ts` asserts no `authorization` header leaves while a
@@ -99,14 +103,14 @@ session is held, and `test/aetherholm.test.ts` asserts every chronicle call site
 Stocks, rates, caps, costs and lift are decimal strings on the wire and **BigInt in this
 client** — `Number()` never touches an amount (`src/lib/format.ts`; grouping happens on the
 string). The city view ticks its stocks forward locally with the same floor arithmetic as the
-server's `accrue` (`aetherholm/src/economy.ts:34-39`), property-swept in `test/format.test.ts`
+server's `accrue` (`aetherholm/src/economy.ts`), property-swept in `test/format.test.ts`
 so the projection can never show a value the CHECK constraint would refuse. The launch preview
 (`src/lib/lattice.ts`) prices the Aether cost **before the commit** from the same constants the
 server charges by — the class table `GET /v1/content/airships` serves
-(`aetherholm/src/content.ts:302-313`) and the lanes `GET /v1/archipelagos/:id/lanes` serves —
-mirroring `aetherholm/src/fleets.ts:294-295` and `:336` ceiling for ceiling, proven by
+(`aetherholm/src/content.ts`) and the lanes `GET /v1/archipelagos/:id/lanes` serves —
+mirroring `aetherholm/src/fleets.ts` ceiling for ceiling, proven by
 hand-worked values in `test/lattice.test.ts`. The alliance shared-lane discount
-(`aetherholm/src/fleets.ts:53`, `:206`) is deliberately not guessed at: the preview prices the
+(`aetherholm/src/fleets.ts`, `SHARED_LANE_DISCOUNT_BP`) is deliberately not guessed at: the preview prices the
 undiscounted path and says so, so the true cost is never higher than the number shown.
 
 ## Running it
@@ -120,8 +124,8 @@ pnpm typecheck && pnpm build
 
 The dev server is 5171 (`vite.config.ts`, with the survey of every sibling's port proving it
 free); the service it talks to resolves at runtime to `http://localhost:4120` — the port
-`micro-aetherholm` binds (`aetherholm/src/env.ts:105`), pinned in the registry
-(`ui/packages/ui/src/surfaces.ts:434`). No `VITE_*`, no `.env`, no build-time host: one image
+`micro-aetherholm` binds (`aetherholm/src/env.ts`), pinned in the registry
+(`ui/packages/ui/src/surfaces.ts`). No `VITE_*`, no `.env`, no build-time host: one image
 serves every environment, and `test/no-build-time-config.test.ts` plus a CI grep keep it so.
 
 ```bash
@@ -150,7 +154,7 @@ placeholder renders as art and hides the gap; the rule and the reasoning are
 
 | Set | Served | Keyed on |
 | --- | --- | --- |
-| `buildings` | 20 | the building type, verbatim (`aetherholm/src/content.ts:23-44`) |
+| `buildings` | 20 | the building type, verbatim (`aetherholm/src/content.ts`) |
 | `ships` | 10 | the airship class the content route sends, as a side profile in the fleet composer |
 | `shipicons` | 10 | the same classes, where a ship is a table row rather than a choice |
 | `icons` | 14 | the four resources, `aegis`, `spire`, and the seven UI glyphs the pages name |
@@ -165,7 +169,7 @@ og card and the social card — byte-identical to `micro-aetherholm-assets/asset
 linked from nowhere until this change.
 
 **THE BAND IS DATA; THE BIOME IS ILLUSTRATION.** The three altitude bands are content,
-constrained at `aetherholm/src/migrations.ts:160`. The four biomes exist in **no source and no
+constrained at `aetherholm/src/migrations.ts`. The four biomes exist in **no source and no
 document** — they are authored in the art set's own `ART_BIBLE.md` §3 — so the archetype shown
 beside a selected island is chosen from that island's index, stable for every player, and the
 caption on screen says exactly that. If that caption is ever dropped, the picture must go with
@@ -183,7 +187,7 @@ asset cannot leave this client by being forgotten:
   and a well-overdraw mechanic. `grep -rnw population src/` and `grep -rnw strain src/` in
   `micro-aetherholm` return nothing: the game does not model either.
 - **`splashes/private-skerry`** — skerry archipelagos exist in the database
-  (`aetherholm/src/migrations.ts:127`) and on no route and no screen.
+  (`aetherholm/src/migrations.ts`) and on no route and no screen.
 - **`keyart/og-source`, `keyart/social-backdrop`** — the uncut sources the two shipped cards were
   derived from. Shipping both halves would put 2 MB in the image for nothing to reference.
 
@@ -209,8 +213,8 @@ else. What remains:
 
 - **`aetherholm:write` was not in the auth scope registry** (cross-repo gap, closed
   2026-08-02). The `user` mechanism's service path demands it (`WRITE_SCOPE`,
-  `aetherholm/src/server.ts:102`, gated at `:1034` — this entry used to cite `:937`, which was
-  stale), and until micro-contracts `0287fa1` the registry lacked it, so identity could not
+  `aetherholm/src/server.ts`, gated where the `user` mechanism resolves a service
+  caller — this entry used to cite a line, and the line went stale), and until micro-contracts `0287fa1` the registry lacked it, so identity could not
   mint a credential that took that path. The registry is now total against the estate's gates —
   all 39 missing scopes registered with citations — and kept total mechanically: micro-org's
   `service-ci.yml` derives every scope a repository's gates demand and fails its build on one
@@ -223,7 +227,7 @@ else. What remains:
   shipped** (this repository, closed 2026-08-05, micro-org#176). The map carried a note on screen
   apologising that "the islands route does not expose the flag the service keeps" and a header
   arguing that marking spires would mean reimplementing world generation. The service had closed
-  that gap *because this client reported it* (`aetherholm/src/seasons.ts:220-224` says so), and
+  that gap *because this client reported it* (`aetherholm/src/seasons.ts` says so), and
   the client's `Island` interface never grew the field — so the apology outlived the defect and
   nothing re-read it. The map marks spires now, from the server's flag, never recomputed. The
   lesson is the narrow one: **a gap recorded in prose goes stale silently, because nothing

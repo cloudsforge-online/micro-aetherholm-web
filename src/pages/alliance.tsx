@@ -4,12 +4,12 @@
  * THE ONE THING THIS SCREEN MUST NOT DO is create a community. An alliance IS a
  * `micro-community` community (docs/ecosystem/20-aetherholm.md §6): proposals, votes, officers,
  * timelocks and the treasury live there, and the game service stores only the binding —
- * `communityId` is required and never minted (`aetherholm/src/server.ts:825-832`). So the
+ * `communityId` is required and never minted (`aetherholm/src/server.ts`). So the
  * founding form here asks for the id of a community that already exists, says where governance
  * lives, and sends exactly that. A "create community" button on this page would be the second
  * voting system the design forbids.
  *
- * Discovery is the DIRECTORY now — `GET /v1/alliances` (`aetherholm/src/server.ts:848`) lists
+ * Discovery is the DIRECTORY now — `GET /v1/alliances` (`aetherholm/src/server.ts`) lists
  * the world with the caller's own membership marked, closing the gap this header used to
  * record. The by-id lookup stays for a pasted id. After founding or opening
  * one, the screen keeps it for the session in React state only.

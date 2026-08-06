@@ -15,7 +15,7 @@
  * of the lattice is the strategy.
  *
  * SPIRES ARE MARKED, at last, from the server's own flag — `IslandSummary.spire`
- * (`aetherholm/src/seasons.ts:227`), selected at `:235` and mapped at `:248`. This page used to
+ * (`aetherholm/src/seasons.ts`), selected by the island query and mapped onto the summary. This page used to
  * carry a paragraph explaining that it could not mark them and a note on screen saying so; the
  * service had closed that gap and the client's `Island` interface dropped the field on parse, so
  * the apology outlived the defect by every deploy since. See the field's own header in
@@ -278,7 +278,7 @@ export function MapPage() {
 
                 `islandArt` picks `<band>_<biome>` from the twelve archetype paintings. The band
                 comes off the wire and is constrained at the database
-                (`aetherholm/src/migrations.ts:160`). The biome does NOT exist: no route, no
+                (`aetherholm/src/migrations.ts`). The biome does NOT exist: no route, no
                 column, no document names one — the four are authored in the art set's own
                 ART_BIBLE §3, which says as much. So the archetype is chosen from the island's
                 index, stable for every player and every visit, and the sentence under it tells

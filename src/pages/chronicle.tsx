@@ -3,7 +3,7 @@
  * serves.
  *
  * Every read on this page goes out with `auth: false` (src/lib/aetherholm.ts): sealed seasons
- * are public history (`aetherholm/src/server.ts:911-913`), and sending a token to a route that
+ * are public history (`aetherholm/src/server.ts`), and sending a token to a route that
  * cannot use one would be a needless credential on the wire. A signed-out visitor gets the whole
  * page, which is the point — the chronicle is the game showing itself to people who have not
  * installed it (docs/ecosystem/20-aetherholm.md §10.1).
@@ -11,7 +11,7 @@
  * A SEALED SEASON IS HISTORY. There is no button on this page that writes, because there is
  * nothing to write to: the service serves no mutation for sealed data, and the database refuses
  * UPDATE and DELETE by trigger even to a caller holding a connection
- * (`aetherholm/src/migrations.ts:667`, `:679`). The digests are displayed in full — the season's
+ * (`aetherholm/src/migrations.ts`). The digests are displayed in full — the season's
  * over its canonicalised summary, each battle's over its inputs and result — because a chronicle
  * whose digests are hidden is a chronicle you are asked to trust rather than check.
  */

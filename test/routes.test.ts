@@ -78,8 +78,8 @@ describe('the route declaration', () => {
     assert.equal(routeFor('/fleets')?.protected, true)
     assert.equal(routeFor('/alliance')?.protected, true)
     // The chronicle is public because its data is the service's one anonymous surface
-    // (aetherholm/src/server.ts:915); battles because a sealed report opens without a session
-    // (server.ts:681) and a live one renders its own refusal honestly.
+    // (aetherholm/src/server.ts); battles because a sealed report opens without a session
+    // (server.ts) and a live one renders its own refusal honestly.
     assert.equal(routeFor('/chronicle')?.protected, false)
     assert.equal(routeFor('/battles')?.protected, false)
   })

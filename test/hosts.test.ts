@@ -4,8 +4,8 @@
  * `micro-emberkin-web` shipped with a derivation layer because the registry had no entry for its
  * surface; the registry has since grown both titles, and this suite pins the fact this client
  * depends on: the `aetherholm` entry exists, resolves per environment, and its devPort is the
- * port the service actually binds — 4120, `aetherholm/src/env.ts:105`, pinned in
- * `ui/packages/ui/src/surfaces.ts:434`. That devPort class has been wrong three times in this
+ * port the service actually binds — 4120, `aetherholm/src/env.ts`, pinned in
+ * `ui/packages/ui/src/surfaces.ts`. That devPort class has been wrong three times in this
  * estate (foresight given beacon's port; emberkin briefly 3014; explorer briefly its own nginx
  * 8080), which is why the value is read out of the registry here rather than trusted.
  */
