@@ -38,7 +38,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[11]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[11]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -82,7 +82,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[8]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[8]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -134,7 +134,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[14]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[14]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -186,7 +186,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[17]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[17]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -238,7 +238,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[2]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[2]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -290,7 +290,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[16]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[16]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -342,7 +342,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[19]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[19]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -394,7 +394,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[18]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[18]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -438,7 +438,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[9]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[9]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -490,7 +490,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[7]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[7]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -534,7 +534,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[0]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[0]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -586,7 +586,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[3]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[3]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -630,7 +630,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[13]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[13]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -682,7 +682,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[4]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[4]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -726,7 +726,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[15]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[15]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -778,7 +778,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[6]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[6]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -822,7 +822,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[5]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[5]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -866,7 +866,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[12]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[12]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -918,7 +918,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[1]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[1]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -962,7 +962,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:23-44 (BUILDING_TYPES[10]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (BUILDING_TYPES[10]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1014,7 +1014,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1066,7 +1066,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1118,7 +1118,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1162,7 +1162,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1214,7 +1214,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1266,7 +1266,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1318,7 +1318,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1370,7 +1370,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1422,7 +1422,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1474,7 +1474,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py",
         "ink tinted toward #b0c0dc by tint.py"
@@ -1527,7 +1527,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1579,7 +1579,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py",
         "ink tinted toward #8fa3b8 by tint.py"
@@ -1624,7 +1624,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1676,7 +1676,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1728,7 +1728,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1780,7 +1780,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "worlds/src/heraldry.ts:24-26, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
+      "sourceSpec": "worlds/src/heraldry.ts, :81 (ranked banner URNs); docs/ecosystem/20-aetherholm.md \u00a77 (heraldry studio); ART_BIBLE.md \u00a76",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1824,7 +1824,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:17; ART_BIBLE.md \u00a75",
+      "sourceSpec": "aetherholm/src/content.ts; ART_BIBLE.md \u00a75",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1868,7 +1868,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:17; ART_BIBLE.md \u00a75",
+      "sourceSpec": "aetherholm/src/content.ts; ART_BIBLE.md \u00a75",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1920,7 +1920,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:17; ART_BIBLE.md \u00a75",
+      "sourceSpec": "aetherholm/src/content.ts; ART_BIBLE.md \u00a75",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -1972,7 +1972,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:17; ART_BIBLE.md \u00a75",
+      "sourceSpec": "aetherholm/src/content.ts; ART_BIBLE.md \u00a75",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2024,7 +2024,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:344 (AEGIS_DAYS); doc \u00a74; ART_BIBLE.md \u00a75",
+      "sourceSpec": "aetherholm/src/content.ts (AEGIS_DAYS); doc \u00a74; ART_BIBLE.md \u00a75",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2472,7 +2472,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:340 (BASE_BUILD_SLOTS); ART_BIBLE.md \u00a75",
+      "sourceSpec": "aetherholm/src/content.ts (BASE_BUILD_SLOTS); ART_BIBLE.md \u00a75",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2524,7 +2524,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:341 (BASE_RESEARCH_SLOTS); ART_BIBLE.md \u00a75",
+      "sourceSpec": "aetherholm/src/content.ts (BASE_RESEARCH_SLOTS); ART_BIBLE.md \u00a75",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2576,7 +2576,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.25,
-      "sourceSpec": "aetherholm/src/content.ts:321 (BASE_SHIP_SLOTS); ART_BIBLE.md \u00a75",
+      "sourceSpec": "aetherholm/src/content.ts (BASE_SHIP_SLOTS); ART_BIBLE.md \u00a75",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2680,7 +2680,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2724,7 +2724,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2776,7 +2776,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2828,7 +2828,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2880,7 +2880,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2932,7 +2932,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -2984,7 +2984,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3028,7 +3028,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3072,7 +3072,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3116,7 +3116,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3160,7 +3160,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3212,7 +3212,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 1,
-      "sourceSpec": "aetherholm/src/world.ts:30 (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
+      "sourceSpec": "aetherholm/src/world.ts (bands); ART_BIBLE.md \u00a73 (biomes, authored here)",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3464,7 +3464,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.06,
-      "sourceSpec": "aetherholm/src/content.ts:240-251 (AIRSHIP_CLASSES[6]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (AIRSHIP_CLASSES[6]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3508,7 +3508,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.06,
-      "sourceSpec": "aetherholm/src/content.ts:240-251 (AIRSHIP_CLASSES[2]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (AIRSHIP_CLASSES[2]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3560,7 +3560,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.06,
-      "sourceSpec": "aetherholm/src/content.ts:240-251 (AIRSHIP_CLASSES[1]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (AIRSHIP_CLASSES[1]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3612,7 +3612,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.06,
-      "sourceSpec": "aetherholm/src/content.ts:240-251 (AIRSHIP_CLASSES[9]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (AIRSHIP_CLASSES[9]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3664,7 +3664,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.06,
-      "sourceSpec": "aetherholm/src/content.ts:240-251 (AIRSHIP_CLASSES[4]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (AIRSHIP_CLASSES[4]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3732,7 +3732,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.06,
-      "sourceSpec": "aetherholm/src/content.ts:240-251 (AIRSHIP_CLASSES[8]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (AIRSHIP_CLASSES[8]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3776,7 +3776,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.06,
-      "sourceSpec": "aetherholm/src/content.ts:240-251 (AIRSHIP_CLASSES[3]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (AIRSHIP_CLASSES[3]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3828,7 +3828,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.06,
-      "sourceSpec": "aetherholm/src/content.ts:240-251 (AIRSHIP_CLASSES[7]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (AIRSHIP_CLASSES[7]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3880,7 +3880,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.06,
-      "sourceSpec": "aetherholm/src/content.ts:240-251 (AIRSHIP_CLASSES[5]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (AIRSHIP_CLASSES[5]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3924,7 +3924,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.06,
-      "sourceSpec": "aetherholm/src/content.ts:240-251 (AIRSHIP_CLASSES[0]); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts (AIRSHIP_CLASSES[0]); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -3968,7 +3968,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.5,
-      "sourceSpec": "aetherholm/src/content.ts:240-251, :302-313 (AIRSHIPS.breaker, role 'siege'); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts, :302-313 (AIRSHIPS.breaker, role 'siege'); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -4044,7 +4044,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.5,
-      "sourceSpec": "aetherholm/src/content.ts:240-251, :302-313 (AIRSHIPS.corvette, role 'war'); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts, :302-313 (AIRSHIPS.corvette, role 'war'); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -4088,7 +4088,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.5,
-      "sourceSpec": "aetherholm/src/content.ts:240-251, :302-313 (AIRSHIPS.cutter, role 'war'); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts, :302-313 (AIRSHIPS.cutter, role 'war'); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -4132,7 +4132,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.5,
-      "sourceSpec": "aetherholm/src/content.ts:240-251, :302-313 (AIRSHIPS.flagship, role 'war'); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts, :302-313 (AIRSHIPS.flagship, role 'war'); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -4192,7 +4192,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.5,
-      "sourceSpec": "aetherholm/src/content.ts:240-251, :302-313 (AIRSHIPS.frigate, role 'war'); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts, :302-313 (AIRSHIPS.frigate, role 'war'); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -4244,7 +4244,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.5,
-      "sourceSpec": "aetherholm/src/content.ts:240-251, :302-313 (AIRSHIPS.grand_hauler, role 'freight'); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts, :302-313 (AIRSHIPS.grand_hauler, role 'freight'); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -4288,7 +4288,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.5,
-      "sourceSpec": "aetherholm/src/content.ts:240-251, :302-313 (AIRSHIPS.gunship, role 'war'); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts, :302-313 (AIRSHIPS.gunship, role 'war'); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -4340,7 +4340,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.5,
-      "sourceSpec": "aetherholm/src/content.ts:240-251, :302-313 (AIRSHIPS.hauler, role 'freight'); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts, :302-313 (AIRSHIPS.hauler, role 'freight'); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -4408,7 +4408,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.5,
-      "sourceSpec": "aetherholm/src/content.ts:240-251, :302-313 (AIRSHIPS.ironclad, role 'war'); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts, :302-313 (AIRSHIPS.ironclad, role 'war'); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
@@ -4484,7 +4484,7 @@
       "licence": "cloudsforge-generated: commercial use permitted; AI-generated, C2PA provenance retained",
       "providerCostUnits": 3,
       "providerOutputMegapixels": 0.5,
-      "sourceSpec": "aetherholm/src/content.ts:240-251, :302-313 (AIRSHIPS.skiff, role 'scout'); ART_BIBLE.md \u00a74",
+      "sourceSpec": "aetherholm/src/content.ts, :302-313 (AIRSHIPS.skiff, role 'scout'); ART_BIBLE.md \u00a74",
       "postProcessing": [
         "ground normalised to #12100f by normalise_ground.py"
       ],
