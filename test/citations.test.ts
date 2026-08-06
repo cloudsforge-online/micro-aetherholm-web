@@ -1,19 +1,24 @@
 /**
- * EVERY `path:line` IN THIS REPOSITORY NAMES A LINE THAT EXISTS.
+ * EVERY CITATION IN THIS REPOSITORY NAMES A FILE THAT EXISTS, AND NAMES NO LINE.
  *
- * `test/aetherholm.test.ts` proves the ROUTE citations are exactly right — it reads the handler
- * at each cited line and matches its `define(...)` and its mechanism. That is the strong check,
- * and it covers twenty-seven routes. This repository carries many other citations: into
- * `aetherholm`'s domain files (`fleets.ts`, `economy.ts`, `content.ts`, `migrations.ts`,
- * `sealing.ts`, `env.ts`), the registry (`ui/packages/ui/src/surfaces.ts`), identity, and
- * worlds' title client.
+ * `test/aetherholm.test.ts` proves the ROUTE citations are exactly right — it finds each route's
+ * `define(...)` in the service and checks its mechanism. That is the strong check, and it covers
+ * twenty-seven routes. This repository carries many other citations: into `aetherholm`'s domain
+ * files (`fleets.ts`, `economy.ts`, `content.ts`, `migrations.ts`, `sealing.ts`, `env.ts`), the
+ * registry (`ui/packages/ui/src/surfaces.ts`), identity, and worlds' title client.
  *
- * A citation is the estate's unit of evidence and it decays silently — a file grows or shrinks
- * under a line number nobody re-read. This sweep is the cheap, total check under the strong,
- * narrow one. It cannot tell whether a citation MEANS what the sentence around it says; what it
- * catches is the failure that actually happens. When a sibling is not checked out, its citations
- * are REPORTED as unchecked rather than passed over in silence, and CI — where every sibling IS
- * checked out — makes an UNCHECKED line fatal.
+ * This file used to check that each cited line was IN RANGE. That was the wrong property to
+ * enforce, because a line number names a position in a file another repository owns and is free to
+ * edit: micro-identity gained email verification and password reset, `/auth/me` moved, and every
+ * citation to it across the estate broke while nothing in any client was wrong. Nothing runs a
+ * frontend's suite when a service changes, so it surfaced during a release — seven of nineteen CI
+ * failures in one day were this one shape.
+ *
+ * So the rule is now the opposite, and it is ENFORCED rather than described: a citation names a
+ * file, and carrying a line number is itself the failure. Cite the file and, if a reader needs the
+ * exact place, name the SYMBOL — `queueRoute()`, `verifyEventSignature` — which moves with the
+ * code. When a sibling is not checked out, its citations are REPORTED as unchecked rather than
+ * passed over in silence, and CI — where every sibling IS checked out — makes that fatal.
  */
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
@@ -79,15 +84,43 @@ function sourceFiles(dir: string): string[] {
   return out
 }
 
-/** A citation: a repository-relative path, a colon, and one line number or a range. */
-const CITATION = /\b((?:[a-z0-9_.-]+\/)+[A-Za-z0-9_.-]+\.(?:ts|tsx|css|yml|md))\/?:(\d+)(?:-(\d+))?/g
+/**
+ * A citation: a repository-relative path to a file. NO LINE NUMBER.
+ *
+ * It used to require one, and requiring one is what this file is now the record of.
+ *
+ * The lookbehind is what keeps a RELATIVE MODULE SPECIFIER out of the sweep. Without it
+ * `'../../src/content/pages.ts'` — an illustration inside a comment in test/journeys/scenario.ts —
+ * matched from `src` onward and was reported as a citation to a directory this repository does not
+ * have. A citation is rooted at a repository name or at the top of this one; a path that begins
+ * `./` or `../` is a module reference TypeScript already resolves.
+ */
+const CITATION = /(?<![\w./\\-])((?:[a-z0-9_.-]+\/)+[A-Za-z0-9_.-]+\.(?:ts|tsx|css|yml|md))\b/g
+
+/** The same citation with a line number stuck to it — the thing this file now FORBIDS. */
+const CITATION_WITH_LINE = /\b((?:[a-z0-9_.-]+\/)+[A-Za-z0-9_.-]+\.(?:ts|tsx|css|yml|md))\/?:(\d+)(?:-(\d+))?/g
 
 interface Citation {
   readonly from: string
   readonly path: string
-  readonly first: number
-  readonly last: number
 }
+
+/**
+ * Directories inside THIS repository that a citation may be rooted at.
+ *
+ * Without this the sweep matches every relative import (`lib/routes.ts`), every package specifier
+ * (`@cloudsforge/ui/tokens.css`) and every URL that happens to end in a source extension, and then
+ * reports all of them as citations to files that do not exist. A citation is rooted either at a
+ * sibling repository or at the top of this one; anything else is a module reference, which
+ * TypeScript already resolves and does not need a second, worse checker.
+ */
+const LOCAL_ROOTS: readonly string[] = ['src', 'test', 'public', 'scripts', '.github']
+
+/**
+ * `docs/` is the ESTATE's, not this repository's. The ecosystem documents live one level up beside
+ * every repository, so a citation to `docs/ecosystem/…` resolves there or nowhere.
+ */
+const ESTATE_ROOTS: readonly string[] = ['docs']
 
 function collect(): Citation[] {
   const out: Citation[] = []
@@ -95,8 +128,11 @@ function collect(): Citation[] {
     const text = readFileSync(file, 'utf8')
     for (const m of text.matchAll(CITATION)) {
       const path = m[1] ?? ''
-      const first = Number(m[2])
-      out.push({ from: relative(here, file), path, first, last: m[3] ? Number(m[3]) : first })
+      const head = path.split('/')[0] ?? ''
+      const bare = head.startsWith('micro-') ? head.slice('micro-'.length) : head
+      if (!SIBLINGS.includes(bare) && !LOCAL_ROOTS.includes(head) && !ESTATE_ROOTS.includes(head))
+        continue
+      out.push({ from: relative(here, file), path })
     }
   }
   return out
@@ -107,6 +143,10 @@ function resolve(path: string): string | null {
   const [head, ...rest] = path.split('/')
   const root = siblingRoot(head ?? '')
   if (root === undefined) {
+    if (ESTATE_ROOTS.includes(head ?? '')) {
+      const estate = join(here, '..', path)
+      return existsSync(estate) ? estate : null
+    }
     // Not a sibling: a path inside THIS repository.
     const local = join(here, path)
     return existsSync(local) ? local : null
@@ -118,7 +158,7 @@ function resolve(path: string): string | null {
 
 const CITATIONS = collect()
 
-describe('every citation names a line that exists', () => {
+describe('every citation names a file that exists', () => {
   it('finds citations at all, so this cannot pass on an empty sweep', () => {
     // A regex that stopped matching would make this whole file a no-op that reads as a
     // guarantee.
@@ -143,18 +183,30 @@ describe('every citation names a line that exists', () => {
     )
   })
 
-  it('names a line INSIDE that file', () => {
-    const broken: string[] = []
+  it('names a FILE and not a directory, so a citation always points at readable bytes', () => {
+    const notFiles: string[] = []
     for (const c of CITATIONS) {
       const file = resolve(c.path)
       if (file === null) continue
-      if (!statSync(file).isFile()) continue
-      const lineCount = readFileSync(file, 'utf8').split('\n').length
-      if (c.first < 1 || c.last > lineCount || c.last < c.first) {
-        broken.push(`${c.from} cites ${c.path}:${c.first}-${c.last}, but that file has ${lineCount} lines`)
+      if (!statSync(file).isFile()) notFiles.push(`${c.from} cites ${c.path}, which is not a file`)
+    }
+    assert.deepEqual(notFiles, [])
+  })
+
+  it('carries no line numbers, because a line number in another repository cannot be kept true', () => {
+    // The rule, enforced rather than described. A service path with a line stuck to it is a claim
+    // about a file this repository does not own and does not watch; it goes stale silently and then
+    // fails a
+    // build that has nothing to do with it. Cite the file and, if a reader needs the exact place,
+    // name the symbol — `queueRoute()`, `verifyEventSignature` — which moves with the code.
+    const withLines: string[] = []
+    for (const file of sourceFiles(here)) {
+      const text = readFileSync(file, 'utf8')
+      for (const m of text.matchAll(CITATION_WITH_LINE)) {
+        withLines.push(`${relative(here, file)} cites ${m[1]}:${m[2]} — cite the file or the symbol`)
       }
     }
-    assert.deepEqual(broken, [])
+    assert.deepEqual(withLines, [])
   })
 
   it('reports which repositories were NOT available, rather than passing quietly', () => {

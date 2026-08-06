@@ -113,7 +113,11 @@ describe('the stylesheet names only tokens that exist', () => {
     })
 
     it('the wrong names are not tokens, and the real ones are', () => {
-      for (const wrong of ['--cf-border', '--cf-critical', '--cf-warning', '--cf-font']) {
+      // `--cf-critical` was on this list and is no longer: micro-ui declares it, along with
+      // `--cf-critical-text`, `--cf-critical-ink`, `--cf-critical-wash` and `--cf-critical-edge`,
+      // and `--cf-danger` is now an alias of `--cf-critical-text`. The list is a record of names
+      // that do NOT exist, so leaving it here failed on the design system being right.
+      for (const wrong of ['--cf-border', '--cf-warning', '--cf-font']) {
         assert.ok(!defined.has(wrong), `${wrong} is defined after all; this comment is wrong`)
       }
       for (const right of [

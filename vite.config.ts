@@ -38,8 +38,8 @@ export default defineConfig({
   //
   // This is a developer convenience and nothing more: it is not the port the app is served on in
   // production, and nothing in the bundle knows about it. The port the app TALKS TO in dev is
-  // 4120 — the port micro-aetherholm binds (`aetherholm/src/env.ts:105`), pinned in the registry
-  // (`ui/packages/ui/src/surfaces.ts:434`) — and that is resolved at runtime by hosts.ts.
+  // 4120 — the port micro-aetherholm binds (`aetherholm/src/env.ts`), pinned in the registry
+  // (`ui/packages/ui/src/surfaces.ts`) — and that is resolved at runtime by hosts.ts.
   server: { port: 5171 },
   preview: { port: 5171 },
 })

@@ -51,7 +51,7 @@ export function App() {
               }
             />
             {/*
-              Public: a sealed season's battles open without a session (server.ts:681), and a
+              Public: a sealed season's battles open without a session (server.ts), and a
               live one answers its own refusal, which the page renders honestly.
             */}
             <Route path="/battles" element={<BattlesPage />} />

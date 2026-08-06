@@ -48,7 +48,7 @@ function lookup(set: string, slug: string): ArtEntry | null {
 /* ---- the game's own vocabularies ------------------------------------- */
 
 /**
- * A building's sprite, by the type the schema spells (`aetherholm/src/content.ts:23-44`).
+ * A building's sprite, by the type the schema spells (`aetherholm/src/content.ts`).
  *
  * Twenty types, twenty sprites, and the slugs are IDENTICAL to the type names — the asset set was
  * planned from `content.ts` itself rather than from a copy of it (`micro-aetherholm-assets`
@@ -66,7 +66,7 @@ export function resourceIcon(resource: Resource | string): string | null {
 /**
  * An airship's side profile, 1024×512, by class.
  *
- * The ten classes are the service's (`aetherholm/src/content.ts:242-253`) and this client never
+ * The ten classes are the service's (`aetherholm/src/content.ts`) and this client never
  * hard-codes them — the class table arrives from `GET /v1/content/airships` at runtime. So this
  * takes whatever string the service sent and answers `null` for a class the art set predates,
  * which is the honest behaviour when the game grows an eleventh hull.
@@ -98,7 +98,7 @@ export function uiIcon(what: string): string | null {
  * ════════════════════════════════════════════════════════════════════════════════════════════════
  * THE ONE PLACE WHERE A SLUG AND A DOMAIN KEY ARE SPELLED DIFFERENTLY, AND SO THE ONE PLACE A
  * WIRING MISTAKE COULD HIDE. `QueueItem.kind` is `building | research | ship`
- * (`src/lib/aetherholm.ts:190`); the icons are `ui-queue-build`, `ui-queue-research` and
+ * (`src/lib/aetherholm.ts`); the icons are `ui-queue-build`, `ui-queue-research` and
  * `ui-queue-shipyard`. Two of the three do not match, so this is a TABLE — three exhaustive
  * entries under a `Record` the compiler checks — rather than a template string that would quietly
  * resolve `ui-queue-building` to nothing and render two icons out of three.
@@ -123,7 +123,7 @@ export function queueIcon(kind: 'building' | 'research' | 'ship'): string | null
  * **NO SOURCE NAMES THESE, AND THAT IS WHY THIS FUNCTION TAKES AN INDEX.**
  *
  * The three BANDS are content: `shallows | midreach | highwind`, constrained at the database
- * (`aetherholm/src/migrations.ts:160`) and carried on every island the islands route returns. The
+ * (`aetherholm/src/migrations.ts`) and carried on every island the islands route returns. The
  * four biomes are not. They exist in no document and no source — the art set's own README says so
  * ("authored in ART_BIBLE.md §3 … until the game grows a biome column") — so there is nothing on
  * the wire to key them on.
@@ -145,7 +145,7 @@ export type Biome = (typeof BIOMES)[number]
 
 /** The archetype shown for an island: its real band, and a stable biome from its index. */
 export function islandBiome(idx: number): Biome {
-  // `idx` is a non-negative integer at the database (`aetherholm/src/migrations.ts:159`); the
+  // `idx` is a non-negative integer at the database (`aetherholm/src/migrations.ts`); the
   // guard is for a wire value that is not, which would otherwise index out of the array.
   const safe = Number.isFinite(idx) && idx >= 0 ? Math.floor(idx) : 0
   return BIOMES[safe % BIOMES.length] as Biome

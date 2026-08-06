@@ -8,8 +8,8 @@
  *
  * Unlike `micro-emberkin-web` at the time it was built, this client needs NO derivation and no
  * correction: the surface registry already carries an `aetherholm` entry
- * (`ui/packages/ui/src/surfaces.ts:426-442`), added when the service shipped, with
- * `devPort: 4120` read from the service itself (`aetherholm/src/env.ts:105`). Emberkin's
+ * (`ui/packages/ui/src/surfaces.ts`), added when the service shipped, with
+ * `devPort: 4120` read from the service itself (`aetherholm/src/env.ts`). Emberkin's
  * `deriveSurfaceUrl`/`stripOwnLabel` workaround existed because its registry entry did not; the
  * whole point of keeping that workaround small and loud was that a successor would not need it.
  * This file is the deletion it promised.
@@ -23,7 +23,7 @@ import { cloudsforgeHosts, type CloudsForgeHosts, type SurfaceKey } from '@cloud
  * entry the bar marks current — the same choice `micro-emberkin-web` makes and for the same
  * reason: a player who opens the switcher from inside the game should see the platform they are
  * playing on highlighted. A title is not a sixth product and claims no switcher slot of its own
- * (`ui/packages/ui/src/surfaces.ts:441`, `inSwitcher: false`).
+ * (`ui/packages/ui/src/surfaces.ts`, `inSwitcher: false`).
  */
 export const PRODUCT: SurfaceKey = 'worlds'
 /**

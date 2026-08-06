@@ -50,7 +50,7 @@ import {
 } from '../src/lib/aetherholm.ts'
 
 /** The dev-port base every call must land on: 4120, the port the service binds
- *  (`aetherholm/src/env.ts:105`), pinned by the registry (`ui/packages/ui/src/surfaces.ts:434`). */
+ *  (`aetherholm/src/env.ts`), pinned by the registry (`ui/packages/ui/src/surfaces.ts`). */
 const BASE = 'http://localhost:4120'
 
 const ID = '11111111-1111-4111-8111-111111111111'
@@ -105,7 +105,7 @@ describe('every request goes to micro-aetherholm', () => {
   })
 
   it('does NOT carry a token on the public content route', async () => {
-    // `aetherholm/src/server.ts:562` takes no principal. A token on a route that cannot read it
+    // `aetherholm/src/server.ts` takes no principal. A token on a route that cannot read it
     // is a needless credential on the wire.
     stub = installFetch(() => json(200, { airships: {} }))
     await fetchAirships()
@@ -115,7 +115,7 @@ describe('every request goes to micro-aetherholm', () => {
 
 /* ==================================================================== the world, read */
 
-describe('fetchCurrentSeason — GET /v1/seasons/current (server.ts:382)', () => {
+describe('fetchCurrentSeason — GET /v1/seasons/current (server.ts)', () => {
   it('gets exactly that path, with the token', async () => {
     stub = installFetch(() => json(200, seasonBody()))
     await fetchCurrentSeason()
@@ -124,12 +124,12 @@ describe('fetchCurrentSeason — GET /v1/seasons/current (server.ts:382)', () =>
     assert.equal(lastCall().headers['authorization'], 'Bearer access-token')
   })
 
-  it('maps the 404 no_open_season (server.ts:386) to null — an answer, not an error', async () => {
+  it('maps the 404 no_open_season (server.ts) to null — an answer, not an error', async () => {
     stub = installFetch(() => json(404, { error: { code: 'no_open_season', message: 'no season is open yet' } }))
     assert.equal(await fetchCurrentSeason(), null)
   })
 
-  it('keeps the seed a string — it is 64-bit and not a JSON number (server.ts:393)', async () => {
+  it('keeps the seed a string — it is 64-bit and not a JSON number (server.ts)', async () => {
     stub = installFetch(() => json(200, seasonBody({ seed: '18446744073709551615' })))
     const season = await fetchCurrentSeason()
     assert.equal(season?.seed, '18446744073709551615')
@@ -142,7 +142,7 @@ describe('fetchCurrentSeason — GET /v1/seasons/current (server.ts:382)', () =>
   })
 })
 
-describe('islands and lanes — GET /v1/archipelagos/:id/{islands,lanes} (server.ts:401, :518)', () => {
+describe('islands and lanes — GET /v1/archipelagos/:id/{islands,lanes} (server.ts)', () => {
   it('gets the islands of exactly that archipelago', async () => {
     stub = installFetch(() => json(200, { islands: [] }))
     await fetchIslands(ID)
@@ -171,8 +171,8 @@ describe('islands and lanes — GET /v1/archipelagos/:id/{islands,lanes} (server
 
 /* ==================================================================== city play */
 
-describe('foundCity — POST /v1/cities (server.ts:415)', () => {
-  it('posts islandId, plot as a NUMBER (server.ts:421), and name', async () => {
+describe('foundCity — POST /v1/cities (server.ts)', () => {
+  it('posts islandId, plot as a NUMBER (server.ts), and name', async () => {
     stub = installFetch(() => json(201, { city: cityBody() }))
     await foundCity({ islandId: ID, plot: 7, name: 'Skyhold' })
     assert.equal(lastCall().url, `${BASE}/v1/cities`)
@@ -189,8 +189,8 @@ describe('foundCity — POST /v1/cities (server.ts:415)', () => {
   })
 })
 
-describe('the queue submissions — POST /v1/cities/:id/{buildings,research,ships} (server.ts:474-482)', () => {
-  it('queueBuilding posts {type} with the Idempotency-Key (a 400 without it, server.ts:875-878)', async () => {
+describe('the queue submissions — POST /v1/cities/:id/{buildings,research,ships} (server.ts)', () => {
+  it('queueBuilding posts {type} with the Idempotency-Key (a 400 without it, server.ts)', async () => {
     stub = installFetch(() => json(200, queueBody()))
     await queueBuilding(ID, 'well_rig', 'key-1')
     assert.equal(lastCall().url, `${BASE}/v1/cities/${ID}/buildings`)
@@ -246,7 +246,7 @@ describe('newIdempotencyKey', () => {
     assert.equal(keys.size, 200)
   })
 
-  it('fits the 1..200 character bound server.ts:876 enforces', () => {
+  it('fits the 1..200 character bound server.ts enforces', () => {
     const key = newIdempotencyKey()
     assert.ok(key.length >= 1 && key.length <= 200, `key length ${key.length} is out of range`)
   })
@@ -254,10 +254,10 @@ describe('newIdempotencyKey', () => {
 
 /* ==================================================================== fleets */
 
-describe('launchFleet — POST /v1/fleets (server.ts:533)', () => {
+describe('launchFleet — POST /v1/fleets (server.ts)', () => {
   const ships = { skiff: 2, hauler: 1 }
 
-  it('posts to exactly /v1/fleets with the Idempotency-Key (server.ts:535-538)', async () => {
+  it('posts to exactly /v1/fleets with the Idempotency-Key (server.ts)', async () => {
     stub = installFetch(() => json(201, launchBody()))
     await launchFleet({ cityId: ID, mission: 'transfer', targetIslandId: ID2, ships }, 'key-l')
     assert.equal(lastCall().url, `${BASE}/v1/fleets`)
@@ -265,7 +265,7 @@ describe('launchFleet — POST /v1/fleets (server.ts:533)', () => {
     assert.equal(lastCall().headers['idempotency-key'], 'key-l')
   })
 
-  it('sends ship counts as NUMBERS — server.ts:561 tests typeof', async () => {
+  it('sends ship counts as NUMBERS — server.ts tests typeof', async () => {
     stub = installFetch(() => json(201, launchBody()))
     await launchFleet({ cityId: ID, mission: 'raid', targetIslandId: ID2, ships }, 'k')
     const sent = bodyOf(lastCall())['ships'] as Record<string, unknown>
@@ -273,7 +273,7 @@ describe('launchFleet — POST /v1/fleets (server.ts:533)', () => {
     assert.strictEqual(typeof sent['hauler'], 'number')
   })
 
-  it('sends cargo as DECIMAL STRINGS — a float is a 400 at server.ts:573-574', async () => {
+  it('sends cargo as DECIMAL STRINGS — a float is a 400 at server.ts', async () => {
     stub = installFetch(() => json(201, launchBody()))
     await launchFleet(
       { cityId: ID, mission: 'transfer', targetIslandId: ID2, ships, cargo: { aether: '9007199254740993' } },
@@ -310,7 +310,7 @@ describe('launchFleet — POST /v1/fleets (server.ts:533)', () => {
   })
 })
 
-describe('fleet reads — GET /v1/fleets, GET /v1/fleets/:id (server.ts:616, :634)', () => {
+describe('fleet reads — GET /v1/fleets, GET /v1/fleets/:id (server.ts)', () => {
   it('lists own fleets with no userId parameter — naming another player is an admin read', async () => {
     stub = installFetch(() => json(200, { fleets: [] }))
     await fetchFleets()
@@ -324,7 +324,7 @@ describe('fleet reads — GET /v1/fleets, GET /v1/fleets/:id (server.ts:616, :63
   })
 })
 
-describe('fetchBattle — GET /v1/battles/:id (server.ts:649)', () => {
+describe('fetchBattle — GET /v1/battles/:id (server.ts)', () => {
   it('gets exactly that path and renders what it is given — no recomputation exists to test', async () => {
     stub = installFetch(() => json(200, { battle: battleBody() }))
     const battle = await fetchBattle(ID)
@@ -336,12 +336,12 @@ describe('fetchBattle — GET /v1/battles/:id (server.ts:649)', () => {
 
 /* ==================================================================== alliances */
 
-describe('alliances (server.ts:715-792)', () => {
+describe('alliances (server.ts)', () => {
   it('foundAlliance posts archipelagoId, communityId and name — and NEVER creates a community', async () => {
     stub = installFetch(() => json(201, { alliance: allianceBody() }))
     await foundAlliance({ archipelagoId: ID, communityId: ID2, name: 'The Windward Compact' })
     assert.equal(lastCall().url, `${BASE}/v1/alliances`)
-    // The body carries the id of an EXISTING community (server.ts:719-726); there is no name,
+    // The body carries the id of an EXISTING community (server.ts); there is no name,
     // no description, no member list — nothing a community-creation call would need.
     assert.deepEqual(bodyOf(lastCall()), {
       archipelagoId: ID,
@@ -388,7 +388,7 @@ describe('alliances (server.ts:715-792)', () => {
 
 /* ==================================================================== the chronicle */
 
-describe('the chronicle — anonymous, exercised as such (server.ts:800-841)', () => {
+describe('the chronicle — anonymous, exercised as such (server.ts)', () => {
   it('lists sealed seasons WITHOUT a token, even while holding one', async () => {
     // The session holds tokens (beforeEach), and the request still goes out bare: the
     // chronicle's anonymity is asserted on every page view, not merely believed.
@@ -429,7 +429,7 @@ describe('the chronicle — anonymous, exercised as such (server.ts:800-841)', (
 
 /* ==================================================================== readyz */
 
-describe('fetchReadiness — GET /readyz (server.ts:314)', () => {
+describe('fetchReadiness — GET /readyz (server.ts)', () => {
   it('gets /readyz, unauthenticated', async () => {
     stub = installFetch(() => json(200, { ready: true }))
     await fetchReadiness()
@@ -442,7 +442,7 @@ describe('fetchReadiness — GET /readyz (server.ts:314)', () => {
     assert.deepEqual(await fetchReadiness(), { readiness: 'ready' })
   })
 
-  it('reads the 503 body as not-ready rather than throwing (server.ts:316)', async () => {
+  it('reads the 503 body as not-ready rather than throwing (server.ts)', async () => {
     stub = installFetch(() => json(503, { ready: false, checks: [] }))
     assert.deepEqual(await fetchReadiness(), { readiness: 'degraded' })
   })

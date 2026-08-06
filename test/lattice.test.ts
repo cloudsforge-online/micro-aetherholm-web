@@ -3,8 +3,8 @@
  *
  * `previewLaunch` claims to price a launch "as the server would charge it". That sentence is
  * only worth having if it is checked, so the expected values below are computed BY HAND from
- * `aetherholm/src/fleets.ts:294-295` (per-leg time: `max(1, floor(pathSeconds × speedBp/10000))`)
- * and `:336` (lift: `(liftPerHourTotal × (out + back) + 3599n) / 3600n`) — never by calling the
+ * `aetherholm/src/fleets.ts` (per-leg time: `max(1, floor(pathSeconds × speedBp/10000))`)
+ * and its lift ceiling ( `(liftPerHourTotal × (out + back) + 3599n) / 3600n`) — never by calling the
  * code under test twice.
  */
 import assert from 'node:assert/strict'

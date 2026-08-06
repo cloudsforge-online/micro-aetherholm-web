@@ -4,13 +4,18 @@
  * Every client in this estate that was built against an imagined surface passed its own tests —
  * that is the whole problem. So this file does not assert paths in the abstract: it reads
  * `aetherholm/src/server.ts` from a sibling checkout and requires that each path and method this
- * bundle calls is REGISTERED there, at the line the citation names, and that each authenticates
- * by the MECHANISM the table records.
+ * bundle calls is REGISTERED there, and that each authenticates by the MECHANISM the table
+ * records.
  *
  * The four disciplines, each earned by a sibling's defect:
  *
- * **1. Citations.** Each entry in `SURFACE`/`DECLINED` names a line; that line must contain the
- * `define(` that registers exactly that method and path.
+ * **1. Registration, found by SEARCHING.** Each entry in `SURFACE`/`DECLINED` must have a
+ * `define(` somewhere in the service that registers exactly that method and path. It used to have
+ * to be at a cited LINE, and that is what made this suite fail for edits made in a different
+ * repository: a service grows an import, every route below it moves, and twenty-seven correct
+ * citations turn red at once — during a release, because nothing runs this suite when the service
+ * changes. Searching is strictly stronger: a route that MOVES can no longer break this, and a
+ * route that is REMOVED still does.
  *
  * **2. SHAPES, never prefixes.** `micro-market`'s guard matched `startsWith(prefix)` and
  * `micro-mint-web` shipped exactly the defect it would have passed. `matchesShape` requires the
@@ -25,10 +30,11 @@
  * one-line delegations to `queueRoute`, so a grep for `authenticate(` in THEIR bodies would call
  * the three routes that charge a treasury public. The helper is verified separately below.
  *
- * **4. NO LINE NUMBER IS EVER WRITTEN INSIDE A CHECK.** micro-trade-web hardcoded one and its
- * guard kept passing while grading a different function after the table moved. Every line this
- * file reads comes out of the tables, and the handler-body extractor walks forward from the
- * cited line to the next `define(` (or the end of the route array) rather than to a number.
+ * **4. NO LINE NUMBER IS WRITTEN ANYWHERE IN THIS FILE.** micro-trade-web hardcoded one and its
+ * guard kept passing while grading a different function after the table moved. Both ends of every
+ * handler body are found by scanning — forward from the `define(` that registers the route to the
+ * next one (or to the end of the route array) — so a service that moves its routes is still graded
+ * on the right function.
  *
  * Without the sibling checkout the cross-repository half SKIPS — `pnpm test` must pass for
  * somebody who cloned only this repository — and CI is where absence becomes fatal: the workflow
@@ -64,7 +70,7 @@ const MECHANISM: Readonly<Record<Exclude<Auth, 'none'>, RegExp>> = {
   // Owner-or-admin for users, read scope for services: authenticate AND an isAdmin branch.
   owner: /await authenticate\(ctx, deps\)[\s\S]*isAdmin\(principal\)[\s\S]*requireScope\(principal, READ_SCOPE\)|await authenticate\(ctx, deps\)[\s\S]*requireScope\(principal, READ_SCOPE\)[\s\S]*isAdmin\(principal\)/,
   // A user acting as themselves; a service must carry aetherholm:write and name x-user-id —
-  // the whole of that lives in requireUser (aetherholm/src/server.ts:1099-1108).
+  // the whole of that lives in requireUser (aetherholm/src/server.ts).
   user: /await requireUser\(ctx, deps\)/,
   // The three queue routes delegate whole: the auth AND the Idempotency-Key requirement live in
   // queueRoute, which its own tests below verify.
@@ -75,7 +81,7 @@ const MECHANISM: Readonly<Record<Exclude<Auth, 'none'>, RegExp>> = {
   'sealed-public': /season_status !== 'sealed'[\s\S]*await authenticate\(ctx, deps\)/,
   /*
    * A SEVENTH MECHANISM, ADDED WHEN THE SERVICE GREW ONE. `POST /v1/events` is the inbound
-   * erasure webhook (`aetherholm/src/server.ts:1004`): the credential is an HMAC over the RAW
+   * erasure webhook (`aetherholm/src/server.ts`): the credential is an HMAC over the RAW
    * BYTES, verified before anything is parsed, and a bad or absent signature is 403 rather than
    * 401 because there is no token for the caller to go and find.
    *
@@ -98,57 +104,57 @@ const ANY_MECHANISM = [
 interface Route {
   readonly method: string
   readonly path: string
-  readonly line: number
   readonly auth: Auth
   /** True when the service refuses the request without an Idempotency-Key header. */
   readonly idempotent: boolean
 }
 
 /**
- * The surface this bundle CALLS, with the line each was read from. Written down as DATA so the
- * checks below can be mechanical: a wrong citation fails and names itself.
+ * The surface this bundle CALLS. Written down as DATA so the checks below can be mechanical: an
+ * entry the service does not register fails and names itself, and a route the service serves that
+ * is in neither table fails too.
  */
 export const SURFACE: readonly Route[] = [
-  { method: 'GET', path: '/readyz', line: 383, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/seasons/current', line: 450, auth: 'bearer', idempotent: false },
-  { method: 'GET', path: '/v1/archipelagos/:id/islands', line: 469, auth: 'bearer', idempotent: false },
-  { method: 'GET', path: '/v1/archipelagos/:id/lanes', line: 626, auth: 'bearer', idempotent: false },
-  { method: 'GET', path: '/v1/content/airships', line: 598, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/content/buildings', line: 562, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/content/research', line: 580, auth: 'none', idempotent: false },
-  { method: 'POST', path: '/v1/cities', line: 483, auth: 'user', idempotent: false },
-  { method: 'GET', path: '/v1/cities', line: 508, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/cities/:id', line: 527, auth: 'owner', idempotent: false },
-  { method: 'POST', path: '/v1/cities/:id/buildings', line: 542, auth: 'user-queue', idempotent: true },
-  { method: 'POST', path: '/v1/cities/:id/research', line: 546, auth: 'user-queue', idempotent: true },
-  { method: 'POST', path: '/v1/cities/:id/ships', line: 550, auth: 'user-queue', idempotent: true },
-  { method: 'POST', path: '/v1/fleets', line: 641, auth: 'user', idempotent: true },
-  { method: 'GET', path: '/v1/fleets', line: 724, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/fleets/:id', line: 742, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/battles', line: 757, auth: 'owner', idempotent: false },
-  { method: 'GET', path: '/v1/battles/:id', line: 791, auth: 'sealed-public', idempotent: false },
-  { method: 'GET', path: '/v1/alliances', line: 884, auth: 'bearer', idempotent: false },
-  { method: 'POST', path: '/v1/alliances', line: 857, auth: 'user', idempotent: false },
-  { method: 'GET', path: '/v1/alliances/:id', line: 893, auth: 'bearer', idempotent: false },
-  { method: 'POST', path: '/v1/alliances/:id/members', line: 903, auth: 'user', idempotent: false },
-  { method: 'DELETE', path: '/v1/alliances/:id/members', line: 916, auth: 'user', idempotent: false },
-  { method: 'POST', path: '/v1/alliances/:id/claims', line: 929, auth: 'user', idempotent: false },
-  { method: 'GET', path: '/v1/chronicle/seasons', line: 951, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/chronicle/seasons/:id', line: 967, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/chronicle/seasons/:id/battles', line: 984, auth: 'none', idempotent: false },
+  { method: 'GET', path: '/readyz', auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/seasons/current', auth: 'bearer', idempotent: false },
+  { method: 'GET', path: '/v1/archipelagos/:id/islands', auth: 'bearer', idempotent: false },
+  { method: 'GET', path: '/v1/archipelagos/:id/lanes', auth: 'bearer', idempotent: false },
+  { method: 'GET', path: '/v1/content/airships', auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/content/buildings', auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/content/research', auth: 'none', idempotent: false },
+  { method: 'POST', path: '/v1/cities', auth: 'user', idempotent: false },
+  { method: 'GET', path: '/v1/cities', auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/cities/:id', auth: 'owner', idempotent: false },
+  { method: 'POST', path: '/v1/cities/:id/buildings', auth: 'user-queue', idempotent: true },
+  { method: 'POST', path: '/v1/cities/:id/research', auth: 'user-queue', idempotent: true },
+  { method: 'POST', path: '/v1/cities/:id/ships', auth: 'user-queue', idempotent: true },
+  { method: 'POST', path: '/v1/fleets', auth: 'user', idempotent: true },
+  { method: 'GET', path: '/v1/fleets', auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/fleets/:id', auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/battles', auth: 'owner', idempotent: false },
+  { method: 'GET', path: '/v1/battles/:id', auth: 'sealed-public', idempotent: false },
+  { method: 'GET', path: '/v1/alliances', auth: 'bearer', idempotent: false },
+  { method: 'POST', path: '/v1/alliances', auth: 'user', idempotent: false },
+  { method: 'GET', path: '/v1/alliances/:id', auth: 'bearer', idempotent: false },
+  { method: 'POST', path: '/v1/alliances/:id/members', auth: 'user', idempotent: false },
+  { method: 'DELETE', path: '/v1/alliances/:id/members', auth: 'user', idempotent: false },
+  { method: 'POST', path: '/v1/alliances/:id/claims', auth: 'user', idempotent: false },
+  { method: 'GET', path: '/v1/chronicle/seasons', auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/chronicle/seasons/:id', auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/chronicle/seasons/:id/battles', auth: 'none', idempotent: false },
 ]
 
 /**
  * The routes `aetherholm` serves that this bundle deliberately does NOT call. Declining is a
  * first-class entry: the "knows about everything it serves" test is satisfied by
  * `SURFACE ∪ DECLINED`, so a route the service grows and nobody reads fails the build instead of
- * going quiet. The REASONS are in the header of src/lib/aetherholm.ts, keyed by these citations.
+ * going quiet. The REASONS are in the header of src/lib/aetherholm.ts, keyed by method and path.
  */
 export const DECLINED: readonly Route[] = [
-  { method: 'GET', path: '/livez', line: 381, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/metrics', line: 388, auth: 'none', idempotent: false },
-  { method: 'GET', path: '/v1/title', line: 406, auth: 'none', idempotent: false },
-  { method: 'POST', path: '/v1/provision', line: 411, auth: 'provision', idempotent: false },
+  { method: 'GET', path: '/livez', auth: 'none', idempotent: false },
+  { method: 'GET', path: '/metrics', auth: 'none', idempotent: false },
+  { method: 'GET', path: '/v1/title', auth: 'none', idempotent: false },
+  { method: 'POST', path: '/v1/provision', auth: 'provision', idempotent: false },
   /*
    * The erasure webhook, and the one entry here that a browser MUST never reach. It is called by
    * micro-identity's relay with an HMAC the page has no secret for, it erases a player's cities,
@@ -156,7 +162,7 @@ export const DECLINED: readonly Route[] = [
    * the signature check. Declined rather than absent, so that the route the service grew on
    * 2026-08-05 is a thing this bundle has READ and refused rather than a thing it never noticed.
    */
-  { method: 'POST', path: '/v1/events', line: 1004, auth: 'webhook', idempotent: false },
+  { method: 'POST', path: '/v1/events', auth: 'webhook', idempotent: false },
 ]
 
 const ALL: readonly Route[] = [...SURFACE, ...DECLINED]
@@ -204,7 +210,7 @@ export function requestedPaths(source: string): readonly string[] {
 }
 
 /** Every call site as METHOD + path + the option block that follows it. GET is the default
- *  (src/lib/api.ts:270). */
+ *  (src/lib/api.ts). */
 function requestedCalls(source: string): ReadonlyArray<{ method: string; path: string; block: string }> {
   const code = codeOf(source)
   const matches = [...code.matchAll(PATH_LITERAL)]
@@ -261,11 +267,25 @@ describe('the client calls only routes it has cited', () => {
     }
   })
 
-  it('cites a line for every route, called or declined, in the client', () => {
+  it('names every route it calls or declines, and says which file it read them from', () => {
+    // The FILE, not a line in it. This used to require the server path with a line stuck to it for
+    // each of the twenty-seven routes, which is twenty-seven promises about a file this repository
+    // does not
+    // own and does not watch. What is worth asserting is that the client points a reader at the
+    // source of truth and that its header still accounts for every route; the tables below prove
+    // the routes are really there.
+    assert.ok(
+      client.includes('aetherholm/src/server.ts'),
+      'src/lib/aetherholm.ts no longer says which service source it was read from',
+    )
     for (const route of ALL) {
+      // The client's header lays its table out in columns, so the gap between method and path is
+      // any run of spaces. `\s+` rather than one, because a single space passed for the called
+      // routes and failed every declined one — a check that measured the formatting.
+      const named = new RegExp(`\\b${route.method}\\s+${route.path.replace(/[/:]/g, '\\$&')}(?![\\w/])`)
       assert.ok(
-        client.includes(`aetherholm/src/server.ts:${route.line}`),
-        `${route.method} ${route.path} has no citation in src/lib/aetherholm.ts`,
+        named.test(client),
+        `${route.method} ${route.path} is in the table and unaccounted for in src/lib/aetherholm.ts`,
       )
     }
   })
@@ -343,7 +363,7 @@ describe('the client calls only routes it has cited', () => {
   })
 })
 
-describe('the cited lines are the lines that register the routes', () => {
+describe('every route this bundle names is really registered by the service', () => {
   if (server === undefined) {
     // NOT a silent pass. It says which check did not run, and CI makes the absence fatal.
     it('SKIPPED: no micro-aetherholm checkout — CI checks one out and requires this to run', () => {
@@ -373,28 +393,46 @@ describe('the cited lines are the lines that register the routes', () => {
     PROVISION_PATH: '/v1/provision',
   }
 
+  /**
+   * Does THIS line register THAT route?
+   *
+   * A LITERAL PATH **or** a named constant whose value is that path. micro-aetherholm registers
+   * /v1/title and /v1/provision through `TITLE_DESCRIPTOR_PATH` and `PROVISION_PATH` — they are
+   * part of the worlds-title contract and are spelled once. A regex that only accepted a literal
+   * reported both as unregistered, which is the opposite of true. The constant is resolved out of
+   * the same file rather than assumed, so a constant pointing somewhere else still fails.
+   */
+  function registers(line: string, route: Route): boolean {
+    const escaped = route.path.replace(/[/:]/g, '\\$&')
+    if (new RegExp(`define\\('${route.method}',\\s*'${escaped}'`).test(line)) return true
+    const named = /define\('[A-Z]+',\s*([A-Z_]+)/.exec(line)
+    return (
+      named !== null &&
+      WORLDS_CONTRACT_PATHS[named[1] ?? ''] === route.path &&
+      new RegExp(`define\\('${route.method}',`).test(line)
+    )
+  }
+
+  /**
+   * WHERE a route is registered, found by SEARCHING for it rather than by citing a line.
+   *
+   * This used to be a `line` in the tables above, and that line is why this repository kept going
+   * red for an edit made in a different one: micro-aetherholm grew email verification and password
+   * reset upstream of its route array, every route below moved, and all twenty-seven citations here
+   * broke while nothing in this bundle was wrong. Nothing runs this suite when that service
+   * changes, so it surfaced during a release.
+   *
+   * Searching costs one pass over a file already in memory and cannot go stale. What is worth
+   * asserting is that the route EXISTS and that its handler authenticates the way this bundle
+   * believes; neither of those is a fact about line 641.
+   */
+  const indexOfRoute = (route: Route): number => lines.findIndex((l) => registers(l, route))
+
   for (const route of ALL) {
-    it(`${route.method} ${route.path} is registered at aetherholm/src/server.ts:${route.line}`, () => {
-      const line = lines[route.line - 1] ?? ''
-      /*
-       * A LITERAL PATH **or** a named constant whose value is that path.
-       *
-       * micro-aetherholm now registers /v1/title and /v1/provision through
-       * `TITLE_DESCRIPTOR_PATH` and `PROVISION_PATH` — they are part of the worlds-title contract
-       * and are spelled once. A regex that only accepted a literal reported both as unregistered,
-       * which is the opposite of true. The constant is resolved out of the same file rather than
-       * assumed, so a constant pointing somewhere else still fails.
-       */
-      const escaped = route.path.replace(/[/:]/g, '\\$&')
-      const literal = new RegExp(`define\\('${route.method}',\\s*'${escaped}'`)
-      const named = /define\('[A-Z]+',\s*([A-Z_]+)/.exec(line)
-      const viaConstant =
-        named !== null &&
-        WORLDS_CONTRACT_PATHS[named[1] ?? ''] === route.path &&
-        new RegExp(`define\\('${route.method}',`).test(line)
+    it(`${route.method} ${route.path} is registered in aetherholm/src/server.ts`, () => {
       assert.ok(
-        literal.test(line) || viaConstant,
-        `aetherholm/src/server.ts:${route.line} is:\n  ${line.trim()}`,
+        indexOfRoute(route) >= 0,
+        `${route.method} ${route.path} is not registered in aetherholm/src/server.ts at all`,
       )
     })
   }
@@ -418,15 +456,17 @@ describe('the cited lines are the lines that register the routes', () => {
   })
 
   /**
-   * Read one handler body: walk forward from the cited line to the next `define(` or the end of
-   * the route array (`  ];`). NO LINE NUMBER IS WRITTEN HERE — the start comes from the table
-   * and the end is found by scanning, so a table that moves fails rather than grading the wrong
-   * function. Stopping at the array's close matters on this service: the auth HELPERS
-   * (`authenticate`, `requireUser`) are defined after the routes, and a walk that ran into them
-   * would find authentication in the last chronicle handler and wrongly fail its `none`.
+   * Read one handler body: find the `define(` that registers the route, then walk forward to the
+   * next `define(` or the end of the route array (`  ];`). NO LINE NUMBER IS WRITTEN ANYWHERE —
+   * both ends are found by scanning, so a service that moves its routes is graded on the right
+   * function rather than on whatever now sits where the route used to be. Stopping at the array's
+   * close matters on this service: the auth HELPERS (`authenticate`, `requireUser`) are defined
+   * after the routes, and a walk that ran into them would find authentication in the last
+   * chronicle handler and wrongly fail its `none`.
    */
-  function bodyOf(line: number): string {
-    const start = line - 1
+  function bodyOf(route: Route): string {
+    const start = indexOfRoute(route)
+    assert.ok(start >= 0, `${route.method} ${route.path} is not registered in aetherholm/src/server.ts`)
     let end = lines.length
     for (let i = start + 1; i < lines.length; i++) {
       if (/^\s{4}define\('/.test(lines[i] ?? '') || /^\s{2}\];/.test(lines[i] ?? '')) {
@@ -439,7 +479,7 @@ describe('the cited lines are the lines that register the routes', () => {
 
   for (const route of ALL) {
     it(`${route.method} ${route.path} authenticates by ${route.auth}`, () => {
-      const body = bodyOf(route.line)
+      const body = bodyOf(route)
       if (route.auth === 'none') {
         for (const pattern of ANY_MECHANISM) {
           assert.doesNotMatch(
@@ -484,7 +524,7 @@ describe('the cited lines are the lines that register the routes', () => {
   it('the launch requires the Idempotency-Key inline, as the table records', () => {
     const route = SURFACE.find((r) => r.method === 'POST' && r.path === '/v1/fleets')
     assert.ok(route, 'the surface table no longer names the launch route')
-    const body = bodyOf(route.line)
+    const body = bodyOf(route)
     assert.match(body, /idempotency-key/, 'POST /v1/fleets no longer requires the header')
     assert.match(
       body,
@@ -507,7 +547,7 @@ describe('the cited lines are the lines that register the routes', () => {
   it('the battle route is public exactly when the season is sealed, and only then', () => {
     const route = SURFACE.find((r) => r.path === '/v1/battles/:id')
     assert.ok(route)
-    const body = bodyOf(route.line)
+    const body = bodyOf(route)
     // The live branch authenticates and checks participation; the sealed branch never reaches it.
     assert.match(body, /season_status !== 'sealed'/)
     assert.match(body, /attacker_user_id[\s\S]*defender_user_id/)
