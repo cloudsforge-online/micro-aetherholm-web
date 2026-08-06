@@ -6,11 +6,23 @@
 
   `worlds`, because Aetherholm is a Forge Worlds title: a title wears its product's accent rather
   than claiming its own, exactly as micro-emberkin-web does (its index.html sets the same value,
-  and the registry gives both titles Worlds' #6d9a49 — ui/packages/ui/src/surfaces.ts:437).
+  and the registry gives both titles Worlds' #6d9a49 — ui/packages/ui/src/surfaces.ts:596 for
+  Emberkin and ui/packages/ui/src/surfaces.ts:619 for this one).
   `cool`, because this game's ground is a storm-lit sky: the quench ramp pulls the shared ash
   towards blue-grey without restating a single hex.
+
+  data-cf-scheme is the THIRD of the three, and it arrives with @cloudsforge/ui 1.1. `auto`
+  follows the reader's operating system; `light` and `dark` force one. It is set here, statically,
+  for exactly the reason the other two are — a page that paints before the attribute lands
+  flashes the wrong palette, and a theme flash is worse than a theme nobody asked for.
+
+  `auto` rather than `dark`, even though this game is a night sky. The ART is dark by
+  construction — every sprite in `public/art/` was painted on a near-black ground and is
+  UNCHANGED by the scheme — but the chrome around it is not the art, and a reader whose machine
+  asks for light has until now been handed a page they had to fight. The substrate stays `cool`:
+  it picks the ash ramp, and both schemes have one.
 -->
-<html lang="en-GB" data-cf-product="worlds" data-cf-substrate="cool">
+<html lang="en-GB" data-cf-product="worlds" data-cf-substrate="cool" data-cf-scheme="auto">
   <head>
     <meta charset="utf-8" />
     <!--
@@ -22,10 +34,36 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     />
-    <meta name="colour-scheme" content="dark" />
+    <!--
+      `color-scheme`, spelled the way the STANDARD spells it. It was `colour-scheme` — correct
+      English, and inert: `color-scheme` is the registered meta name, no browser has ever read the
+      British one, and so the declaration meant to tell the browser which form controls,
+      scrollbars and canvas to draw did nothing at all. Every `<input>` and `<select>` on the
+      found-a-city, compose-a-launch and open-a-report forms was drawn as light chrome on a dark
+      page in every browser that honours this.
+
+      Both values, in that order, rather than only `dark`: `data-cf-scheme="auto"` on <html> above
+      means the token layer now resolves whichever palette the reader's system asks for, and
+      declaring only `dark` here would leave the chrome the browser draws disagreeing with the
+      page it is drawn on — which is the same defect again, pointing the other way.
+    -->
+    <meta name="color-scheme" content="dark light" />
+    <!--
+      THE DESCRIPTION IS THE REGISTRY'S, BYTE FOR BYTE.
+
+      It reads `surfaceMeta('aetherholm')` in `@cloudsforge/ui/seo` — the surface blurb plus the
+      one sentence about what the platform is — and `test/head.test.ts` asserts these bytes equal
+      that function's output. It used to be a fourth hand-written sentence about this game, and a
+      hand-written copy of a string the registry already holds is the drift `seo.ts` opens by
+      recording: `site`'s shell and its application disagreed about the front page's own
+      description for as long as it took somebody to open the served HTML.
+
+      It stays IN THE SHELL as well as being applied at runtime, because the link-preview fetchers
+      used by chat clients generally do not execute JavaScript. This is what they get.
+    -->
     <meta
       name="description"
-      content="Aetherholm — build a sky-city, command airship fleets, and contest an archipelago that seals into history."
+      content="A sky-island strategy MMO, played through Forge Worlds. Part of CloudsForge: EMBER, the chain it runs on, and every surface built on top of it."
     />
     <!--
       The build that produced this bundle. Stamped by the Dockerfile, read by src/lib/obs.ts, and
@@ -33,6 +71,28 @@
       rather than a configuration: it names the artefact, it does not tell it where it is running.
     -->
     <meta name="cf-release" content="dev" />
+    <!--
+      THE GOOGLE ANALYTICS MEASUREMENT ID, AND NOT THE GOOGLE ANALYTICS TAG.
+      ──────────────────────────────────────────────────────────────────────────────────────────
+      There is deliberately no third-party analytics `<script src=…>` anywhere in this file, and
+      there must never be one. The tag's own domain is not spelled out here either, so a grep for
+      it over this file returns nothing and the absence is CHECKABLE rather than asserted. The
+      stock snippet fetches that script and sets `_ga` on load — before any banner has been drawn,
+      let alone answered — and under ePrivacy Art. 5(3) an analytics cookie set before consent is
+      a violation a banner underneath it does not cure.
+
+      `@cloudsforge/ui/consent` injects the tag from exactly one place: the Accept button in
+      `CookieBanner`, which this app renders last in `src/components/shell.tsx`. Read that
+      module's header for the whole argument.
+
+      A meta tag rather than a build-time variable, for the reason `cf-release` above already is:
+      `test/no-build-time-config.test.ts` greps this file for `VITE`-prefixed configuration and
+      fails the build, because an artefact with an environment frozen into it is not the artefact
+      that passed CI. The ID is an IDENTITY — it names the property, it does not tell the bundle
+      where it is running — and an absent or empty value simply means analytics is off, which is
+      what a local `pnpm dev` gets and is a supported mode rather than a misconfiguration.
+    -->
+    <meta name="cf-analytics" content="G-NB8DNLTKZQ" />
     <!--
       The title's OWN chrome, generated by micro-aetherholm-assets and byte-copied from its
       assets/title set — favicon 512/192/32 cut from the generated mark by its derive.py, and the
@@ -61,7 +121,20 @@
          names no hostname. Crawlers resolve it against the page they fetched. -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Aetherholm" />
-    <meta property="og:description" content="A sky-island strategy MMO. Hold the Aether Spires when the season seals. A Forge Worlds title." />
+    <!--
+      THE SAME SENTENCE AS THE `description` ABOVE, and that is the point rather than an oversight.
+
+      It was a different one — a punchier line about holding the Aether Spires — so this file
+      carried two descriptions of one product, of which a search engine read one and a chat client
+      read the other. Two strings can only agree by somebody remembering; `applyHead` writes the
+      registry's sentence into BOTH tags on every navigation, so the shell disagreeing with the
+      running page would have meant a link preview and the page it opens saying different things
+      about the same game. `test/head.test.ts` holds all three to the one source.
+    -->
+    <meta
+      property="og:description"
+      content="A sky-island strategy MMO, played through Forge Worlds. Part of CloudsForge: EMBER, the chain it runs on, and every surface built on top of it."
+    />
     <meta property="og:image" content="/og-1200x630.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <!--

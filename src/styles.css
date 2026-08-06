@@ -12,6 +12,20 @@
  * Local classes are prefixed `ah-`. The shared ones this bundle uses: `.cf-btn`,
  * `.cf-btn--ember` (the one solid call to action — there is no `.cf-btn--primary`), `.cf-input`,
  * `.cf-input--mono`, `.cf-select`, `.cf-num`, `.cf-sr`.
+ *
+ * ── `--cf-accent` IS NOT A TEXT COLOUR, AND `--cf-accent-text` IS ────────────────────────────
+ *
+ * @cloudsforge/ui 1.1 splits the ramp, and the split is a contrast measurement rather than a
+ * preference: `--cf-accent` is validated at 3:1, which is the floor for a BORDER, a FILL, an
+ * OUTLINE or a STROKE, and `--cf-accent-text` is the 4.5:1 step for words a reader has to read.
+ * Every `color:` below now takes the `-text` step — the active navigation tab, the in-page link
+ * and the spire tag were all set in the fill colour and were therefore under the text floor while
+ * looking entirely deliberate. Every border, fill and stroke KEEPS `--cf-accent`: raising those
+ * would change the drawing rather than fix anything.
+ *
+ * The same split applies to severity, and for the same reason: `--cf-warn` is the fill,
+ * `--cf-warn-text` is the one that is read. (`--cf-danger` needs no change — tokens.css already
+ * defines it AS `--cf-critical-text`.)
  */
 
 /* ---- shell ----------------------------------------------------------- */
@@ -61,7 +75,8 @@ body {
 }
 
 .ah-nav__link.is-active {
-  color: var(--cf-accent);
+  /* Text takes the 4.5:1 step; the underline is a 2px border and keeps the 3:1 fill. */
+  color: var(--cf-accent-text);
   border-bottom-color: var(--cf-accent);
 }
 
@@ -75,7 +90,7 @@ body {
   border: 1px solid var(--cf-line-strong);
   border-radius: var(--cf-radius);
   background: var(--cf-surface);
-  color: var(--cf-warn);
+  color: var(--cf-warn-text);
 }
 
 .ah-degraded p {
@@ -111,11 +126,11 @@ body {
 }
 
 .ah-warn {
-  color: var(--cf-warn);
+  color: var(--cf-warn-text);
 }
 
 .ah-link {
-  color: var(--cf-accent);
+  color: var(--cf-accent-text);
 }
 
 .ah-band {
@@ -224,7 +239,7 @@ body {
 }
 
 .ah-state--forbidden .ah-state__icon {
-  color: var(--cf-warn);
+  color: var(--cf-warn-text);
 }
 
 .ah-state__title {
@@ -474,45 +489,17 @@ body {
 }
 
 /* -----------------------------------------------------------------------
- * The skip link. Hidden until focused, and then unmistakably visible.
+ * `.ah-skip` WAS HERE, with its own `prefers-reduced-motion` override.
  *
- * `top` moves rather than `display` toggling, because a link that is
- * `display: none` is not focusable at all and a skip link that cannot be
- * reached by Tab is decoration. The focused position clears the shared bar
- * by its own height token, so it does not land underneath it.
+ * Both are gone with the markup they styled: the skip link is `SkipLink` from @cloudsforge/ui,
+ * which brings `.cf-skip` and — the part that actually mattered — targets a `<main>` carrying
+ * `tabIndex={-1}`, which the local anchor's target did not. ui.css's own reduced-motion block
+ * lists `.cf-skip` and additionally drops the transform, which is more than the rule deleted here
+ * did: switching the transition off left it sliding instantly rather than not sliding.
+ *
+ * A rule left behind after its element is deleted is dead weight the next reader has to prove is
+ * dead, so it is not kept "just in case".
  * ------------------------------------------------------------------- */
-.ah-skip {
-  position: absolute;
-  left: var(--cf-space-sm);
-  top: -4rem;
-  z-index: 100;
-  padding: var(--cf-space-sm) var(--cf-space-xl);
-  border-radius: var(--cf-radius);
-  background: var(--cf-accent);
-  color: var(--cf-accent-ink);
-  font-weight: 600;
-  text-decoration: none;
-  transition: top var(--cf-speed) var(--cf-ease);
-}
-
-.ah-skip:focus {
-  top: calc(var(--cf-bar-h) + var(--cf-space-sm));
-}
-
-/*
- * The skip link does not slide for a reader who asked for less motion.
- *
- * `prefers-reduced-motion: reduce` is an accessibility setting rather than a taste — for some
- * readers motion causes nausea or triggers a vestibular episode — and this file already honours it
- * elsewhere. The skip link was the last thing on the surface still moving, which is only
- * discoverable by setting the preference and reading COMPUTED durations: the rule is right there
- * in the stylesheet and says nothing about who it applies to. Found by BJ-A11Y-11.
- */
-@media (prefers-reduced-motion: reduce) {
-  .ah-skip {
-    transition: none;
-  }
-}
 
 
 /* ---- the generated art -------------------------------------------------
@@ -661,8 +648,9 @@ body {
   margin-left: var(--cf-space-sm);
   padding: var(--cf-space-3xs) var(--cf-space-2xs);
   border-radius: var(--cf-radius-sm);
+  /* The edge is a border and stays at the 3:1 step; the word inside it is read. */
   border: 1px solid var(--cf-accent);
-  color: var(--cf-accent);
+  color: var(--cf-accent-text);
   font-size: var(--cf-text-xs);
   text-transform: uppercase;
   letter-spacing: 0.06em;

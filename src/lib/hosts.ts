@@ -8,7 +8,7 @@
  *
  * Unlike `micro-emberkin-web` at the time it was built, this client needs NO derivation and no
  * correction: the surface registry already carries an `aetherholm` entry
- * (`ui/packages/ui/src/surfaces.ts:426-442`), added when the service shipped, with
+ * (`ui/packages/ui/src/surfaces.ts:603-625`), added when the service shipped, with
  * `devPort: 4120` read from the service itself (`aetherholm/src/env.ts:105`). Emberkin's
  * `deriveSurfaceUrl`/`stripOwnLabel` workaround existed because its registry entry did not; the
  * whole point of keeping that workaround small and loud was that a successor would not need it.
@@ -23,20 +23,31 @@ import { cloudsforgeHosts, type CloudsForgeHosts, type SurfaceKey } from '@cloud
  * entry the bar marks current — the same choice `micro-emberkin-web` makes and for the same
  * reason: a player who opens the switcher from inside the game should see the platform they are
  * playing on highlighted. A title is not a sixth product and claims no switcher slot of its own
- * (`ui/packages/ui/src/surfaces.ts:441`, `inSwitcher: false`).
+ * (`ui/packages/ui/src/surfaces.ts:624`, `inSwitcher: false`).
  */
 export const PRODUCT: SurfaceKey = 'worlds'
 /**
- * The surface this application IS, for the footer. **Deliberately not `'worlds'`.**
+ * The surface this application IS. **Deliberately not `'worlds'`.**
  *
  * The two constants answer two different questions and collapsing them would make one of them
  * wrong. `PRODUCT` is what the BAR marks current, and the switcher is a list of platforms a
  * player chooses between — Aetherholm is played through Forge Worlds, so `worlds` is the honest
- * highlight there. The FOOTER lists surfaces, and Aetherholm is one: it has its own registry row and
- * its own hostname (`aetherholm` in @cloudsforge/ui's surfaces.ts). So "you are here" in the footer is
- * Aetherholm, and the footer's closing line reads Aetherholm's own blurb rather than Forge Worlds'.
+ * highlight there. This one is IDENTITY: Aetherholm has its own registry row and its own hostname
+ * (`ui/packages/ui/src/surfaces.ts:608`), and everything that has to name the thing a reader
+ * actually opened reads it.
+ *
+ * ── It was `FOOTER_SURFACE`, and the second consumer is why it is not any more ────────────────
+ *
+ * The footer was the only caller when this was written, so it was named for its call site. With
+ * @cloudsforge/ui 1.1 the document head is derived from the registry too, and
+ * `surfaceMeta(SURFACE, …)` in `components/shell.tsx` is the caller that decides the `<title>`,
+ * the description, the Open Graph card and the canonical of every address on this surface.
+ * Passing `PRODUCT` there would have titled every page of this game "Forge Worlds" and described
+ * it as "Ninety Days After, and what follows it" — the platform's row, not the title's — which is
+ * a mistake a constant called FOOTER_SURFACE actively invites at the one call site that is not a
+ * footer. The name now says which QUESTION it answers rather than which component asked.
  */
-export const FOOTER_SURFACE: SurfaceKey = 'aetherholm'
+export const SURFACE: SurfaceKey = 'aetherholm'
 
 
 /** The name reported to the observability ingest and shown in error copy. */

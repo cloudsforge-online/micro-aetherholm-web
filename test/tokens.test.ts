@@ -113,7 +113,23 @@ describe('the stylesheet names only tokens that exist', () => {
     })
 
     it('the wrong names are not tokens, and the real ones are', () => {
-      for (const wrong of ['--cf-border', '--cf-critical', '--cf-warning', '--cf-font']) {
+      /*
+       * `--cf-critical` WAS ON THIS LIST AND HAS BEEN TAKEN OFF IT, WHICH IS THE INTERESTING PART.
+       *
+       * This assertion is the guard the list at the top of the file needs: a name asserted to be
+       * a typo, which then becomes real upstream, turns every "do not use it" comment in this
+       * repository into a lie nobody re-reads. It fired for exactly that reason.
+       * @cloudsforge/ui 1.1 introduced a full severity ramp — `--cf-good`/`--cf-warn`/
+       * `--cf-critical`, each with an `-ink` step for text laid ON the fill and a `-text` step for
+       * the fill's colour used as WORDS — and `--cf-critical` is now the 3:1 fill, defined at
+       * `ui/packages/ui/src/tokens.css:360`. So it moved from the wrong list to the right one, and
+       * its `-text` sibling moved with it.
+       *
+       * `--cf-border`, `--cf-warning` and `--cf-font` are still typos and still guarded: they are
+       * the three shapes a person reaches for when the real names are `--cf-line`, `--cf-warn` and
+       * `--cf-font-sans`.
+       */
+      for (const wrong of ['--cf-border', '--cf-warning', '--cf-font']) {
         assert.ok(!defined.has(wrong), `${wrong} is defined after all; this comment is wrong`)
       }
       for (const right of [
@@ -123,9 +139,35 @@ describe('the stylesheet names only tokens that exist', () => {
         '--cf-warn',
         '--cf-success',
         '--cf-font-sans',
+        // The 1.1 text steps. `--cf-accent` is validated at 3:1 (a border or a fill) and these are
+        // the 4.5:1 ones this stylesheet now uses for every `color:` — see its header.
+        '--cf-accent-text',
+        '--cf-warn-text',
+        '--cf-critical-text',
+        '--cf-critical',
       ]) {
         assert.ok(defined.has(right), `${right} is not defined; the stylesheet is built on it`)
       }
+    })
+
+    it('spends the accent ramp the way the design system validated it', () => {
+      /*
+       * THE HALF OF THE 1.1 SPLIT A TOKEN-EXISTENCE CHECK CANNOT SEE. `--cf-accent` and
+       * `--cf-accent-text` are both defined, so a stylesheet using the first as a text colour
+       * passes every assertion above while rendering Worlds' green at 3.11:1 on this substrate —
+       * under the floor, and looking entirely deliberate.
+       *
+       * So: no `color:` declaration may name the fill step. Borders, fills, strokes and outlines
+       * still may, and do.
+       */
+      const misuse = [...CSS.matchAll(/(?:^|[;{])\s*color:\s*var\((--cf-[a-z0-9-]+)\)/g)]
+        .map((m) => m[1] ?? '')
+        .filter((token) => ['--cf-accent', '--cf-warn', '--cf-good', '--cf-critical'].includes(token))
+      assert.deepEqual(
+        [...new Set(misuse)],
+        [],
+        'a `color:` uses a 3:1 fill step; the 4.5:1 text step is the same name with `-text`.',
+      )
     })
 
     /* ── the class-existence half ─────────────────────────────────────────────────────────── */
