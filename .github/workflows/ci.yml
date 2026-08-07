@@ -518,8 +518,13 @@ jobs:
           fi
           # And the refusal is stated where the aegis is offered, so the absence is a sentence a
           # player reads rather than a gap nobody can check.
-          grep -q 'never sold' src/pages/map.tsx || {
-            echo "::error::the founding form no longer says the aegis is never sold"
+          # The refusal has to be ON SCREEN, not merely true. It was matched here as the literal
+          # 'never sold', which pinned one wording of it forever; the map now says "Nothing here
+          # is sold for advantage: what a city can do is what you built", which says the same
+          # thing to a player who has never read a design doc. Matched on the claim instead, so
+          # the sentence can be rewritten again without the claim being allowed to disappear.
+          grep -qiE 'nothing (here )?is sold|never sold|not (for )?sale' src/pages/map.tsx || {
+            echo "::error::the map no longer tells the player that advantage is not sold"
             exit 1
           }
           echo "ok: no purchasable-power vocabulary, and the refusal is on screen"
