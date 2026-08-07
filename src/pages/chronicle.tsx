@@ -83,8 +83,9 @@ function SeasonList({ onOpen }: { onOpen: (id: string) => void }) {
         {chronicleGlyph && <img className="ah-page-head__glyph" src={chronicleGlyph} alt="" aria-hidden="true" />}
         <h1>The chronicle</h1>
         <p className="ah-page-head__meta">
-          Sealed seasons, public and immutable. No account needed; nothing here can be changed —
-          by anyone.
+          Finished seasons, open to everyone and fixed for good. You need no account to read any
+          of it. Once a season is sealed nobody can alter a line of it, including us: the database
+          refuses the edit.
         </p>
       </header>
 
@@ -92,8 +93,8 @@ function SeasonList({ onOpen }: { onOpen: (id: string) => void }) {
         /* `season-seal`: the archipelago caught mid-freeze, turning to amber glass. It paints the
            exact event this page exists to list, on the run where none has happened yet. */
         <Empty
-          title="No season has sealed yet"
-          hint="At day 120 the archipelago freezes and appears here."
+          title="No season has finished"
+          hint="On day 120 the archipelago freezes exactly as it stands, and the whole of it lands here."
           art={splash('season-seal')}
         />
       )}
@@ -162,8 +163,8 @@ function SealedSeason({ seasonId, onBack }: { seasonId: string; onBack: () => vo
   if (chronicle === null) {
     return (
       <Empty
-        title="No sealed season with that id"
-        hint="A live season never appears here, even by id — only history does."
+        title="No finished season with that id"
+        hint="A season still being played never shows up here, however you ask for it. This page is history only."
         action={
           <button type="button" className="cf-btn" onClick={onBack}>
             Back to the chronicle
@@ -185,17 +186,18 @@ function SealedSeason({ seasonId, onBack }: { seasonId: string; onBack: () => vo
       <div className="ah-report__digest">
         <h2>Season digest</h2>
         <p className="ah-dim">
-          sha256 over the canonicalised summary, written at the seal. The row it signs cannot be
-          updated or deleted — the database refuses, not a policy.
+          Taken over the summary at the instant the season closed. The row it signs cannot be
+          changed or deleted: the database itself refuses, which is a good deal stronger than a
+          rule somebody promises to follow.
         </p>
         <code className="cf-num ah-digest">{chronicle.digest}</code>
       </div>
 
-      <h2>The summary, as sealed</h2>
+      <h2>The season, exactly as it froze</h2>
       <pre className="ah-json">{JSON.stringify(chronicle.summary, null, 2)}</pre>
 
       <h2>Every battle, verbatim ({battles.length})</h2>
-      {battles.length === 0 && <p className="ah-dim">A quiet season: no battles were fought.</p>}
+      {battles.length === 0 && <p className="ah-dim">A peaceful one. Nobody fought anybody.</p>}
       {battles.length > 0 && (
         <div className="ah-scroll">
           <table className="ah-table">

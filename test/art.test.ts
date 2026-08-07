@@ -396,8 +396,8 @@ describe('every island archetype exists', () => {
      * picture becomes a claim about the world, so the sentence is asserted rather than trusted.
      */
     const page = read('src/pages/map.tsx')
-    assert.match(page, /The game records no terrain/, 'the archetype caption is gone; so must the art be')
-    assert.match(page, /not a fact about it/)
+    assert.match(page, /The game keeps no terrain of its own/, 'the archetype caption is gone; so must the art be')
+    assert.match(page, /do not plan around it/)
   })
 })
 

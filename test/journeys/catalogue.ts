@@ -451,7 +451,13 @@ export const CATALOGUE: readonly Scenario[] = [
         try {
           await assertMounted(session)
           await assertLandmarks(session.page, path)
-          await assertSkipLink(session.page, path)
+          // `#cf-main`, not `#main`. The shell's own anchor was replaced by `SkipLink` from
+          // @cloudsforge/ui, whose href and whose `MainRegion` target are both composed from one
+          // exported constant (`MAIN_ID`) — which is the fix, not the rename: the local pair
+          // could and did disagree, with `<main>` carrying no `tabIndex={-1}` so following the
+          // link scrolled the page and left focus behind. This argument is passed explicitly so
+          // that a change to the shared id fails HERE rather than silently asserting nothing.
+          await assertSkipLink(session.page, path, '#cf-main')
         } finally {
           await session.close()
         }

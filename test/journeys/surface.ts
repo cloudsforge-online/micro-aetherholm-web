@@ -107,6 +107,20 @@ interface Decision {
 function decide(body: string): Decision | null {
   const ret = /return\s+200\s+"([^"]*)"/.exec(body)
   if (ret) return { kind: 'literal', text: (ret[1] ?? '').replace(/\\n/g, '\n') }
+  /*
+   * A SINGLE-QUOTED literal body, which is what `/sitemap.xml` and `/robots.txt` use: nginx needs
+   * single quotes there because both bodies contain `"` (the XML declaration, the `add_header`
+   * values above them) and both run over several lines.
+   *
+   * Anchored to a `return` at the START OF ITS OWN LINE at the location's indentation, and that is
+   * load-bearing rather than tidy: `/robots.txt` carries a CONDITIONAL
+   * `if ($cf_env) { return 200 '…'; }` ABOVE its real body, and a regex taking the first match
+   * would model this surface as permanently non-mainnet — every address serving `Disallow: /` to
+   * a harness that would never say so. `$host` here is 127.0.0.1, which is no environment, so the
+   * unconditional body is the correct one.
+   */
+  const quoted = /\n {8}return\s+200\s+'([\s\S]*?)';/.exec(body)
+  if (quoted) return { kind: 'literal', text: (quoted[1] ?? '').replace(/\\n/g, '\n') }
   if (/try_files\s+\/index\.html/.test(body)) return { kind: 'shell' }
   if (/try_files\s+\$uri/.test(body)) return { kind: 'file' }
   return null

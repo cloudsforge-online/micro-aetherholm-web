@@ -84,7 +84,7 @@ export function Empty({
 export function Failed({
   notice,
   onRetry,
-  title = 'That did not load',
+  title = 'That would not load',
 }: {
   notice: ErrorNotice
   onRetry?: (() => void) | undefined
@@ -99,7 +99,7 @@ export function Failed({
       <p className="ah-state__hint">{notice.message}</p>
       {notice.requestId && (
         <p className="ah-state__meta">
-          Quote this to support: <code className="cf-num ah-reqid">{notice.requestId}</code>
+          Give support this reference: <code className="cf-num ah-reqid">{notice.requestId}</code>
         </p>
       )}
       {onRetry && (
@@ -122,7 +122,7 @@ export function Failed({
  */
 export function Forbidden({
   notice,
-  title = 'That is not yours to see',
+  title = 'That belongs to somebody else',
 }: {
   notice?: ErrorNotice | undefined
   title?: string | undefined
@@ -135,7 +135,7 @@ export function Forbidden({
       <p className="ah-state__title">{title}</p>
       <p className="ah-state__hint">
         {notice?.message ??
-          'Another player’s economy and fleets stay theirs until a battle report says otherwise.'}
+          'What another player has built and what they are flying stays private until a battle report makes it public.'}
       </p>
       {notice?.requestId && (
         <p className="ah-state__meta">

@@ -157,7 +157,7 @@ export function CitiesPage() {
         {head}
         <Empty
           title="You hold no cities this season"
-          hint="Found one from the archipelago map. The first seven days are under aegis."
+          hint="Pick an island on the archipelago map and settle a plot. Nobody can touch you for the first seven days."
         />
       </>
     )
@@ -229,8 +229,8 @@ function CityDetail({
 
       <h2>Stocks</h2>
       <p className="ah-dim">
-        Computed live from the settled position — the same floor arithmetic the server charges by.
-        Cap {formatAmount(cap)} per resource.
+        Worked out here as you watch, from your last settled position, using the same rounding the
+        server bills by. You can hold {formatAmount(cap)} of each resource before the rest spills.
       </p>
       <table className="ah-table">
         <thead>
@@ -259,7 +259,7 @@ function CityDetail({
       </table>
 
       <h2>Queues</h2>
-      {pending.length === 0 && <p className="ah-dim">Nothing queued.</p>}
+      {pending.length === 0 && <p className="ah-dim">Nothing is being built.</p>}
       {pending.length > 0 && (
         <ul className="ah-queue">
           {pending.map((item) => (
@@ -277,7 +277,7 @@ function CityDetail({
 
       <div className="ah-forms">
         <QueueForm
-          title="Queue a building"
+          title="Put up a building"
           options={BUILDING_TYPES.map((t) => {
             const c = buildContent[t]
             return {
@@ -289,10 +289,10 @@ function CityDetail({
           })}
           submit={(target, key) => queueBuilding(city.id, target, key)}
           onDone={onChanged}
-          note="Costs shown are the engine\u2019s own, served from the source it charges from: base \u00d7 next level. The reply shows your settled position after the charge."
+          note="These prices come from the engine that charges them: the base cost times the next level. Once it is queued you will see what your stores look like after paying."
         />
         <QueueForm
-          title="Queue research"
+          title="Research something"
           options={Object.entries(RESEARCH_NODES).flatMap(([branch, nodes]) =>
             nodes.map((node) => {
               const c = researchContent[node]
@@ -306,22 +306,22 @@ function CityDetail({
           )}
           submit={(target, key) => queueResearch(city.id, target, key)}
           onDone={onChanged}
-          note="Exact node costs and durations above are served, not computed here."
+          note="The costs and times above are the game\u2019s own figures, not something this page worked out."
         />
         <QueueForm
-          title="Lay a keel"
+          title="Start a ship"
           options={Object.entries(airships).map(([cls, spec]) => ({
             value: cls,
             label: `${label(cls)} — needs aerodock ${spec.aerodock}${spec.aerodock > aerodockLevel ? ' (yours is lower)' : ''}`,
           }))}
           submit={(target, key) => queueShip(city.id, target, key)}
           onDone={onChanged}
-          note="Ship costs come from the served class table below."
+          note="What a ship costs is in the class table further down."
         />
       </div>
 
       <h2>Garrison</h2>
-      {city.ships.length === 0 && <p className="ah-dim">No ships in harbour.</p>}
+      {city.ships.length === 0 && <p className="ah-dim">Nothing is moored here.</p>}
       {city.ships.length > 0 && (
         <ul className="ah-garrison">
           {city.ships.map((s) => (
@@ -334,7 +334,7 @@ function CityDetail({
       )}
 
       <h2>The class table</h2>
-      <p className="ah-dim">As served by the game — amounts are decimal strings, rendered without rounding.</p>
+      <p className="ah-dim">Straight from the game. The figures are shown whole, with nothing rounded off.</p>
       <div className="ah-scroll">
         <table className="ah-table">
           <thead>
@@ -372,7 +372,7 @@ function CityDetail({
       </div>
 
       <h2>Buildings</h2>
-      {city.buildings.length === 0 && <p className="ah-dim">Bare plots so far.</p>}
+      {city.buildings.length === 0 && <p className="ah-dim">Bare ground. Nothing built.</p>}
       {city.buildings.length > 0 && (
         /*
          * The one place in this client where the generated art is the CONTENT rather than a
@@ -422,7 +422,7 @@ function QueueForm({
       setMessage('Queued.')
       onDone()
     } catch (err) {
-      setMessage(noticeFor(err, 'The queue refused that.').message)
+      setMessage(noticeFor(err, 'That was turned down.').message)
     } finally {
       setBusy(false)
     }
@@ -448,7 +448,7 @@ function QueueForm({
         ))}
       </select>
       <button type="submit" className="cf-btn" disabled={busy || !target}>
-        {busy ? 'Queueing…' : 'Queue'}
+        {busy ? 'Starting…' : 'Start it'}
       </button>
       <p className="ah-dim">{note}</p>
       {message && <p role="status">{message}</p>}
