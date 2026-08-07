@@ -10,6 +10,7 @@
  * — so splitting a page that renders tables would buy a round trip and save nothing.
  */
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { ScrollToTop } from './components/scroll-to-top.tsx'
 import { AppShell } from './components/shell.tsx'
 import { AuthProvider, ProtectedRoute } from './lib/auth.tsx'
 import { AlliancePage } from './pages/alliance.tsx'
@@ -23,6 +24,7 @@ import { NotFoundPage } from './pages/not-found.tsx'
 export function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <Routes>
           <Route element={<AppShell />}>
