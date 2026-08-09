@@ -59,7 +59,10 @@ import { RESOURCES } from '../src/lib/format.ts'
 // @ts-expect-error — a .mjs tool with no type declarations, imported so that the test re-derives
 // the catalogue from the manifest rather than re-implementing the derivation and agreeing with
 // itself.
-import { ROOT_CHROME, UNSHIPPED, catalogueFrom, render, shipped } from '../tools/sync-art.mjs'
+// Kept on ONE line: the directive above suppresses the next line, and the error TypeScript
+// reports is on the module specifier — so a wrapped import puts the specifier out of its reach
+// and the directive itself becomes unused, which is also an error.
+import { MECHANIC_CLAIMS, ROOT_CHROME, UNSHIPPED, catalogueFrom, render, shipped } from '../tools/sync-art.mjs'
 
 const root = new URL('../', import.meta.url)
 const at = (p: string): string => fileURLToPath(new URL(p, root))
@@ -177,9 +180,122 @@ describe('the partition of the set is total', () => {
   it('holds out exactly the twenty-two recorded in micro-org#175', () => {
     // A number rather than a list, so that adding a twenty-third is a deliberate edit here as well
     // as there. Sixteen heraldry, two icons and one splash for mechanics the service does not
-    // have, one splash for a screen that does not exist, two derivation sources.
+    // have, one splash for a mechanic it has and no route lets a client find, two derivation
+    // sources. The block below re-measures the last four rather than trusting this sentence.
     assert.equal(Object.keys(UNSHIPPED as object).length, 22)
   })
+})
+
+/**
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE REASON A PICTURE IS HELD OUT IS A CLAIM ABOUT ANOTHER REPOSITORY, SO MEASURE IT THERE.
+ *
+ * micro-org#186 reports six assets that "illustrate mechanics the built game does not have". The
+ * partition above proves each one is named with a reason; it cannot tell whether the reason is
+ * still TRUE, because a reason is prose and prose is not re-read. Two failures hide in that gap
+ * and they point opposite ways:
+ *
+ *   * the game grows the mechanic and the picture stays withheld — micro-org#175 again, a good
+ *     asset held back from a screen that now has data for it;
+ *   * the reason was wrong when it was written, and every later reader inherits it.
+ *
+ * The second one is what this block found on 2026-08-10. `private-skerry` was held out under
+ * "the built game has no such thing", citing `archipelagos.kind` in a migration as though a CHECK
+ * constraint were the whole of it. It is not: `provisioning.ts` provisions a skerry against a
+ * paid entitlement, `world.ts` seeds its twelve islands from `skerrySeed(entitlementId)`,
+ * `server.ts` serves the title contract's provision route, and a `skerry.provisioned` event goes
+ * out. The mechanic is BUILT and sold. What is missing is a way for a client to find one: no
+ * route lists the archipelagos a subject owns, so this bundle has no id to ask
+ * `GET /v1/archipelagos/:id/islands` for. That is a real reason to hold the splash back and a
+ * completely different reason from the one on the label.
+ *
+ * So `MECHANIC_CLAIMS` records the word each asset turns on and whether the service has it, and
+ * this block re-derives both directions from a sibling checkout. It reads the service's own
+ * source rather than a description of it, for the reason test/aetherholm.test.ts gives at length.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════
+ */
+describe('a mechanic a held-out picture names is measured in the service, not remembered', () => {
+  interface Claim {
+    readonly word: string
+    readonly built: boolean
+  }
+  const claims = MECHANIC_CLAIMS as Readonly<Record<string, Claim>>
+
+  /** Where a micro-aetherholm checkout is, in the order CI and a developer's machine put it. */
+  const roots = [
+    process.env['CLOUDSFORGE_AETHERHOLM_SRC'],
+    at('../aetherholm/src'),
+    at('.aetherholm/src'),
+  ].filter((v): v is string => Boolean(v))
+  const src = roots.find((p) => existsSync(p))
+
+  /**
+   * Every `.ts` under the service's `src`, EXCLUDING its own tests. A test file is not the
+   * service: micro-aetherholm's suite mentions `population` nowhere but names `skerry` dozens of
+   * times, and counting either would answer a question about the suite rather than about what the
+   * game does.
+   */
+  const sources = (dir: string): string[] =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+      const full = join(dir, e.name)
+      if (e.isDirectory()) return sources(full)
+      return e.isFile() && e.name.endsWith('.ts') && !e.name.endsWith('.test.ts') ? [full] : []
+    })
+
+  const body = src ? sources(src).map((f) => readFileSync(f, 'utf8')).join('\n') : ''
+  const mentions = (word: string): boolean => new RegExp(`\\b${word}\\b`, 'i').test(body)
+
+  it('claims a state for every held-out asset that is not somebody else\'s and not a source', () => {
+    // Total, like the partition above: the twenty-two are sixteen heraldry components, the two
+    // sources their own derivatives superseded, and four claims about the game. An asset that
+    // slips out of all three would be held out for a reason nothing here re-reads.
+    const derivedSources = new Set(
+      manifest.assets
+        .map((a) => (a as { derivedFrom?: string }).derivedFrom)
+        .filter((p): p is string => Boolean(p)),
+    )
+    const unaccounted = Object.keys(UNSHIPPED as object).filter(
+      (p) => !p.startsWith('assets/heraldry/') && !derivedSources.has(p) && !(p in claims),
+    )
+    assert.deepEqual(unaccounted, [], `held out with an unmeasured reason: ${unaccounted.join(', ')}`)
+  })
+
+  it('names only assets that really are held out', () => {
+    const strays = Object.keys(claims).filter((p) => !(p in (UNSHIPPED as object)))
+    assert.deepEqual(strays, [], `claimed about, but shipped or unknown: ${strays.join(', ')}`)
+  })
+
+  if (!src) {
+    it('SKIPPED: no micro-aetherholm checkout — CI checks one out and requires this to run', () => {
+      console.log('UNCHECKED: micro-aetherholm is not checked out; mechanic claims not measured')
+      assert.ok(true)
+    })
+  } else {
+    it('holds nothing back for a mechanic the service has since built', () => {
+      // The #175 direction. Red here means the picture can come off the bench.
+      const grown = Object.entries(claims)
+        .filter(([, c]) => !c.built && mentions(c.word))
+        .map(([path, c]) => `${path} (micro-aetherholm names "${c.word}")`)
+      assert.deepEqual(grown, [], `held out as unbuilt, but the service has it: ${grown.join('; ')}`)
+    })
+
+    it('does not credit the service with a mechanic it has not got', () => {
+      // The other direction. Red here means an asset is withheld for a client-shaped reason that
+      // is really a game-shaped one, and the honest label is the shorter one.
+      const absent = Object.entries(claims)
+        .filter(([, c]) => c.built && !mentions(c.word))
+        .map(([path, c]) => `${path} (nothing in micro-aetherholm names "${c.word}")`)
+      assert.deepEqual(absent, [], `claimed built, and it is not: ${absent.join('; ')}`)
+    })
+
+    it('measured the service, rather than an empty string', () => {
+      // A recursion that silently returned nothing would make both assertions above vacuous in
+      // one direction and unfalsifiable in the other — the estate's most-repeated defect, a check
+      // that lost its operand. `city` is in micro-aetherholm's source under every phase it built.
+      assert.ok(body.length > 50_000, 'the service source read short; the walk found almost nothing')
+      assert.ok(mentions('city'), 'the probe found no "city" in micro-aetherholm; it is not reading it')
+    })
+  }
 })
 
 describe('the generated catalogue', () => {

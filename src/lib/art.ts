@@ -161,9 +161,12 @@ export function islandArt(band: string, idx: number): string | null {
 /**
  * A season or event splash, 1536×640, by slug.
  *
- * Four of the six are wired. `storm-surge` paints well strain and `private-skerry` paints a
- * skerry archipelago; the service models neither on any route, so both are held out of the
- * catalogue rather than hung off an unrelated screen. See `UNSHIPPED` in `tools/sync-art.mjs`.
+ * Four of the six are wired, and the two that are not are held out for DIFFERENT reasons.
+ * `storm-surge` paints well strain, which the service does not model at all. `private-skerry`
+ * paints a mechanic micro-aetherholm really has and sells — no route lists the skerries a subject
+ * owns, so this client can never learn the id of one to show. Neither is hung off an unrelated
+ * screen. See `UNSHIPPED` and `MECHANIC_CLAIMS` in `tools/sync-art.mjs`, which `test/art.test.ts`
+ * re-measures against the service on every run rather than leaving to this comment.
  */
 export function splash(slug: 'season-dawn' | 'season-seal' | 'spire-war' | 'trade-flotilla'): string | null {
   return lookup('splashes', slug)?.path ?? null
