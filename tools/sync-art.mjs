@@ -88,10 +88,21 @@ export const UNSHIPPED = Object.freeze({
   'assets/icons/status-strain-512x512.png': 'no well carries a strain; the service has no such mechanic',
   // The splash of an overdrawn well, which is the same absent mechanic painted wide.
   'assets/splashes/storm-surge-1536x640.png': 'illustrates well strain, which the service does not model',
-  // Private skerries are real in the DATABASE — `archipelagos.kind` is `public` or `skerry`
-  // (`aetherholm/src/migrations.ts:127`) — and reach no client: no route serves the kind, and
-  // there is no screen on which a player provisions or enters one.
-  'assets/splashes/private-skerry-1536x640.png': 'no route exposes archipelago kind; no screen shows a skerry',
+  // ── built, and unreachable from here ────────────────────────────────────────────────────────
+  // A DIFFERENT KIND OF GAP FROM THE THREE ABOVE, and it was mislabelled as one of them until
+  // 2026-08-10. The Private Skerry is not a plan: `provisioning.ts` raises one against a paid
+  // entitlement, `world.ts` seeds its twelve islands from `skerrySeed(entitlementId)` so the same
+  // purchase yields the same geography on both sides of a race, `server.ts` serves the title
+  // contract's provision route, and `aetherholm.skerry.provisioned` goes out on the bus.
+  //
+  // What is missing is the way in. Provisioning is a SERVICE act driven by the entitlement bridge
+  // — a user token is refused — and no route lists the archipelagos a subject owns. So a player
+  // who has bought one cannot be handed an id here, and `GET /v1/archipelagos/:id/islands` wants
+  // an id. The splash is held back for want of a screen it could sit on, not for want of a
+  // mechanic; the honest fix is a route in micro-aetherholm, and it is a smaller thing than the
+  // three above. Recorded in micro-org#186.
+  'assets/splashes/private-skerry-1536x640.png':
+    'the skerry is built and sold, and no route lists the ones a subject owns — this client cannot find one to show',
 
   // ── superseded by their own derivatives ─────────────────────────────────────────────────────
   // These two are the SOURCES the shipped cards were cut and composited from (`derivedFrom` on
@@ -115,6 +126,36 @@ export const UNSHIPPED = Object.freeze({
  * found the brand layer healthy and the product layer empty. `test/art.test.ts` re-checks the
  * bytes, because "copied once" is not a property that stays true.
  */
+/**
+ * The word each held-out mechanic asset turns on, and whether the SERVICE has it — the claim in
+ * the reason above, in a form a test can measure instead of a form a reader has to trust.
+ *
+ * ════════════════════════════════════════════════════════════════════════════════════════════════
+ * A REASON IS A MEASUREMENT WITH A DATE ON IT, AND MEASUREMENTS GO STALE.
+ *
+ * "The service has no such mechanic" was true of every entry here when it was written. It stays
+ * true only until somebody builds one, and the day that happens this table is a picture withheld
+ * from a screen that now has data for it — the same defect as micro-org#175 in miniature, and
+ * invisible for the same reason: nothing re-reads a comment.
+ *
+ * So the claim is written down as `built`, and `test/art.test.ts` re-derives it from a sibling
+ * `micro-aetherholm` checkout on every run. `false` means the word must return NOTHING from the
+ * service's own source; `true` means it must be there, and the asset is held out for a reason
+ * that is about this client rather than about the game.
+ *
+ * The word is the crudest possible probe and that is deliberate: it goes red when somebody merely
+ * MENTIONS the mechanic, which is a prompt to say which of the two rows they are now in, not a
+ * false alarm. `test/aetherholm.test.ts` makes the same trade for route paths and gives the
+ * argument at length.
+ * ════════════════════════════════════════════════════════════════════════════════════════════════
+ */
+export const MECHANIC_CLAIMS = Object.freeze({
+  'assets/icons/status-population-512x512.png': { word: 'population', built: false },
+  'assets/icons/status-strain-512x512.png': { word: 'strain', built: false },
+  'assets/splashes/storm-surge-1536x640.png': { word: 'strain', built: false },
+  'assets/splashes/private-skerry-1536x640.png': { word: 'skerry', built: true },
+})
+
 export const ROOT_CHROME = Object.freeze({
   'assets/title/favicon-32x32.png': 'favicon-32x32.png',
   'assets/title/favicon-192x192.png': 'favicon-192x192.png',

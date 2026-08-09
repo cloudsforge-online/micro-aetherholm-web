@@ -262,6 +262,43 @@ jobs:
           }
           echo "ok: $count routes verified against the service that serves them, mechanisms included"
 
+      # ── The reasons the pictures are held back were re-measured, not re-read ──────────────────
+      #
+      # `test/art.test.ts` searches a sibling micro-aetherholm checkout for the word each withheld
+      # asset turns on, and skips that half when there is no checkout — same arrangement as the
+      # route cross-check above and the same failure mode, so the same guard. Without it the
+      # marker "the game does not model this" would be a comment nobody re-reads, and a mechanic
+      # the service grew would leave a good picture on the bench indefinitely. That is
+      # micro-org#175 exactly, and micro-org#186 is the record of it having already happened once
+      # in the other direction: a splash filed as "no such mechanic" for a Private Skerry that
+      # micro-aetherholm provisions, seeds and sells.
+      - name: The withheld pictures were checked against the game
+        working-directory: aetherholm-web
+        run: |
+          set -euo pipefail
+          test -d ../aetherholm/src || {
+            echo "::error::micro-aetherholm was not checked out; the mechanic claims were never measured"
+            exit 1
+          }
+          out=$(node --import tsx --test test/art.test.ts 2>&1 || true)
+          # Read from a here-string, never a pipe into `grep -q` — see the EPIPE note above.
+          if grep -q 'UNCHECKED: micro-aetherholm is not checked out' <<<"$out"; then
+            echo "::error::the mechanic claims skipped themselves while micro-aetherholm was present"
+            exit 1
+          fi
+          grep -q 'measured the service, rather than an empty string' <<<"$out" || {
+            echo "::error::the operand check did not run; the mechanic claims may have graded an empty string"
+            exit 1
+          }
+          # `if`, not `cmd && { … }`: under `set -e` an AND-list whose left side fails takes the
+          # whole list's non-zero status with it, so the no-failures case — the good one — would
+          # end the step red.
+          if grep -q '^not ok' <<<"$out"; then
+            echo "::error::a withheld asset's stated reason no longer matches micro-aetherholm"
+            exit 1
+          fi
+          echo "ok: every withheld picture's reason re-measured against micro-aetherholm"
+
       # …and the cross-check can fail. Name a route the service does not serve and require the
       # suite to go red, so an aetherholm.test.ts reduced to assertions that always pass cannot
       # look like a verified client.

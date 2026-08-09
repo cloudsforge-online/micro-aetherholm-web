@@ -185,9 +185,19 @@ asset cannot leave this client by being forgotten:
   fourth would be a lie told confidently. Reported for `worlds`, not fixed here.
 - **`icons/status-population`, `icons/status-strain`, `splashes/storm-surge`** — a citizen count
   and a well-overdraw mechanic. `grep -rnw population src/` and `grep -rnw strain src/` in
-  `micro-aetherholm` return nothing: the game does not model either.
-- **`splashes/private-skerry`** — skerry archipelagos exist in the database
-  (`aetherholm/src/migrations.ts`) and on no route and no screen.
+  `micro-aetherholm` return nothing: the game does not model either. That is not left as a claim
+  in prose — `MECHANIC_CLAIMS` records the word each of these turns on and `test/art.test.ts`
+  re-runs the search against a sibling checkout, in **both** directions: an asset held back for a
+  mechanic the service has since built is the same defect as micro-org#175, and it would otherwise
+  be invisible because nothing re-reads a comment.
+- **`splashes/private-skerry`** — **not the same kind of gap, and it was filed as one until
+  2026-08-10.** The Private Skerry is built and sold: `aetherholm/src/provisioning.ts` raises one
+  against a paid entitlement, `world.ts` seeds its twelve islands from the entitlement id, the
+  title contract's provision route serves it and an event goes out. What is missing is the way in
+  — provisioning is a service act the bridge drives, and no route lists the archipelagos a subject
+  owns, so this client is never handed an id to ask
+  `GET /v1/archipelagos/:id/islands` about. The splash waits on a route in `micro-aetherholm`,
+  which is a far smaller thing than the three above.
 - **`keyart/og-source`, `keyart/social-backdrop`** — the uncut sources the two shipped cards were
   derived from. Shipping both halves would put 2 MB in the image for nothing to reference.
 
