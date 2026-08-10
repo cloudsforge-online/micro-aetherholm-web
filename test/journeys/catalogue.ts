@@ -22,6 +22,8 @@
  * on screen are the ones the response carried, and never that they are the right numbers.
  */
 import assert from 'node:assert/strict'
+import { HUB_MINE_PATH, NOT_PAID_CLAUSE } from '@cloudsforge/ui'
+import { hosts } from '../../src/lib/hosts.ts'
 import { assertMounted, renderOnlyWithStubbedNetwork, type Stubs } from './browser.ts'
 import {
   assertAxeClean,
@@ -557,6 +559,105 @@ export const CATALOGUE: readonly Scenario[] = [
         } finally {
           await session.close()
         }
+      }
+    },
+  },
+
+  /* ---- browser mining, offered from the bar ----------------------------- */
+  {
+    id: 'BJ-MINE-LINK',
+    title:
+      'the bar offers browser mining beside the account, as a link to the surface that runs it, and names no payment',
+    tier: 1,
+    asserts: 'presentation',
+    noServerRule:
+      'every clause here is a decision this bundle makes with nothing in hand. The control is ' +
+      'seated by src/components/shell.tsx, its destination is composed by cloudsforgeHosts() from ' +
+      'the address the page was served from, and the not-paid sentence is a constant in ' +
+      '@cloudsforge/ui. No route is read to produce any of it, so there is no server rule to own.',
+    async run(surface) {
+      /*
+       * Signed in, because that is the harder half. Signed out the neighbour is a `Sign in` button
+       * this file would find by its words; signed in it is the handle trigger, and a control that
+       * drifted below the account menu would still LOOK correct in a screenshot of either.
+       */
+      const session = await renderOnlyWithStubbedNetwork(surface.origin, { storage: SIGNED_IN, stubs: BASE })
+      try {
+        await assertMounted(session)
+        await session.page.waitForSelector('.cf-bar .cf-mine', { timeout: 10_000 })
+
+        // Scoped to the bar, and COUNTED. A shell that passed `mining` twice — once here and once
+        // from a page — and a bar that dropped it are both invisible in source.
+        const found = await session.page.$$eval('.cf-bar .cf-mine', (nodes) =>
+          nodes.map((n) => ({
+            tag: n.tagName,
+            href: n.getAttribute('href'),
+            text: (n.textContent ?? '').trim(),
+            describedBy: n.getAttribute('aria-describedby'),
+          })),
+        )
+        assert.equal(found.length, 1, `expected one mining control in the bar, found ${found.length}`)
+        const [mine] = found
+        assert.ok(mine, 'the bar renders no mining control')
+
+        // An anchor, not an onClick. A destination expressed as a handler cannot be middle-clicked
+        // or opened in a new tab, its target cannot be copied, and it is invisible to everything
+        // that reads links — a player who wants to mine while the map is open needs all three.
+        assert.equal(mine.tag, 'A', 'the mining control is not a link')
+        // Resolved through the registry on THIS side too, so the assertion cannot pass by both
+        // halves quoting the same typed-in string. The surface is served from 127.0.0.1, so
+        // `cloudsforgeHosts()` answers the local ports in the page and in this process alike.
+        assert.equal(
+          mine.href,
+          `${hosts().hub}${HUB_MINE_PATH}`,
+          'the mining control does not point at Forge Hub’s mining address',
+        )
+
+        /*
+         * Beside the account in TAB ORDER, driven with a real Tab in a real browser rather than
+         * read off document order. A stylesheet can seat a box anywhere, `order` on a flex row can
+         * reverse two neighbours on screen while the markup stays put, and a `tabindex` on either
+         * one moves the keyboard without moving either. Only pressing the key answers this.
+         */
+        await session.page.focus('.cf-bar .cf-mine')
+        await session.page.keyboard.press('Tab')
+        const next = await session.page.evaluate(() => {
+          const el = document.activeElement
+          return el === null
+            ? null
+            : { haspopup: el.getAttribute('aria-haspopup'), text: (el.textContent ?? '').trim() }
+        })
+        assert.ok(next, 'nothing holds focus one Tab after the mining control')
+        assert.equal(
+          next.haspopup,
+          'menu',
+          `one Tab past the mining control is not a dropdown trigger, it is “${next.text}”`,
+        )
+        assert.match(
+          next.text,
+          new RegExp(ME.user.handle),
+          `one Tab past the mining control is not the account menu, it is “${next.text}”`,
+        )
+
+        // And it promises nothing the pool pays. `payoutsImplemented` is false today, and on a
+        // screen about seasons and territory a figure beside the word Mine would be read as what a
+        // season of mining is worth.
+        const description = await session.page.evaluate(
+          (id) => (id === null ? null : (document.getElementById(id)?.textContent ?? null)),
+          mine.describedBy,
+        )
+        assert.ok(description, 'the mining control carries no description for a screen reader')
+        assert.ok(
+          description.includes(NOT_PAID_CLAUSE),
+          'the mining control does not carry the not-paid clause',
+        )
+        assert.doesNotMatch(
+          `${mine.text} ${description}`,
+          /[$€£]|\d/,
+          'the mining control shows a figure, and nothing is paid',
+        )
+      } finally {
+        await session.close()
       }
     },
   },
