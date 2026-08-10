@@ -37,6 +37,7 @@ import {
   fetchFleets,
   fetchIslands,
   fetchLanes,
+  fetchOwnedArchipelagos,
   fetchReadiness,
   foundAlliance,
   foundCity,
@@ -139,6 +140,42 @@ describe('fetchCurrentSeason — GET /v1/seasons/current (server.ts)', () => {
   it('still throws on a 500 — only the 404 is expected', async () => {
     stub = installFetch(() => json(500, { error: { code: 'internal', message: 'nope' } }))
     await assert.rejects(() => fetchCurrentSeason(), (err: unknown) => err instanceof ApiError && err.status === 500)
+  })
+})
+
+describe('fetchOwnedArchipelagos — GET /v1/archipelagos (server.ts)', () => {
+  it('gets exactly that path, with the token, and NEVER names a userId', async () => {
+    stub = installFetch(() => json(200, { archipelagos: [] }))
+    await fetchOwnedArchipelagos()
+    assert.equal(lastCall().url, `${BASE}/v1/archipelagos`)
+    assert.equal(lastCall().method, 'GET')
+    assert.equal(lastCall().headers['authorization'], 'Bearer access-token')
+    // `?userId=` is an admin's read on the service (server.ts): a player client that sent one
+    // would be asking for a 403 on every request it makes.
+    assert.equal(new URL(lastCall().url).search, '')
+  })
+
+  it('carries the urn through instead of re-deriving it from the id', async () => {
+    // The service answers null for a world it did not mint through the bridge
+    // (aetherholm/src/provisioning.ts). A client that filled that in from the id would
+    // manufacture an identity the bridge never issued.
+    stub = installFetch(() =>
+      json(200, {
+        archipelagos: [
+          { id: ID, kind: 'skerry', name: 'The Gullery', urn: `cf:aetherholm:skerry:${ID}`, createdAt: '2026-08-10T00:00:00.000Z' },
+          { id: ID2, kind: 'skerry', name: 'Windward Rock', urn: null, createdAt: '2026-08-09T00:00:00.000Z' },
+        ],
+      }),
+    )
+    const owned = await fetchOwnedArchipelagos()
+    assert.equal(owned.length, 2)
+    assert.equal(owned[0]?.urn, `cf:aetherholm:skerry:${ID}`)
+    assert.equal(owned[1]?.urn, null)
+  })
+
+  it('treats a body without the key as an empty list, never a crash', async () => {
+    stub = installFetch(() => json(200, {}))
+    assert.deepEqual(await fetchOwnedArchipelagos(), [])
   })
 })
 

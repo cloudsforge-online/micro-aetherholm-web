@@ -618,6 +618,16 @@ body {
   align-items: center;
 }
 
+/* Which archipelago the map is drawing: the open season, or one of this player's own skerries.
+   Rendered only when there is more than one, so this never styles a control that cannot act
+   (pages/map.tsx). The select itself is the design system's `cf-input`; all this adds is the
+   label sitting beside it rather than above it. */
+.ah-world-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cf-space-xs);
+}
+
 /* The archipelago's spire marker, drawn as an SVG <image> inside the map. It is NOT an
    HTMLImageElement — see the note at its call site in pages/map.tsx. */
 .ah-map__spire {

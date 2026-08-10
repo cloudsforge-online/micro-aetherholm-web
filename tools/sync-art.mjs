@@ -33,7 +33,7 @@ const MANIFEST = new URL('public/art/MANIFEST.json', root)
 const OUT = new URL('src/art/catalogue.ts', root)
 
 /**
- * Assets this client does NOT serve, and why not — twenty-two of the hundred and one.
+ * Assets this client does NOT serve, and why not — twenty-one of the hundred and one.
  *
  * ════════════════════════════════════════════════════════════════════════════════════════════════
  * THIS TABLE IS THE POINT OF THE FILE. An asset set wired by eye leaves the leftovers invisible:
@@ -88,21 +88,25 @@ export const UNSHIPPED = Object.freeze({
   'assets/icons/status-strain-512x512.png': 'no well carries a strain; the service has no such mechanic',
   // The splash of an overdrawn well, which is the same absent mechanic painted wide.
   'assets/splashes/storm-surge-1536x640.png': 'illustrates well strain, which the service does not model',
-  // ── built, and unreachable from here ────────────────────────────────────────────────────────
-  // A DIFFERENT KIND OF GAP FROM THE THREE ABOVE, and it was mislabelled as one of them until
-  // 2026-08-10. The Private Skerry is not a plan: `provisioning.ts` raises one against a paid
-  // entitlement, `world.ts` seeds its twelve islands from `skerrySeed(entitlementId)` so the same
-  // purchase yields the same geography on both sides of a race, `server.ts` serves the title
-  // contract's provision route, and `aetherholm.skerry.provisioned` goes out on the bus.
+  // ── `splashes/private-skerry` USED TO BE HERE, AND IS NOW SERVED ────────────────────────────
+  // Kept as a note rather than deleted, because the way this entry left the table is the point.
   //
-  // What is missing is the way in. Provisioning is a SERVICE act driven by the entitlement bridge
-  // — a user token is refused — and no route lists the archipelagos a subject owns. So a player
-  // who has bought one cannot be handed an id here, and `GET /v1/archipelagos/:id/islands` wants
-  // an id. The splash is held back for want of a screen it could sit on, not for want of a
-  // mechanic; the honest fix is a route in micro-aetherholm, and it is a smaller thing than the
-  // three above. Recorded in micro-org#186.
-  'assets/splashes/private-skerry-1536x640.png':
-    'the skerry is built and sold, and no route lists the ones a subject owns — this client cannot find one to show',
+  // It was first held out under "the built game has no such thing", which was simply wrong: the
+  // Private Skerry is raised against a paid entitlement in `provisioning.ts`, its twelve islands
+  // are seeded from `skerrySeed(entitlementId)` in `world.ts`, and `aetherholm.skerry.provisioned`
+  // goes out on the bus. On 2026-08-10 `MECHANIC_CLAIMS` re-measured that against a real checkout
+  // and the label was corrected to a claim about THIS repository instead: the mechanic is built,
+  // and no route listed the archipelagos a subject owns, so a client could not be handed the id
+  // that `GET /v1/archipelagos/:id/islands` wants.
+  //
+  // That second reason was true, narrow, and about a missing route — so somebody built the route
+  // (micro-org#332). `GET /v1/archipelagos` lists a subject's own worlds, the map page draws the
+  // one you pick, and the splash hangs on that page's owner panel. Both facts about it are now
+  // the same fact, which is why it is out of `UNSHIPPED` and out of `MECHANIC_CLAIMS`.
+  //
+  // The lesson, which is the reason for these fifteen lines: an asset held out with a REASON THAT
+  // NAMES ONE MISSING THING is a work item. An asset held out with a vague one is a deletion
+  // nobody notices.
 
   // ── superseded by their own derivatives ─────────────────────────────────────────────────────
   // These two are the SOURCES the shipped cards were cut and composited from (`derivedFrom` on
@@ -153,7 +157,11 @@ export const MECHANIC_CLAIMS = Object.freeze({
   'assets/icons/status-population-512x512.png': { word: 'population', built: false },
   'assets/icons/status-strain-512x512.png': { word: 'strain', built: false },
   'assets/splashes/storm-surge-1536x640.png': { word: 'strain', built: false },
-  'assets/splashes/private-skerry-1536x640.png': { word: 'skerry', built: true },
+  // `assets/splashes/private-skerry-1536x640.png` was `{ word: 'skerry', built: true }` — the one
+  // row that ever read `true`, and the row that said out loud "this picture is withheld for a
+  // reason about the client, not about the game". It is served now; a claim about an asset that
+  // is no longer held out is a claim nothing can be measured against, and the test above refuses
+  // one on purpose.
 })
 
 export const ROOT_CHROME = Object.freeze({
