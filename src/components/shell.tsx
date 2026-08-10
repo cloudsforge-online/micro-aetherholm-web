@@ -18,10 +18,11 @@ import {
   CookieBanner,
   MainRegion,
   SkipLink,
+  miningOnHub,
 } from '@cloudsforge/ui'
 import { applyHead, surfaceMeta } from '@cloudsforge/ui/seo'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { PRODUCT, SURFACE } from '../lib/hosts.ts'
+import { PRODUCT, SURFACE, hosts } from '../lib/hosts.ts'
 import { fetchReadiness, type Readiness } from '../lib/aetherholm.ts'
 import { keyart, titleArt } from '../lib/art.ts'
 import { useSession } from '../lib/auth.tsx'
@@ -58,7 +59,33 @@ export function AppShell() {
         neither half can be shipped without the other.
       */}
       <SkipLink>Skip to the page</SkipLink>
-      <CloudsForgeBar current={PRODUCT} account={account} onSignIn={() => signIn()} onSignOut={signOut} />
+      {/*
+        `mining` is the design system's own control, and the bar seats it immediately before the
+        account menu — so the offer stands on all six screens of this game rather than on one page
+        of another surface, which is where a player had to go looking for it.
+
+        What is handed over is `miningOnHub()`, the control's `elsewhere` state, and that is the
+        honest state here rather than a reduced one. A session is a WebSocket to the pool plus two
+        Web Workers, pinned to one origin and one page; `hub.<apex>` is not this origin, and nothing
+        in this bundle can start, watch or stop a session over there. So the control renders an
+        ANCHOR to the surface that can — middle-clickable, openable in a new tab, its target
+        copyable, and legible to everything that reads links. A destination expressed as an
+        `onClick` has none of those, which is the same argument `SkipLink` above makes about a
+        target this file used to write by hand and get half right.
+
+        `hosts().hub`, never a URL typed in here. `hosts()` works the apex out from the address the
+        page was served from, and this client is served from localhost, from a `.localtest.me`
+        gateway host and from the apex — a literal would be right on exactly one of the three, and
+        the degradation banner below records what it costs when a client's idea of an address and
+        the estate's come apart.
+      */}
+      <CloudsForgeBar
+        current={PRODUCT}
+        account={account}
+        onSignIn={() => signIn()}
+        onSignOut={signOut}
+        mining={miningOnHub(hosts().hub)}
+      />
 
       <TitleStrip />
 
