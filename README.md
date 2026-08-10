@@ -138,7 +138,7 @@ rendering the app's own not-found page. CI probes the running container for the 
 (`/chronicle`, the unprotected route), the honest 404, the security headers on every location,
 and the favicons.
 
-## The generated art — 74 of 101 served, and the other 27 named
+## The generated art — 75 of 101 served, and the other 26 named
 
 `micro-aetherholm-assets` produced **101 FLUX 2 Pro images**, and until 2026-08-05 this client
 referenced **none of them**: no `<img>`, no `background-image`, no fetch. Nothing was broken —
@@ -159,7 +159,7 @@ placeholder renders as art and hides the gap; the rule and the reasoning are
 | `shipicons` | 10 | the same classes, where a ship is a table row rather than a choice |
 | `icons` | 14 | the four resources, `aegis`, `spire`, and the seven UI glyphs the pages name |
 | `islands` | 12 | `<band>_<biome>` — **read the caveat below** |
-| `splashes` | 4 | the empty state each one paints |
+| `splashes` | 5 | the empty state each one paints |
 | `keyart` | 2 | the chronicle's hero and the title strip's backdrop |
 | `title` | 2 | the mark and the wordmark |
 
@@ -175,7 +175,7 @@ beside a selected island is chosen from that island's index, stable for every pl
 caption on screen says exactly that. If that caption is ever dropped, the picture must go with
 it; `test/art.test.ts` asserts the sentence.
 
-**What is NOT served, and why.** Twenty-two assets are held out, each named with a reason in
+**What is NOT served, and why.** Twenty-one assets are held out, each named with a reason in
 `UNSHIPPED` in `tools/sync-art.mjs`, and `test/art.test.ts` proves the partition is total — an
 asset cannot leave this client by being forgotten:
 
@@ -190,18 +190,19 @@ asset cannot leave this client by being forgotten:
   re-runs the search against a sibling checkout, in **both** directions: an asset held back for a
   mechanic the service has since built is the same defect as micro-org#175, and it would otherwise
   be invisible because nothing re-reads a comment.
-- **`splashes/private-skerry`** — **not the same kind of gap, and it was filed as one until
-  2026-08-10.** The Private Skerry is built and sold: `aetherholm/src/provisioning.ts` raises one
-  against a paid entitlement, `world.ts` seeds its twelve islands from the entitlement id, the
-  title contract's provision route serves it and an event goes out. What is missing is the way in
-  — provisioning is a service act the bridge drives, and no route lists the archipelagos a subject
-  owns, so this client is never handed an id to ask
-  `GET /v1/archipelagos/:id/islands` about. The splash waits on a route in `micro-aetherholm`,
-  which is a far smaller thing than the three above.
 - **`keyart/og-source`, `keyart/social-backdrop`** — the uncut sources the two shipped cards were
   derived from. Shipping both halves would put 2 MB in the image for nothing to reference.
 
 Nothing was deleted. The art is permanent and lives in `micro-aetherholm-assets`.
+
+**One left this list, which is the outcome the list is for.** `splashes/private-skerry` was the
+twenty-second entry. It was first held out as a mechanic the game did not have — wrong — and on
+2026-08-10 `MECHANIC_CLAIMS` re-measured that against a real service checkout and the label was
+corrected to a claim about *this* repository: the skerry is built and sold, and no route listed the
+archipelagos a subject owns, so the client could never be handed an id to draw. A vague reason is a
+picture nobody misses; a reason naming one missing route is a work item, and micro-org#332 built
+it. `GET /v1/archipelagos` lists a player's own worlds, the map draws the one they pick, and the
+painting hangs on that page's owner panel.
 
 `micro-beacon`'s browser tier declares five of these paths as art this surface cannot work
 without, resolved in Chromium from this origin, so an empty `/art/` mount goes red before

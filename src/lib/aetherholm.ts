@@ -8,10 +8,11 @@
  * any citation below stops naming the line that registers the route, or if a route authenticates
  * by a different MECHANISM than the one recorded here.
  *
- * ── The surface, called (23 routes) ───────────────────────────────────────────────────────────
+ * ── The surface, called (24 routes) ───────────────────────────────────────────────────────────
  *
  *   GET    /readyz                            aetherholm/src/server.ts
  *   GET    /v1/seasons/current                aetherholm/src/server.ts
+ *   GET    /v1/archipelagos                   aetherholm/src/server.ts
  *   GET    /v1/archipelagos/:id/islands       aetherholm/src/server.ts
  *   GET    /v1/archipelagos/:id/lanes         aetherholm/src/server.ts
  *   GET    /v1/content/airships               aetherholm/src/server.ts
@@ -50,6 +51,10 @@
  *                    `aetherholm:provision`, and refused for user tokens outright
  *                    (server.ts). A browser must never hold that credential; a client
  *                    that could provision worlds would be a free-worlds endpoint with a UI.
+ *                    Declining it left a hole for as long as it was the ONLY route that knew a
+ *                    skerry existed — the buyer had no id and no screen (micro-org#332). The hole
+ *                    was in the service, not in this decision: `GET /v1/archipelagos` is the
+ *                    user-token read half, and it is called above.
  *   POST /v1/events  aetherholm/src/server.ts — the inbound erasure webhook, called by
  *                    identity's relay when a user is deleted. Its credential is an HMAC over the
  *                    RAW REQUEST BYTES, verified before the body is parsed, and a bad or absent
@@ -139,6 +144,29 @@ export interface Season {
   openedAt: string
   endsAt: string
   archipelagoId: string
+}
+
+/**
+ * One world a player owns: a Private Skerry, bought through `worlds` and provisioned into
+ * `micro-aetherholm`. The public season world is NOT one of these — it has no owner and never
+ * appears in this list (`aetherholm/src/provisioning.ts`).
+ */
+export interface OwnedArchipelago {
+  id: string
+  /** `skerry` for everything the service can return here; carried so the wire says which kind of
+   *  world it handed back rather than leaving this client to assume. */
+  kind: string
+  name: string
+  /**
+   * `cf:aetherholm:skerry:<id>` — the identity the rest of the estate dereferences.
+   *
+   * Null for a world not minted through the bridge, which is the service's honest answer rather
+   * than a urn re-derived from the id (`aetherholm/src/provisioning.ts`). Nothing in this client
+   * renders it; it is typed because it is on the wire, and a field this client silently drops at
+   * the type boundary is exactly the defect `Island.spire` records above.
+   */
+  urn: string | null
+  createdAt: string
 }
 
 export interface Island {
@@ -380,6 +408,22 @@ export async function fetchCurrentSeason(): Promise<Season | null> {
     if (err instanceof ApiError && err.status === 404) return null
     throw err
   }
+}
+
+/**
+ * GET /v1/archipelagos (`aetherholm/src/server.ts`). Own list — no `?userId=`, for the reason
+ * `fetchCities` gives: naming another player is an admin's read and this is a player client.
+ *
+ * This is the route that closes the gap this client used to carry in prose. A Private Skerry is
+ * sold through `worlds`, provisioned by `POST /v1/provision` — which a browser must never call —
+ * and until 2026-08-10 nothing told the buyer the id it had minted. Every screen here addresses a
+ * world by id, so a purchased world was unreachable from the client that renders worlds
+ * (micro-org#332). It is not paginated because the service does not paginate it: it caps at 100
+ * rows, one per entitlement.
+ */
+export async function fetchOwnedArchipelagos(): Promise<OwnedArchipelago[]> {
+  const body = await aetherholm<{ archipelagos?: OwnedArchipelago[] }>('/v1/archipelagos')
+  return body?.archipelagos ?? []
 }
 
 /** GET /v1/archipelagos/:id/islands (`aetherholm/src/server.ts`). */

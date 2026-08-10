@@ -90,6 +90,27 @@ const ISLANDS = [
   { id: 'aaaaaaaa-0000-4000-8000-000000000009', idx: 8, band: 'highwind', plots: 2, freePlots: 2 },
 ]
 
+/**
+ * A Private Skerry this player owns, as `GET /v1/archipelagos` serves one.
+ *
+ * Its three islands are a DIFFERENT set from `ISLANDS`, on purpose: the whole claim of
+ * micro-org#332 is that the map can be pointed at a world other than the season's, and a fixture
+ * that answered the same nine islands for both would pass whether the switch worked or not.
+ */
+const SKERRY = {
+  id: '55555555-5555-4555-8555-555555555555',
+  kind: 'skerry',
+  name: 'The Gullery',
+  urn: 'cf:aetherholm:skerry:55555555-5555-4555-8555-555555555555',
+  createdAt: '2026-08-01T00:00:00.000Z',
+}
+
+const SKERRY_ISLANDS = [
+  { id: 'cccccccc-0000-4000-8000-000000000001', idx: 0, band: 'shallows', plots: 6, freePlots: 6 },
+  { id: 'cccccccc-0000-4000-8000-000000000002', idx: 1, band: 'midreach', plots: 4, freePlots: 4 },
+  { id: 'cccccccc-0000-4000-8000-000000000003', idx: 2, band: 'highwind', plots: 3, freePlots: 3 },
+]
+
 /** Directed: A→B and B→A are separate lanes with separate rolls. That asymmetry is the game. */
 const LANES = [
   { id: 'bbbbbbbb-0000-4000-8000-000000000001', fromIslandId: 'aaaaaaaa-0000-4000-8000-000000000001', toIslandId: 'aaaaaaaa-0000-4000-8000-000000000004', multiplierBp: 12_500, travelSeconds: 900 },
@@ -129,6 +150,10 @@ const BASE: Stubs = [
   // right to treat that as a defect.
   ['GET /readyz', { json: { ready: true } }],
   ['GET /v1/seasons/current', { json: SEASON }],
+  // The player's own worlds. Empty by default, because most scenarios are about the season and an
+  // owner is the exception — but ANSWERED, because the map asks for it on every load and an
+  // unarranged request is a failure the harness is right to report.
+  ['GET /v1/archipelagos', { json: { archipelagos: [] } }],
   ['GET /v1/archipelagos/*/islands', { json: { islands: ISLANDS } }],
   ['GET /v1/archipelagos/*/lanes', { json: { lanes: LANES } }],
   ['GET /v1/content/airships', { json: { airships: {} } }],
@@ -221,6 +246,77 @@ export const CATALOGUE: readonly Scenario[] = [
         // fetched, not against the import graph.
         const heavy = session.collected.requests.filter((r) => /three|babylon|pixi|\.glb$/.test(r.url))
         assert.deepEqual(heavy.map((r) => r.url), [], 'the map pulled in a renderer')
+      } finally {
+        await session.close()
+      }
+    },
+  },
+
+  /* ---- micro-org#332 ---------------------------------------------------- */
+  {
+    id: 'BJ-AET-13',
+    title: 'a player who owns a Private Skerry can switch the map to it, and it draws THEIR islands',
+    tier: 2,
+    asserts: 'presentation',
+    async run(surface) {
+      // The defect, stated as a fixture: this player has bought a world. Before micro-org#332 the
+      // only route that knew it existed was the provision write, which a browser must never call,
+      // so nothing on this page could have named it.
+      const session = await renderOnlyWithStubbedNetwork(surface.origin, {
+        storage: SIGNED_IN,
+        stubs: [
+          ['GET /v1/archipelagos', { json: { archipelagos: [SKERRY] } }],
+          // Specific above general — the harness takes the FIRST match — so the skerry answers its
+          // own three islands and the season keeps its nine.
+          [`GET /v1/archipelagos/${SKERRY.id}/islands`, { json: { islands: SKERRY_ISLANDS } }],
+          [`GET /v1/archipelagos/${SKERRY.id}/lanes`, { json: { lanes: [] } }],
+          ...BASE,
+        ],
+      })
+      try {
+        await assertMounted(session)
+        await session.page.waitForSelector('svg circle[role="button"]', { timeout: 10_000 })
+
+        // It opens on the season, because that is the game everybody is playing.
+        assert.equal(
+          (await session.page.$$('svg circle[role="button"]')).length,
+          ISLANDS.length,
+          'the map did not open on the open season',
+        )
+
+        const select = await session.page.$('select')
+        assert.ok(select, 'a player who owns a world is offered no way to look at it')
+        const options = await session.page.$$eval('select option', (nodes) =>
+          nodes.map((n) => ({ value: (n as HTMLOptionElement).value, text: n.textContent ?? '' })),
+        )
+        assert.equal(options.length, 2, `the switcher offers ${options.length} worlds, expected the season and the skerry`)
+        assert.ok(
+          options.some((o) => o.value === SKERRY.id && o.text.includes(SKERRY.name)),
+          'the skerry is not offered by name',
+        )
+
+        await select.selectOption(SKERRY.id)
+        // THE ASSERTION THE ISSUE IS ABOUT: the id from the owned list is one the islands route
+        // accepts, and what comes back is drawn.
+        await session.page.waitForFunction(
+          (n) => document.querySelectorAll('svg circle[role="button"]').length === n,
+          SKERRY_ISLANDS.length,
+          { timeout: 10_000 },
+        )
+        const asked = session.apiCalls().map((r) => new URL(r.url).pathname)
+        assert.ok(
+          asked.includes(`/v1/archipelagos/${SKERRY.id}/islands`),
+          `the switch asked for ${asked.join(', ')}`,
+        )
+
+        // And the picture that was on the bench for want of this screen is now on the screen.
+        const splashes = await session.page.$$eval('img', (nodes) =>
+          nodes.map((n) => (n as HTMLImageElement).getAttribute('src') ?? ''),
+        )
+        assert.ok(
+          splashes.some((src) => src.includes('private-skerry')),
+          `the skerry splash did not render; images were ${splashes.join(', ')}`,
+        )
       } finally {
         await session.close()
       }

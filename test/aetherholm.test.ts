@@ -117,6 +117,7 @@ interface Route {
 export const SURFACE: readonly Route[] = [
   { method: 'GET', path: '/readyz', auth: 'none', idempotent: false },
   { method: 'GET', path: '/v1/seasons/current', auth: 'bearer', idempotent: false },
+  { method: 'GET', path: '/v1/archipelagos', auth: 'owner', idempotent: false },
   { method: 'GET', path: '/v1/archipelagos/:id/islands', auth: 'bearer', idempotent: false },
   { method: 'GET', path: '/v1/archipelagos/:id/lanes', auth: 'bearer', idempotent: false },
   { method: 'GET', path: '/v1/content/airships', auth: 'none', idempotent: false },

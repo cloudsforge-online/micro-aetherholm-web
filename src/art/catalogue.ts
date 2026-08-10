@@ -5,8 +5,8 @@
  * `micro-aetherholm-assets`. Run `pnpm sync-art` after copying a new asset set in;
  * `test/art.test.ts` fails if this file and the manifest disagree.
  *
- * 74 of the set's 101. The other 27 are the five pieces of browser chrome
- * served from the site root and the 22 this client does not serve at all — read
+ * 75 of the set's 101. The other 26 are the five pieces of browser chrome
+ * served from the site root and the 21 this client does not serve at all — read
  * `UNSHIPPED` in the generator for which, and for why each one. They are NOT missing and they
  * were NOT deleted; the art is permanent and lives in `micro-aetherholm-assets`.
  *
@@ -102,6 +102,7 @@ export const ART: readonly ArtEntry[] = [
   {"set":"ships","slug":"hauler","name":"hauler","path":"/art/ships/hauler-1024x512.png","size":"1024x512","accent":"#7fa3c0"},
   {"set":"ships","slug":"ironclad","name":"ironclad","path":"/art/ships/ironclad-1024x512.png","size":"1024x512","accent":"#7fa3c0"},
   {"set":"ships","slug":"skiff","name":"skiff","path":"/art/ships/skiff-1024x512.png","size":"1024x512","accent":"#7fa3c0"},
+  {"set":"splashes","slug":"private-skerry","name":"Private skerry","path":"/art/splashes/private-skerry-1536x640.png","size":"1536x640","accent":"#8f7ae8"},
   {"set":"splashes","slug":"season-dawn","name":"Season dawn","path":"/art/splashes/season-dawn-1536x640.png","size":"1536x640","accent":"#8f7ae8"},
   {"set":"splashes","slug":"season-seal","name":"Season seal","path":"/art/splashes/season-seal-1536x640.png","size":"1536x640","accent":"#8f7ae8"},
   {"set":"splashes","slug":"spire-war","name":"Spire war","path":"/art/splashes/spire-war-1536x640.png","size":"1536x640","accent":"#8f7ae8"},

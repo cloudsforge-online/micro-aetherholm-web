@@ -21,14 +21,15 @@
  * The rule is `micro-emberkin-web/src/lib/art.ts`'s, inherited with its reasoning.
  * ────────────────────────────────────────────────────────────────────────────────────────────────
  *
- * WHAT IS NOT HERE: the twenty-seven assets this bundle does not serve. Five are browser chrome
- * addressed by `index.html` directly; twenty-two are named, with a reason each, in `UNSHIPPED` in
- * `tools/sync-art.mjs`. None of them was deleted — the art is permanent.
+ * WHAT IS NOT HERE: the twenty-six assets this bundle does not serve. Five are browser chrome
+ * addressed by `index.html` directly; twenty-one are named, with a reason each, in `UNSHIPPED` in
+ * `tools/sync-art.mjs`. None of them was deleted — the art is permanent, and one of them came back
+ * (see `splash`, and micro-org#332).
  */
 import { ART, type ArtEntry } from '../art/catalogue.ts'
 import type { Resource } from './format.ts'
 
-/** Indexed once at module load: a linear scan of seventy-four entries per table row is silly. */
+/** Indexed once at module load: a linear scan of seventy-five entries per table row is silly. */
 const bySet = new Map<string, Map<string, ArtEntry>>()
 for (const entry of ART) {
   let set = bySet.get(entry.set)
@@ -161,14 +162,21 @@ export function islandArt(band: string, idx: number): string | null {
 /**
  * A season or event splash, 1536×640, by slug.
  *
- * Four of the six are wired, and the two that are not are held out for DIFFERENT reasons.
- * `storm-surge` paints well strain, which the service does not model at all. `private-skerry`
- * paints a mechanic micro-aetherholm really has and sells — no route lists the skerries a subject
- * owns, so this client can never learn the id of one to show. Neither is hung off an unrelated
- * screen. See `UNSHIPPED` and `MECHANIC_CLAIMS` in `tools/sync-art.mjs`, which `test/art.test.ts`
- * re-measures against the service on every run rather than leaving to this comment.
+ * Five of the six are wired. `storm-surge` is the one still held back, and its reason is about the
+ * GAME: it paints well strain, which the service does not model at all.
+ *
+ * `private-skerry` used to sit beside it under a different reason — the mechanic was built and
+ * sold, and no route listed the skerries a subject owned, so this client could never learn the id
+ * of one to show. That was a claim about micro-aetherholm, and on 2026-08-10 it stopped being
+ * true: `GET /v1/archipelagos` lists them, the map page draws one, and its owner's panel is where
+ * the painting hangs (micro-org#332). Recording the two reasons apart is what made the difference
+ * visible — `MECHANIC_CLAIMS` in `tools/sync-art.mjs` states each as a measurement and
+ * `test/art.test.ts` re-derives it from a real service checkout on every run, in both directions,
+ * rather than leaving it to a comment nobody re-reads.
  */
-export function splash(slug: 'season-dawn' | 'season-seal' | 'spire-war' | 'trade-flotilla'): string | null {
+export function splash(
+  slug: 'private-skerry' | 'season-dawn' | 'season-seal' | 'spire-war' | 'trade-flotilla',
+): string | null {
   return lookup('splashes', slug)?.path ?? null
 }
 

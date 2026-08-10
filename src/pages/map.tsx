@@ -29,6 +29,27 @@
  * and the selected island shows its band's archetype painting. READ `islandArt` IN lib/art.ts
  * BEFORE TOUCHING THAT LAST ONE — the band is the server's and the biome is this client's
  * illustration, and the caption saying so is load-bearing.
+ *
+ * ── MORE THAN ONE WORLD, since 2026-08-10 (micro-org#332) ────────────────────────────────────
+ *
+ * This page used to render one archipelago: the open season's. That was not a design decision, it
+ * was the only id a client could obtain. A Private Skerry is bought through `worlds` and raised by
+ * `POST /v1/provision`, which a browser must never call, and nothing told the buyer what had been
+ * made for them — so a purchased world existed, with its twelve islands and its own wind lattice,
+ * and the client that draws worlds could not address it. `GET /v1/archipelagos` is the read half,
+ * and this page is where it lands, because a skerry is not a second KIND of map: it is the same
+ * map of a smaller, private graph. A separate screen would have duplicated every line below to
+ * show the same thing.
+ *
+ * Two consequences worth naming, because both were wrong on this page before:
+ *
+ *   - THE SEASON IS NO LONGER THE PRECONDITION. The old empty state said "the archipelago exists
+ *     only inside a season", which the schema contradicts: a skerry has `season_id` null by
+ *     constraint (`aetherholm/src/migrations.ts`). Between seasons, an owner now has
+ *     their own world to look at, and that sentence is only shown to somebody who owns none.
+ *   - THE SWITCHER IS HIDDEN WHEN THERE IS NOTHING TO SWITCH. A select with one option is a
+ *     control that teaches the reader something can be changed and then refuses; nobody who owns
+ *     no skerry sees one.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { noticeFor, type ErrorNotice } from '../lib/api.ts'
@@ -36,9 +57,11 @@ import {
   fetchCurrentSeason,
   fetchIslands,
   fetchLanes,
+  fetchOwnedArchipelagos,
   foundCity,
   type Island,
   type Lane,
+  type OwnedArchipelago,
   type Season,
 } from '../lib/aetherholm.ts'
 import { formatDuration, formatMultiplier } from '../lib/format.ts'
@@ -85,6 +108,9 @@ function lanePath(from: Point, to: Point): string {
 
 export function MapPage() {
   const [season, setSeason] = useState<Season | null | undefined>(undefined)
+  const [owned, setOwned] = useState<OwnedArchipelago[]>([])
+  /** The archipelago id being drawn: the season's world, or one of this player's own. */
+  const [viewing, setViewing] = useState<string | null>(null)
   const [islands, setIslands] = useState<Island[]>([])
   const [lanes, setLanes] = useState<Lane[]>([])
   const [notice, setNotice] = useState<ErrorNotice | null>(null)
@@ -93,26 +119,64 @@ export function MapPage() {
   const [foundNotice, setFoundNotice] = useState<string | null>(null)
   const [cityName, setCityName] = useState('')
   const [plot, setPlot] = useState(1)
+  /** Bumped to re-read the world being drawn, without re-asking which worlds exist. */
+  const [epoch, setEpoch] = useState(0)
 
-  const load = useCallback(() => {
+  /**
+   * WHICH worlds this player may look at. Both reads together: the season is public and the
+   * skerries are the subject's own, and a player who owns one between seasons still has somewhere
+   * to be — so neither answer alone decides what this page shows.
+   */
+  const loadWorlds = useCallback(() => {
     setNotice(null)
     setSeason(undefined)
-    fetchCurrentSeason()
-      .then(async (open) => {
+    Promise.all([fetchCurrentSeason(), fetchOwnedArchipelagos()])
+      .then(([open, skerries]) => {
         setSeason(open)
-        if (!open) return
-        const [isles, winds] = await Promise.all([
-          fetchIslands(open.archipelagoId),
-          fetchLanes(open.archipelagoId),
-        ])
-        setIslands(isles)
-        setLanes(winds)
+        setOwned(skerries)
+        // The season first when there is one — it is the game everybody is playing. A player who
+        // has switched to their skerry stays there across a refresh of this list, because the
+        // reload after founding a city must not silently move them somewhere else.
+        setViewing((current) =>
+          current && (current === open?.archipelagoId || skerries.some((s) => s.id === current))
+            ? current
+            : (open?.archipelagoId ?? skerries[0]?.id ?? null),
+        )
       })
       .catch((err: unknown) => setNotice(noticeFor(err, 'The archipelago could not be loaded.')))
   }, [])
 
-  useEffect(load, [load])
+  useEffect(loadWorlds, [loadWorlds])
 
+  // THE world being drawn. Separate from the list above so that switching worlds costs two
+  // requests rather than four, and so that founding a city re-reads the map without re-deciding
+  // which map it is.
+  useEffect(() => {
+    if (!viewing) return undefined
+    let live = true
+    const target = viewing
+    Promise.all([fetchIslands(target), fetchLanes(target)])
+      .then(([isles, winds]) => {
+        if (!live) return
+        setIslands(isles)
+        setLanes(winds)
+      })
+      .catch((err: unknown) => {
+        if (live) setNotice(noticeFor(err, 'That archipelago could not be loaded.'))
+      })
+    return () => {
+      // A slow answer for the world you just switched AWAY from must not paint over the one you
+      // are looking at.
+      live = false
+    }
+  }, [viewing, epoch])
+
+  const load = useCallback(() => {
+    loadWorlds()
+    setEpoch((n) => n + 1)
+  }, [loadWorlds])
+
+  const viewedSkerry = owned.find((a) => a.id === viewing) ?? null
   const points = useMemo(() => placeIslands(islands), [islands])
   const selectedIsland = islands.find((i) => i.id === selected) ?? null
   const spireGlyph = statusIcon('spire')
@@ -141,26 +205,61 @@ export function MapPage() {
 
   if (notice) return <Failed notice={notice} onRetry={load} />
   if (season === undefined) return <Loading label="Reading the winds" />
-  if (season === null) {
+  if (season === null && owned.length === 0) {
     return (
       /* `season-dawn`: a fresh archipelago at first light, founding airships fanning out. The
-         screen a player sees between seasons is the one place that painting belongs. */
+         screen a player sees between seasons is the one place that painting belongs — and it is
+         now shown only to somebody who owns no world of their own, which is what makes the
+         sentence below true rather than merely usual. */
       <Empty
         title="No season is running"
-        hint="The archipelago exists only inside a season. Until one starts, the Chronicle is where the world is — every sealed season, open to anybody."
+        hint="You own no private skerry, so there is no archipelago to fly over until a season opens. The Chronicle is where the world is meanwhile — every sealed season, open to anybody."
         art={splash('season-dawn')}
       />
     )
   }
 
+  const isSeason = season !== null && viewing === season.archipelagoId
   return (
     <div className="ah-map">
       <header className="ah-page-head">
-        <h1>{season.name}</h1>
-        <p className="ah-page-head__meta">
-          Season seed <code className="cf-num">{season.seed}</code> · seals{' '}
-          {new Date(season.endsAt).toLocaleDateString()}
-        </p>
+        <h1>{isSeason ? season.name : (viewedSkerry?.name ?? 'Archipelago')}</h1>
+        {isSeason ? (
+          <p className="ah-page-head__meta">
+            Season seed <code className="cf-num">{season.seed}</code> · seals{' '}
+            {new Date(season.endsAt).toLocaleDateString()}
+          </p>
+        ) : (
+          <p className="ah-page-head__meta">
+            Your own archipelago. It belongs to no season, so nothing seals it and nothing takes it
+            away{viewedSkerry ? ` — raised ${new Date(viewedSkerry.createdAt).toLocaleDateString()}` : ''}.
+          </p>
+        )}
+        {owned.length > 0 && (season !== null || owned.length > 1) && (
+          <p className="ah-page-head__meta">
+            <label className="ah-world-switch">
+              Archipelago{' '}
+              <select
+                className="cf-input"
+                value={viewing ?? ''}
+                onChange={(e) => {
+                  // Clear the selection with the world: island ids do not cross archipelagos, and
+                  // a stale one would leave the panel showing a place that is not on this map.
+                  setSelected(null)
+                  setFoundNotice(null)
+                  setViewing(e.target.value)
+                }}
+              >
+                {season && <option value={season.archipelagoId}>{season.name} — the open season</option>}
+                {owned.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name} — yours
+                  </option>
+                ))}
+              </select>
+            </label>
+          </p>
+        )}
         <p className="ah-page-head__meta">
           Aetherholm is a strategy game about cities that float. You settle a plot on an island,
           work out how to feed it, build airships, and fly them down wind lanes to trade with or
@@ -286,8 +385,29 @@ export function MapPage() {
         </svg>
 
         <aside className="ah-map__panel">
-          {!selectedIsland && (
+          {!selectedIsland && !viewedSkerry && (
             <Empty title="Pick an island" hint="Choose one on the map and its winds, its free plots and the form to settle there appear here." />
+          )}
+          {!selectedIsland && viewedSkerry && (
+            /*
+              `splashes/private-skerry` — "a small private archipelago at lantern-lit evening …
+              intimate and calm, far from any war" (its own prompt, public/art/MANIFEST.json). It
+              was held out of this bundle since the art set landed, for a reason that was true when
+              it was written: the mechanic was built and sold and no route could hand a client the
+              id of one. That route exists now (micro-org#332) and this is the screen the picture
+              was waiting for — the panel a skerry's owner reads before they have chosen anywhere
+              to settle. It is hung on the world it depicts, not on an unrelated screen, which is
+              the rule `UNSHIPPED` in tools/sync-art.mjs states and test/art.test.ts enforces.
+
+              The island count is READ, never asserted: the service seeds twelve
+              (`aetherholm/src/world.ts`), and a number written here would be this client keeping a
+              private copy of a constant it is already being told.
+            */
+            <Empty
+              title={viewedSkerry.name}
+              hint={`Your own archipelago: ${islands.length} islands and their own winds, seeded from the purchase itself, so this map is yours and no one else's. Pick an island to settle it.`}
+              art={splash('private-skerry')}
+            />
           )}
           {selectedIsland && (
             <>

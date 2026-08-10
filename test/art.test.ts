@@ -177,12 +177,18 @@ describe('the partition of the set is total', () => {
     }
   })
 
-  it('holds out exactly the twenty-two recorded in micro-org#175', () => {
-    // A number rather than a list, so that adding a twenty-third is a deliberate edit here as well
-    // as there. Sixteen heraldry, two icons and one splash for mechanics the service does not
-    // have, one splash for a mechanic it has and no route lets a client find, two derivation
-    // sources. The block below re-measures the last four rather than trusting this sentence.
-    assert.equal(Object.keys(UNSHIPPED as object).length, 22)
+  it('holds out exactly twenty-one — one fewer than micro-org#175 recorded', () => {
+    // A number rather than a list, so that adding a twenty-second is a deliberate edit here as
+    // well as there. Sixteen heraldry, two icons and one splash for mechanics the service does not
+    // have, two derivation sources. The block below re-measures the last three rather than
+    // trusting this sentence.
+    //
+    // It was twenty-two until 2026-08-10. `splashes/private-skerry` was the one entry held back
+    // for a reason about a MISSING ROUTE rather than a missing mechanic, that route was built
+    // (micro-org#332), and the picture went to the screen it had been waiting for. Which is the
+    // outcome the whole partition exists to make possible: a held-out asset is a work item, and a
+    // work item that nothing re-measures is a deletion in slow motion.
+    assert.equal(Object.keys(UNSHIPPED as object).length, 21)
   })
 })
 
@@ -204,10 +210,15 @@ describe('the partition of the set is total', () => {
  * constraint were the whole of it. It is not: `provisioning.ts` provisions a skerry against a
  * paid entitlement, `world.ts` seeds its twelve islands from `skerrySeed(entitlementId)`,
  * `server.ts` serves the title contract's provision route, and a `skerry.provisioned` event goes
- * out. The mechanic is BUILT and sold. What is missing is a way for a client to find one: no
- * route lists the archipelagos a subject owns, so this bundle has no id to ask
- * `GET /v1/archipelagos/:id/islands` for. That is a real reason to hold the splash back and a
+ * out. The mechanic is BUILT and sold. What was missing was a way for a client to find one: no
+ * route listed the archipelagos a subject owns, so this bundle had no id to ask
+ * `GET /v1/archipelagos/:id/islands` for. That was a real reason to hold the splash back and a
  * completely different reason from the one on the label.
+ *
+ * AND THEN IT WAS FIXED, which is the ending this discipline is for. Correcting the label turned a
+ * vague "the game hasn't got it" into a named missing route; a named missing route is a work item;
+ * micro-org#332 built it, and the splash now hangs on the map page's owner panel. The entry is out
+ * of both tables and the assertions below are the ones that would notice it going back.
  *
  * So `MECHANIC_CLAIMS` records the word each asset turns on and whether the service has it, and
  * this block re-derives both directions from a sibling checkout. It reads the service's own
@@ -246,8 +257,8 @@ describe('a mechanic a held-out picture names is measured in the service, not re
   const mentions = (word: string): boolean => new RegExp(`\\b${word}\\b`, 'i').test(body)
 
   it('claims a state for every held-out asset that is not somebody else\'s and not a source', () => {
-    // Total, like the partition above: the twenty-two are sixteen heraldry components, the two
-    // sources their own derivatives superseded, and four claims about the game. An asset that
+    // Total, like the partition above: the twenty-one are sixteen heraldry components, the two
+    // sources their own derivatives superseded, and three claims about the game. An asset that
     // slips out of all three would be held out for a reason nothing here re-reads.
     const derivedSources = new Set(
       manifest.assets
@@ -307,7 +318,9 @@ describe('the generated catalogue', () => {
 
   it('has one entry per served asset', () => {
     assert.equal(ART.length, (catalogueFrom(manifest) as unknown[]).length)
-    assert.equal(ART.length, 74)
+    // 74 until 2026-08-10; `splashes/private-skerry` came off the bench when micro-org#332 gave it
+    // a screen.
+    assert.equal(ART.length, 75)
   })
 
   it('serves every path from /art/, never from the repository-relative assets/', () => {
@@ -553,17 +566,20 @@ describe('the interface glyphs the components ask for', () => {
 })
 
 describe('the scenes and the title lockup', () => {
-  it('has the four splashes that have a screen', () => {
-    for (const slug of ['season-dawn', 'season-seal', 'spire-war', 'trade-flotilla'] as const) {
+  it('has the five splashes that have a screen', () => {
+    for (const slug of ['private-skerry', 'season-dawn', 'season-seal', 'spire-war', 'trade-flotilla'] as const) {
       assert.ok(splash(slug), `no splash for ${slug}`)
     }
   })
 
-  it('ships four of the six, and the other two are named with reasons', () => {
-    assert.equal(slugsIn('splashes').length, 4)
+  it('ships five of the six, and the one that is not is named with a reason', () => {
+    assert.equal(slugsIn('splashes').length, 5)
     const held = Object.keys(UNSHIPPED as object)
     assert.ok(held.some((p) => p.includes('storm-surge')))
-    assert.ok(held.some((p) => p.includes('private-skerry')))
+    // `private-skerry` was the second one here until 2026-08-10. It is asserted the other way
+    // round now, so that putting it back on the bench cannot happen quietly: the reason it was
+    // held out (no route lists a subject's own archipelagos) was closed by micro-org#332.
+    assert.ok(!held.some((p) => p.includes('private-skerry')), 'the skerry splash is back on the bench')
   })
 
   it('has the hero and the wordmark backdrop', () => {
