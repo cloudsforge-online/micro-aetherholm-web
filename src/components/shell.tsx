@@ -27,8 +27,13 @@ import { fetchReadiness, type Readiness } from '../lib/aetherholm.ts'
 import { keyart, titleArt } from '../lib/art.ts'
 import { useSession } from '../lib/auth.tsx'
 import { NAV, routeFor } from '../lib/routes.ts'
+import { setViewedNetwork, viewedNetwork, type ViewedNetwork } from '../lib/viewed.ts'
 
 export function AppShell() {
+  // The viewed network: in-tab memory, defaulting to the hostname's own (micro-org#459).
+  // `setViewedNetwork` runs first in the handler below so the remounted tree reads the new value
+  // on its very first render.
+  const [viewed, setViewed] = useState<ViewedNetwork>(viewedNetwork())
   const { account, signIn, signOut } = useSession()
   // Starts 'unknown' rather than 'ready': before the probe answers we have established nothing,
   // and 'unknown' and 'ready' render identically (no banner), so the initial value cannot flash a
@@ -79,12 +84,28 @@ export function AppShell() {
         the degradation banner below records what it costs when a client's idea of an address and
         the estate's come apart.
       */}
+      {/*
+        In-app network context (micro-org#459, the combined view). The reader's choice lives in
+        `lib/viewed.ts` — module memory, never storage — and the `key` on the Outlet below is the
+        refetch mechanism: switching remounts the page tree, and `apiBase()` reads `viewedHosts()`,
+        so the same page re-reads itself from the other estate WITHOUT going anywhere. The band and
+        the switcher both follow the selection, so testnet data under a mainnet address bar is
+        never unmarked. The bar also stamps `?net=` onto its product links, which is what carries
+        the choice across a product switch — every surface is its own origin, so nothing else can.
+      */}
       <CloudsForgeBar
         current={PRODUCT}
         account={account}
         onSignIn={() => signIn()}
         onSignOut={signOut}
         mining={miningOnHub(hosts().hub)}
+        networkSwitch={{
+          selected: viewed,
+          onSelect: (n) => {
+            setViewedNetwork(n)
+            setViewed(n)
+          },
+        }}
       />
 
       <TitleStrip />
@@ -130,7 +151,7 @@ export function AppShell() {
         from the same constant.
       */}
       <MainRegion className="ah-main">
-        <Outlet />
+        <Outlet key={viewed} />
       </MainRegion>
 
       {/*
