@@ -15,6 +15,7 @@
  * This file is the deletion it promised.
  */
 import { cloudsforgeHosts, type CloudsForgeHosts, type SurfaceKey } from '@cloudsforge/ui'
+import { viewedSurfaceUrl } from './viewed.ts'
 
 /**
  * The surface this application presents itself AS, for the product switcher.
@@ -70,9 +71,15 @@ export function hosts(): CloudsForgeHosts {
  * because an SPA and its API usually share an origin behind the gateway; Aetherholm's client and
  * service are separate surfaces even in production, so the request is always absolute and always
  * cross-origin. Pretending otherwise would send every call to the static file server.
+ *
+ * `viewedSurfaceUrl(SURFACE)` rather than `hosts()[…]` is the in-place network view at this layer
+ * (micro-org#459): it answers this surface's own estate until the reader picks the other network
+ * in the bar, and the sibling estate's `-testnet` origin after that. `/v1` on a `-testnet`
+ * hostname is exempt from the retirement redirect and still answers from the testnet service,
+ * which is what makes reading the other network from this page possible. See `lib/viewed.ts`.
  */
 export function apiBase(): string {
-  return new URL(hosts().aetherholm).origin
+  return new URL(viewedSurfaceUrl(SURFACE)).origin
 }
 
 /** The page origin, or a stable placeholder when there is no document (tests, prerender). */
