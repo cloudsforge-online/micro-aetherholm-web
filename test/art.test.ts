@@ -349,9 +349,9 @@ describe('the generated catalogue', () => {
      */
     const urls = [
       ...RESOURCES.map((r) => resourceIcon(r)),
-      ...BIOMES.map((b) => keyart(b)),
+      ...BIOMES.map((b, i) => islandArt(b, i)),
+      keyart('hero'),
       statusIcon('aegis'),
-      uiIcon('queue'),
       titleArt('wordmark'),
     ].filter((u): u is string => u !== null)
     assert.ok(urls.length > 0, 'nothing to check — the accessors returned nothing at all')
