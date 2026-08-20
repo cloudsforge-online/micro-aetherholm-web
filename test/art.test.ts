@@ -56,6 +56,7 @@ import {
   uiIcon,
 } from '../src/lib/art.ts'
 import { RESOURCES } from '../src/lib/format.ts'
+import { BASE } from '../src/lib/routes.ts'
 // @ts-expect-error — a .mjs tool with no type declarations, imported so that the test re-derives
 // the catalogue from the manifest rather than re-implementing the derivation and agreeing with
 // itself.
@@ -327,6 +328,35 @@ describe('the generated catalogue', () => {
     for (const entry of ART) {
       assert.ok(entry.path.startsWith('/art/'), `${entry.path} is not served from /art/`)
       assert.ok(!entry.path.startsWith('/art/assets/'), `${entry.path} kept the manifest prefix`)
+    }
+  })
+
+  it('hands every accessor a MOUNTED url, not the catalogue path', () => {
+    /*
+     * The pair above and here is the whole invariant, and the gap between them is what shipped
+     * broken for a release.
+     *
+     * `ART` holds the path NGINX serves the file from — `/art/buildings/...` — and the test above
+     * pins it, because the generator and the orphan check both work in those terms. What a BROWSER
+     * needs is different: this bundle is served from `<apex>/worlds/aetherholm`, so an `<img src>`
+     * of `/art/buildings/...` asks the apex for a file that is not there and every sprite on the
+     * island breaks. vite's `base` rewrites `src=` in `index.html` and static imports; it never
+     * rewrites a string that lives inside a module, which is exactly what a catalogue row is.
+     *
+     * `lookup()` composes the mount, so this asserts the accessors — the things a component actually
+     * calls — rather than the table. Before the fix every one of these returned the bare `/art/`
+     * path and the suite was green.
+     */
+    const urls = [
+      ...RESOURCES.map((r) => resourceIcon(r)),
+      ...BIOMES.map((b, i) => islandArt(b, i)),
+      keyart('hero'),
+      statusIcon('aegis'),
+      titleArt('wordmark'),
+    ].filter((u): u is string => u !== null)
+    assert.ok(urls.length > 0, 'nothing to check — the accessors returned nothing at all')
+    for (const url of urls) {
+      assert.ok(url.startsWith(`${BASE}/art/`), `${url} is not mounted under ${BASE}`)
     }
   })
 
