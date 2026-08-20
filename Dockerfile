@@ -49,7 +49,9 @@ RUN sed -i "s|name=\"cf-release\" content=\"dev\"|name=\"cf-release\" content=\"
 FROM nginxinc/nginx-unprivileged:1.27-alpine AS runtime
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html
+# Into a folder INSIDE a folder, because that is what a Forge Worlds title is. `/worlds/aetherholm`,
+# matching `base:` in vite.config.ts and every `location` in nginx.conf.
+COPY --from=build /app/dist /usr/share/nginx/html/worlds/aetherholm
 
 EXPOSE 8080
 

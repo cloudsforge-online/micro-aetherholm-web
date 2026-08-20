@@ -20,10 +20,11 @@ import { CitiesPage } from './pages/cities.tsx'
 import { FleetsPage } from './pages/fleets.tsx'
 import { MapPage } from './pages/map.tsx'
 import { NotFoundPage } from './pages/not-found.tsx'
+import { BASE } from './lib/routes.ts'
 
 export function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={BASE}>
       <ScrollToTop />
       <AuthProvider>
         <Routes>

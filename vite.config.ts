@@ -13,6 +13,10 @@ import { defineConfig } from 'vite'
  * deleting the test does not delete the rule.
  */
 export default defineConfig({
+  // WHERE ON ANY ORIGIN this bundle lives. Not an environment — the same string everywhere — but a
+  // build-time constant regardless, because it goes in front of every hashed asset name in the
+  // emitted `index.html`. The trailing slash is required by vite.
+  base: '/worlds/aetherholm/',
   plugins: [react()],
   resolve: {
     // @cloudsforge/ui is a `link:` dependency, so its own node_modules holds a second copy of
