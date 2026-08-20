@@ -28,6 +28,7 @@
  */
 import { ART, type ArtEntry } from '../art/catalogue.ts'
 import type { Resource } from './format.ts'
+import { publicPath } from './routes.ts'
 
 /** Indexed once at module load: a linear scan of seventy-five entries per table row is silly. */
 const bySet = new Map<string, Map<string, ArtEntry>>()
@@ -42,8 +43,24 @@ for (const entry of ART) {
   if (!set.has(entry.slug)) set.set(entry.slug, entry)
 }
 
+/**
+ * One entry, with its `path` MOUNTED — which is the reason every accessor below goes through here
+ * rather than reading `ART` itself.
+ *
+ * `src/art/catalogue.ts` is generated and `test/art.test.ts` re-renders it byte for byte from
+ * `public/art/MANIFEST.json`, asserting that every `path` starts with `/art/`. That prefix is what
+ * NGINX serves the file from and it has to stay exactly that in the table. But this bundle is served
+ * from `<apex>/worlds/aetherholm` since the apex consolidation, and a browser handed
+ * `/art/buildings/...` asks the APEX for it — vite's `base` rewrites `src=` in `index.html` and
+ * static imports, and never a string literal inside a module.
+ *
+ * So the mount is composed HERE, at the one boundary where a catalogue row stops being data and
+ * becomes a URL a browser will fetch. Every `?.path` accessor below inherits it, and so does any
+ * accessor added later.
+ */
 function lookup(set: string, slug: string): ArtEntry | null {
-  return bySet.get(set)?.get(slug) ?? null
+  const entry = bySet.get(set)?.get(slug)
+  return entry ? { ...entry, path: publicPath(entry.path) } : null
 }
 
 /* ---- the game's own vocabularies ------------------------------------- */
