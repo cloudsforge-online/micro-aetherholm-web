@@ -474,14 +474,14 @@ jobs:
           set -uo pipefail
           directives=$(grep -v '^[[:space:]]*#' nginx.conf)
           if printf '%s\n' "$directives" | grep -nE 'try_files[[:space:]]+\$uri[[:space:]]+(\$uri/[[:space:]]+)?/index\.html'; then
-            echo "::error::unknown paths must 404; serve the shell through error_page 404 /index.html"
+            echo "::error::unknown paths must 404; serve the shell through error_page 404 /worlds/aetherholm/index.html"
             exit 1
           fi
           # Left as a pipe deliberately. The EPIPE hazard that forced here-strings on the suite
           # output above needs kilobytes still unwritten when grep exits; this producer is
           # nginx.conf minus comments — 1,788 bytes, with the match seven lines from the end.
           # Measured, bounded by a file a person edits by hand, and not worth the churn.
-          printf '%s\n' "$directives" | grep -q 'error_page 404 /index.html'
+          printf '%s\n' "$directives" | grep -q 'error_page 404 /worlds/aetherholm/index.html'
           echo "ok: unknown paths answer 404"
 
       - name: The auth callback is redeemed before the app renders
