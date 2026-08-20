@@ -39,7 +39,7 @@ const directives = nginx
 
 /** The alternation inside nginx's enumerated `location ~ ^/(…)` block. */
 function nginxPaths(): string[] {
-  const match = /location\s+~\s+\^\/\(([^)]+)\)/.exec(directives)
+  const match = /location\s+~\s+\^\/worlds\/aetherholm\/\(([^)]+)\)/.exec(directives)
   assert.ok(match, 'nginx.conf has no enumerated route block')
   return (match[1] ?? '').split('|').map((p) => p.trim())
 }
@@ -149,23 +149,28 @@ describe('nginx serves every route the router owns', () => {
   })
 
   it('matches the index exactly', () => {
-    assert.match(directives, /location\s+=\s+\/\s*\{/)
+    assert.match(directives, /location\s+=\s+\/worlds\/aetherholm\s*\{/)
   })
 
   it('KEEPS THE 404 — error_page, never a try_files fallback to the shell', () => {
-    assert.ok(directives.includes('error_page 404 /index.html'), 'the shell is not served through error_page')
+    assert.ok(directives.includes('error_page 404 /worlds/aetherholm/index.html'), 'the shell is not served through error_page')
     const banned = /try_files\s+\$uri\s+(\$uri\/\s+)?\/index\.html/
     assert.ok(!banned.test(directives), 'an unknown address would be answered 200 with the app shell')
   })
 
   it('404s a missing asset rather than handing it the shell', () => {
-    assert.match(directives, /location \/assets\/\s*\{[^}]*try_files \$uri =404/s)
+    assert.match(directives, /location \/worlds\/aetherholm\/assets\/\s*\{[^}]*try_files \$uri =404/s)
   })
 
   it('never caches index.html — on EVERY location that serves it', () => {
-    assert.match(directives, /location = \/index\.html\s*\{[^}]*no-store/s)
-    assert.match(directives, /location = \/\s*\{[^}]*no-store/s)
-    assert.match(directives, /location ~ \^\/\([^)]+\)[^{]*\{[^}]*no-store/s)
+    assert.match(directives, /location = \/worlds\/aetherholm\/index\.html\s*\{[^}]*no-store/s)
+    // THE FRONT DOOR IS TWO LOCATIONS SINCE THE MOUNT, and both are checked: `/worlds/aetherholm`
+    // and `/worlds/aetherholm/` are different addresses to nginx's `=` matcher, a link in the wild
+    // will use either, and a bundle that answers one and 404s the other is broken for half its
+    // inbound traffic. There is no `location = /` to fall back on — that address is micro-site's.
+    assert.match(directives, /location = \/worlds\/aetherholm\s*\{[^}]*no-store/s)
+    assert.match(directives, /location = \/worlds\/aetherholm\/\s*\{[^}]*no-store/s)
+    assert.match(directives, /location ~ \^\/worlds\/aetherholm\/\([^)]+\)[^{]*\{[^}]*no-store/s)
   })
 
   it('REPEATS the security headers in every location that sets a header of its own', () => {

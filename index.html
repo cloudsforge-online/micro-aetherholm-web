@@ -134,14 +134,24 @@
       property="og:description"
       content="A sky-island strategy MMO, played through Forge Worlds. Part of CloudsForge: EMBER, the chain it runs on, and every surface built on top of it."
     />
-    <meta property="og:image" content="/og-1200x630.png" />
+    <!--
+      ── THE MOUNT IS IN THESE BY HAND, AND IT HAS TO BE ────────────────────────────────────────
+      vite rewrites `src` and `href` against `base`, and does NOT touch `content`. So a
+      root-relative `content="/og-1200x630.png"` stays root-relative through the build, and on the
+      apex that address belongs to micro-site — a link preview for this game would show the
+      COMPANY card rather than the game's, silently and only ever in someone else's chat client.
+      The bundle's own copy is at `/worlds/aetherholm/og-1200x630.png`, because the Dockerfile mounts
+      `dist` there. `mountAsset()` in @cloudsforge/ui does the same composition at runtime; this
+      is the copy a preview fetcher reads, and those generally do not execute JavaScript.
+    -->
+    <meta property="og:image" content="/worlds/aetherholm/og-1200x630.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <!--
       The 1280×640 card, which the asset set composited for exactly this and which nothing linked.
       Twitter falls back to og:image without it, so this is not a repair — it is the card being
       used at the aspect ratio it was made for instead of one cut for Open Graph.
     -->
-    <meta name="twitter:image" content="/social-1280x640.png" />
+    <meta name="twitter:image" content="/worlds/aetherholm/social-1280x640.png" />
   </head>
   <body>
     <div id="root"></div>

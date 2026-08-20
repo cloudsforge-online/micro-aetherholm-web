@@ -23,7 +23,10 @@ describe('the registry entry this client resolves through', () => {
   it('exists, is a service surface, and pins devPort 4120 — the port micro-aetherholm binds', () => {
     const entry = SURFACES.find((s) => s.key === 'aetherholm')
     assert.ok(entry, 'the registry has no aetherholm entry; hosts.ts would need emberkin’s old derivation')
-    assert.equal(entry.subdomain, 'aetherholm')
+    // NO subdomain since the nesting: the title is a folder under the catalogue. The devPort is
+    // untouched by that — a mount is a fact about an address, a port a fact about a service.
+    assert.equal(entry.subdomain, '')
+    assert.equal(entry.basePath, '/worlds/aetherholm')
     assert.equal(entry.devPort, 4120)
   })
 
@@ -58,8 +61,8 @@ describe('apiBase', () => {
 
   it('uses the subdomain in production', () => {
     removeWindow()
-    installWindow('https://aetherholm.example.com/fleets')
-    assert.equal(apiBase(), 'https://aetherholm.example.com')
+    installWindow('https://example.com/worlds/aetherholm/fleets')
+    assert.equal(apiBase(), 'https://example.com/worlds/aetherholm')
   })
 
   it('resolves the same host when the page is served from another estate surface', () => {
@@ -73,22 +76,25 @@ describe('apiBase', () => {
     // Forge Worlds, so the page is served from another estate surface, and this surface's own host
     // must still resolve to its own hostname rather than to something under the referrer's.
     installWindow('https://example.com/worlds/')
-    assert.equal(apiBase(), 'https://aetherholm.example.com')
+    assert.equal(apiBase(), 'https://example.com/worlds/aetherholm')
   })
 
   it('is re-read per call, not cached in a module constant', () => {
     assert.equal(apiBase(), 'http://localhost:4120')
     removeWindow()
-    installWindow('https://aetherholm.example.com/')
-    assert.equal(apiBase(), 'https://aetherholm.example.com')
+    installWindow('https://example.com/worlds/aetherholm/')
+    assert.equal(apiBase(), 'https://example.com/worlds/aetherholm')
   })
 
   it('leaves an unknown prefix alone on a preview deployment', () => {
     removeWindow()
     installWindow('https://pr-42.example.dev/')
     // The registry deliberately treats the whole hostname as the apex when no known subdomain
-    // leads it, so the service resolves under the preview's own name.
-    assert.equal(apiBase(), 'https://aetherholm.pr-42.example.dev')
+    // leads it — so a preview gets the preview's own apex, and since the nesting the MOUNT under
+    // it rather than a label in front of it. `aetherholm.pr-42.example.dev` would have been a
+    // hostname nobody provisioned; `pr-42.example.dev/worlds/aetherholm` is the same shape the
+    // real estate serves, which is what makes a preview worth having.
+    assert.equal(apiBase(), 'https://pr-42.example.dev/worlds/aetherholm')
   })
 })
 

@@ -474,14 +474,14 @@ jobs:
           set -uo pipefail
           directives=$(grep -v '^[[:space:]]*#' nginx.conf)
           if printf '%s\n' "$directives" | grep -nE 'try_files[[:space:]]+\$uri[[:space:]]+(\$uri/[[:space:]]+)?/index\.html'; then
-            echo "::error::unknown paths must 404; serve the shell through error_page 404 /index.html"
+            echo "::error::unknown paths must 404; serve the shell through error_page 404 /worlds/aetherholm/index.html"
             exit 1
           fi
           # Left as a pipe deliberately. The EPIPE hazard that forced here-strings on the suite
           # output above needs kilobytes still unwritten when grep exits; this producer is
           # nginx.conf minus comments — 1,788 bytes, with the match seven lines from the end.
           # Measured, bounded by a file a person edits by hand, and not worth the churn.
-          printf '%s\n' "$directives" | grep -q 'error_page 404 /index.html'
+          printf '%s\n' "$directives" | grep -q 'error_page 404 /worlds/aetherholm/index.html'
           echo "ok: unknown paths answer 404"
 
       - name: The auth callback is redeemed before the app renders
@@ -657,7 +657,7 @@ jobs:
           set -uo pipefail
           docker run -d --name ci-aetherholm-web -p 127.0.0.1:8080:8080 aetherholm-web:ci
           for _ in $(seq 1 30); do
-            code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/ || true)
+            code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/worlds/aetherholm/ || true)
             [ "$code" = "200" ] && break
             sleep 1
           done
@@ -668,12 +668,29 @@ jobs:
           # A route this app OWNS must survive a hard refresh. /chronicle is DEEP_LINK_PATH in
           # src/lib/routes.ts, and test/routes.test.ts checks this file against it — a real,
           # unprotected route, since the probe has no token.
-          deep=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/chronicle || true)
+          deep=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/worlds/aetherholm/chronicle || true)
           [ "$deep" = "200" ] || { echo "::error::an owned route returned $deep — it must be served the shell"; fail=1; }
 
           # A route it does NOT own must answer 404 while still serving the shell, so the reader
           # gets a real page and the status line tells the truth.
-          unknown=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/nope/not/a/route || true)
+
+          # ── TWO ADDRESSES THAT MUST BE EMPTY, AND THEY ARE THE POINT OF THE MOUNT ──────────
+          #
+          # This image is built for `/worlds/aetherholm` and copied there by the Dockerfile. If it were
+          # ever copied to the document root instead, `/` would answer 200 with this game's shell
+          # — and on the apex that address is MICRO-SITE's home page. The gateway routes by path,
+          # so a container answering `/` does not shadow anything by itself; but the same mistake
+          # in the Dockerfile is what would put the game's index.html at the apex root the moment
+          # a future router widened. Cheap to assert, and it fails loudly rather than subtly.
+          #
+          # `/robots.txt` for the sharper version of it: a folder has no robots.txt of its own.
+          # One served here would be a SECOND document at an address micro-site already owns, and
+          # whichever won would be decided by router priority rather than by anybody's intent.
+          root=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/ || true)
+          [ "$root" = 404 ] || { echo "FAIL: / answered $root; this image belongs at /worlds/aetherholm and nowhere else"; exit 1; }
+          robots=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/robots.txt || true)
+          [ "$robots" = 404 ] || { echo "FAIL: /robots.txt answered $robots; a folder has no robots.txt, micro-site owns that address"; exit 1; }
+          unknown=$(curl -s -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/worlds/aetherholm/nope/not/a/route || true)
           [ "$unknown" = "404" ] || { echo "::error::an unknown address returned $unknown; it must be 404"; fail=1; }
           # NOT A PIPE INTO `grep -q` — the hazard this file already avoids with here-strings
           # elsewhere, on the one check that still had it. grep -q exits at its first match and
@@ -686,7 +703,7 @@ jobs:
           # micro-hub-web#16 then failed here twice in a row with the build green in the same run.
           # Measured 2026-08-10 — micro-org#347. Capturing first leaves no pipe to close early, and
           # `case` is an exact glob rather than a regex.
-          shell_404=$(curl -s -m 5 http://127.0.0.1:8080/nope/not/a/route || true)
+          shell_404=$(curl -s -m 5 http://127.0.0.1:8080/worlds/aetherholm/nope/not/a/route || true)
           case "$shell_404" in
             *'<div id="root">'*) ;;
             *) echo "::error::the 404 did not serve the app shell"; fail=1 ;;
@@ -701,22 +718,31 @@ jobs:
             esac
           }
 
-          asset=$(curl -s http://127.0.0.1:8080/ | grep -oE '/assets/[^"]+\.js' | head -1)
-          for target in "http://127.0.0.1:8080/" "http://127.0.0.1:8080/chronicle" "http://127.0.0.1:8080$asset"; do
+          # ── THE PATTERN MUST BE THE WHOLE PATH, NOT THE `/assets/` INSIDE IT ────────────────
+          #
+          # This read `grep -oE '/assets/[^"]+\.js'`, and since the mount the shell references
+          # `/worlds/aetherholm/assets/main-<hash>.js`. That pattern still MATCHES — on the
+          # substring — and yields `/assets/main-<hash>.js`, an address the container 404s. The
+          # header loop below would then read the 404's `no-store` and pass, reporting that the
+          # immutable one-year cache on the bundle's JavaScript is in place when nothing had
+          # checked it. Third time this exact substring trap has been written in this estate.
+          asset=$(curl -s http://127.0.0.1:8080/worlds/aetherholm/ | grep -oE '/worlds/aetherholm/assets/[^"]+\.js' | head -1)
+          [ -n "$asset" ] || { echo 'FAIL: the shell references no /worlds/aetherholm/assets/*.js'; exit 1; }
+          for target in "http://127.0.0.1:8080/worlds/aetherholm/" "http://127.0.0.1:8080/worlds/aetherholm/chronicle" "http://127.0.0.1:8080$asset"; do
             [ -n "$asset" ] || [ "$target" != "http://127.0.0.1:8080" ] || continue
             check "$target" X-Content-Type-Options "nosniff" "$target"
             check "$target" X-Frame-Options "SAMEORIGIN" "$target"
             check "$target" Referrer-Policy "strict-origin-when-cross-origin" "$target"
           done
-          check "http://127.0.0.1:8080/" Cache-Control "no-store" "the shell"
-          check "http://127.0.0.1:8080/chronicle" Cache-Control "no-store" "an enumerated route"
+          check "http://127.0.0.1:8080/worlds/aetherholm/" Cache-Control "no-store" "the shell"
+          check "http://127.0.0.1:8080/worlds/aetherholm/chronicle" Cache-Control "no-store" "an enumerated route"
           [ -n "$asset" ] && check "http://127.0.0.1:8080$asset" Cache-Control "immutable" "a hashed asset"
 
           # The brand chrome is SERVED by the image, not merely committed: the web template's
           # Dockerfile once did not copy public/, and four frontends shipped iconless images
           # while their own brand tests passed.
           for asset in favicon-32x32.png favicon-192x192.png og-1200x630.png; do
-            code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080/$asset" || true)
+            code=$(curl -s -m 5 -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080/worlds/aetherholm/$asset" || true)
             [ "$code" = "200" ] || { echo "::error::/$asset returned $code from the image"; fail=1; }
           done
 
