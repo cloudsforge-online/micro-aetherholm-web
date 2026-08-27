@@ -1,6 +1,6 @@
 {
   "name": "@cloudsforge/aetherholm-web",
-  "version": "2026.8.102",
+  "version": "2026.8.103",
   "packageManager": "pnpm@11.9.0",
   "private": true,
   "description": "Aetherholm — the game client for the third Forge Worlds title: the archipelago map, city view, fleet control, battle reports and the chronicle browser.",
